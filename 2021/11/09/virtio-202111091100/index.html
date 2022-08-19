@@ -22,15 +22,15 @@
     var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
   </script>
 
-  <meta name="description" content="一、什么是virtiovirtio 是一种 I&#x2F;O 半虚拟化解决方案，是一套通用 I&#x2F;O 设备虚拟化的程序，是对半虚拟化 Hypervisor 中的一组通用 I&#x2F;O 设备的抽象。提供了一套上层应用与各 Hypervisor 虚拟化设备（KVM，Xen，VMware等）之间的通信框架和编程接口，减少跨平台所带来的兼容性问题，大大提高驱动程序开发效率。virtio 协议定">
+  <meta name="description" content="什么是virtiovirtio 是一种 I&#x2F;O 半虚拟化解决方案，是一套通用 I&#x2F;O 设备虚拟化的程序，是对半虚拟化 Hypervisor 中的一组通用 I&#x2F;O 设备的抽象。提供了一套上层应用与各 Hypervisor 虚拟化设备（KVM，Xen，VMware等）之间的通信框架和编程接口，减少跨平台所带来的兼容性问题，大大提高驱动程序开发效率。virtio 协议定义了">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Virtio-设备模拟详解">
 <meta property="og:url" content="http://example.com/2021/11/09/virtio-202111091100/index.html">
 <meta property="og:site_name" content="怀德维宁">
-<meta property="og:description" content="一、什么是virtiovirtio 是一种 I&#x2F;O 半虚拟化解决方案，是一套通用 I&#x2F;O 设备虚拟化的程序，是对半虚拟化 Hypervisor 中的一组通用 I&#x2F;O 设备的抽象。提供了一套上层应用与各 Hypervisor 虚拟化设备（KVM，Xen，VMware等）之间的通信框架和编程接口，减少跨平台所带来的兼容性问题，大大提高驱动程序开发效率。virtio 协议定">
+<meta property="og:description" content="什么是virtiovirtio 是一种 I&#x2F;O 半虚拟化解决方案，是一套通用 I&#x2F;O 设备虚拟化的程序，是对半虚拟化 Hypervisor 中的一组通用 I&#x2F;O 设备的抽象。提供了一套上层应用与各 Hypervisor 虚拟化设备（KVM，Xen，VMware等）之间的通信框架和编程接口，减少跨平台所带来的兼容性问题，大大提高驱动程序开发效率。virtio 协议定义了">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2021-11-09T03:00:00.000Z">
-<meta property="article:modified_time" content="2022-08-19T06:10:38.238Z">
+<meta property="article:modified_time" content="2022-08-19T09:11:16.423Z">
 <meta property="article:author" content="杨维宁">
 <meta property="article:tag" content="虚拟化">
 <meta property="article:tag" content="kvm">
@@ -201,7 +201,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-08-19 14:10:38" itemprop="dateModified" datetime="2022-08-19T14:10:38+08:00">2022-08-19</time>
+                <time title="修改时间：2022-08-19 17:11:16" itemprop="dateModified" datetime="2022-08-19T17:11:16+08:00">2022-08-19</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -224,11 +224,11 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <h2 id="一、什么是virtio"><a href="#一、什么是virtio" class="headerlink" title="一、什么是virtio"></a>一、什么是virtio</h2><p>virtio 是一种 I&#x2F;O 半虚拟化解决方案，是一套通用 I&#x2F;O 设备虚拟化的程序，是对半虚拟化 Hypervisor 中的一组通用 I&#x2F;O 设备的抽象。提供了一套上层应用与各 Hypervisor 虚拟化设备（KVM，Xen，VMware等）之间的通信框架和编程接口，减少跨平台所带来的兼容性问题，大大提高驱动程序开发效率。<br>virtio 协议定义了各类设备与驱动，定义了它们如何初始化，如何通信，如何通知等。其中，最核心的是设备与驱动的通信机制，避免了每次访问外设寄存器都要 vm_exit&#x2F;vm_enter 的问题。</p>
+        <h2 id="什么是virtio"><a href="#什么是virtio" class="headerlink" title="什么是virtio"></a>什么是virtio</h2><p>virtio 是一种 I&#x2F;O 半虚拟化解决方案，是一套通用 I&#x2F;O 设备虚拟化的程序，是对半虚拟化 Hypervisor 中的一组通用 I&#x2F;O 设备的抽象。提供了一套上层应用与各 Hypervisor 虚拟化设备（KVM，Xen，VMware等）之间的通信框架和编程接口，减少跨平台所带来的兼容性问题，大大提高驱动程序开发效率。<br>virtio 协议定义了各类设备与驱动，定义了它们如何初始化，如何通信，如何通知等。其中，最核心的是设备与驱动的通信机制，避免了每次访问外设寄存器都要 vm_exit&#x2F;vm_enter 的问题。</p>
 <span id="more"></span>
-<h2 id="二、Virtio架构"><a href="#二、Virtio架构" class="headerlink" title="二、Virtio架构"></a>二、Virtio架构</h2><p>从总体上看，virtio 可以分为四层，包括前端 guest 中各种驱动程序模块，后端 Hypervisor （实现在Qemu上）上的处理程序模块，中间用于前后端通信的 virtio 层和 virtio-ring 层，virtio 这一层实现的是虚拟队列接口，算是前后端通信的桥梁，而 virtio-ring 则是该桥梁的具体实现，它实现了两个环形缓冲区，分别用于保存前端驱动程序和后端处理程序执行的信息。</p>
+<h2 id="Virtio架构"><a href="#Virtio架构" class="headerlink" title="Virtio架构"></a>Virtio架构</h2><p>从总体上看，virtio 可以分为四层，包括前端 guest 中各种驱动程序模块，后端 Hypervisor （实现在Qemu上）上的处理程序模块，中间用于前后端通信的 virtio 层和 virtio-ring 层，virtio 这一层实现的是虚拟队列接口，算是前后端通信的桥梁，而 virtio-ring 则是该桥梁的具体实现，它实现了两个环形缓冲区，分别用于保存前端驱动程序和后端处理程序执行的信息。</p>
 <p>严格来说，virtio 和 virtio-ring 可以看做是一层，virtio-ring 实现了 virtio 的具体通信机制和数据流程。或者这么理解可能更好，virtio 层属于控制层，负责前后端之间的通知机制（kick，notify）和控制流程，而 virtio-vring 则负责具体数据流转发。</p>
-<h2 id="三、vring共享内存基本原理"><a href="#三、vring共享内存基本原理" class="headerlink" title="三、vring共享内存基本原理"></a>三、vring共享内存基本原理</h2><p>virtio vring 本质是共享内存，要求使用共享内存的软件模块可以访问这段内存。在虚拟化场景，guest&#x2F;host 如何实现共享内存呢？</p>
+<h2 id="vring共享内存基本原理"><a href="#vring共享内存基本原理" class="headerlink" title="vring共享内存基本原理"></a>vring共享内存基本原理</h2><p>virtio vring 本质是共享内存，要求使用共享内存的软件模块可以访问这段内存。在虚拟化场景，guest&#x2F;host 如何实现共享内存呢？</p>
 <p>第一个问题：vring 描述符中存放的内存地址是什么？</p>
 <p>vring 由 guest 驱动申请，所以 vring 描述符内存放的地址是 GPA。</p>
 <p>第二个问题：guest&#x2F;host 如何实现共享？</p>
@@ -242,23 +242,19 @@
 <p>(1)初始化过程中，qemu 通过 ioctl 命令字将 vring 的内存信息通知 vhost-net 内核模块。内存信息包括：GPA&#x2F;userspace_addr&#x2F;size 等。</p>
 <p>(2)vhost-net 内核模块会记录 GPA 与 userspace_addr（qemu 进程上下文虚拟地址） 的内存映射。</p>
 <p>(3)vhost-net 内核模块在启动内核线程时记录此线程为哪个 qemu 虚拟机服务，同时记录 qemu 虚拟机进程的页表信息，在内核线程运行时，使用对应的 qemu 虚拟机进程页表。这样 vhost-net 内核模块就可以访问 qemu 进程上下文的虚拟地址。</p>
-<h2 id="四、PCI设备概述"><a href="#四、PCI设备概述" class="headerlink" title="四、PCI设备概述"></a>四、PCI设备概述</h2><p>PCI即Peripheral Component Interconnect，中文意思是“外围器件互联”，是由PCISIG (PCI Special Interest Group)推出的一种局部并行总线标准。PCI总线是由ISA(Industy Standard Architecture)总线发展而来的，是一种同步的独立于处理器的32位或64位局部总线。从结构上看，PCI是在CPU的供应商和原来的系统总线之间插入的一级总线，具体由一个桥接电路实现对这一层的管理，并实现上下之间的接口以协调数据的传送。</p>
+<h2 id="PCI设备概述"><a href="#PCI设备概述" class="headerlink" title="PCI设备概述"></a>PCI设备概述</h2><p>PCI即Peripheral Component Interconnect，中文意思是“外围器件互联”，是由PCISIG (PCI Special Interest Group)推出的一种局部并行总线标准。PCI总线是由ISA(Industy Standard Architecture)总线发展而来的，是一种同步的独立于处理器的32位或64位局部总线。从结构上看，PCI是在CPU的供应商和原来的系统总线之间插入的一级总线，具体由一个桥接电路实现对这一层的管理，并实现上下之间的接口以协调数据的传送。</p>
 <p>PCI总线是一种共享总线，所以需要特定的仲裁器（Arbiter）来决定当前时刻的总线的控制权。一般该仲裁器位于北桥中，而仲裁器（主机）则通过一对引脚，REQ#（request） 和GNT# （grant）来与各个从机连接。<br>CPU可以直接通过load&#x2F;store指令来访问PCI设备，PCI设备有如下三种不同内存：</p>
 <ul>
 <li>MMIO</li>
 <li>PCI IO space</li>
 <li>PCI configuration space</li>
 </ul>
-<h2 id="五、guest前端驱动程序操作接口"><a href="#五、guest前端驱动程序操作接口" class="headerlink" title="五、guest前端驱动程序操作接口"></a>五、guest前端驱动程序操作接口</h2><p>驱动程序对PCI 配置的操作可以分成以下几个部分：</p>
+<h2 id="guest前端驱动程序操作接口"><a href="#guest前端驱动程序操作接口" class="headerlink" title="guest前端驱动程序操作接口"></a>guest前端驱动程序操作接口</h2><p>驱动程序对PCI 配置的操作可以分成以下几个部分：</p>
 <p>读写 feature bits<br>定义了 Guest 和 Host 支持的功能，例如 VIRTIO_NET_F_CSUM bit 表示网络设备是否支持 checksum offload。feature bits 机制提供了未来扩充功能的灵活性，以及兼容旧设备的能力。</p>
-<p>1.读写配置空间</p>
-<p>一般通过一个数据结构和一个虚拟设备关联，Guest 可以读写此空间。</p>
-<p>2.读写 status bits</p>
-<p>这是一个8bits的长度，Guest用来标识device probe的状态，当 VIRIO_CONFIG_S_DRIVE_OK被设置，那么Guest已经完成了feature协商，可以跟host进行数据交互了。</p>
-<p>3.Device reset</p>
-<p>重置设备，配置status bits。</p>
-<p>4.Virtqueue的创建和销毁</p>
-<p>提供了分配virtqueue内存和Host的IO空间的初始化操作。</p>
+<h3 id="读写配置空间"><a href="#读写配置空间" class="headerlink" title="读写配置空间"></a>读写配置空间</h3><p>一般通过一个数据结构和一个虚拟设备关联，Guest 可以读写此空间。</p>
+<h3 id="读写-status-bits"><a href="#读写-status-bits" class="headerlink" title="读写 status bits"></a>读写 status bits</h3><p>这是一个8bits的长度，Guest用来标识device probe的状态，当 VIRIO_CONFIG_S_DRIVE_OK被设置，那么Guest已经完成了feature协商，可以跟host进行数据交互了。</p>
+<h3 id="Device-reset"><a href="#Device-reset" class="headerlink" title="Device reset"></a>Device reset</h3><p>重置设备，配置status bits。</p>
+<h3 id="Virtqueue的创建和销毁"><a href="#Virtqueue的创建和销毁" class="headerlink" title="Virtqueue的创建和销毁"></a>Virtqueue的创建和销毁</h3><p>提供了分配virtqueue内存和Host的IO空间的初始化操作。</p>
 <p>对应的代码如下：</p>
 <pre><code>//代码路径virtio-win/VirtIO/windows/VirtIOPCIModern.c
 static const struct virtio_device_ops virtio_pci_device_ops = &#123;
@@ -306,7 +302,7 @@ unsigned idx, u16 msix_vec);
 void (*delete_queue)(VirtIOQueueInfo *info);
 &#125;;
 </code></pre>
-<h2 id="六、virtio-数据流交互机制：virtqueue"><a href="#六、virtio-数据流交互机制：virtqueue" class="headerlink" title="六、virtio 数据流交互机制：virtqueue"></a>六、virtio 数据流交互机制：virtqueue</h2><p>Virtio 使用 virtqueue 来实现 I&#x2F;O 机制，每个 virtqueue 就是一个承载大量数据的队列，具体使用多少个队列取决于需求，例如，virtio 网络驱动程序（virtio-net）使用两个队列（一个用于接受，另一个用于发送），而 virtio 块驱动程序（virtio-blk）仅使用一个队列。</p>
+<h2 id="virtio-数据流交互机制：virtqueue"><a href="#virtio-数据流交互机制：virtqueue" class="headerlink" title="virtio 数据流交互机制：virtqueue"></a>virtio 数据流交互机制：virtqueue</h2><p>Virtio 使用 virtqueue 来实现 I&#x2F;O 机制，每个 virtqueue 就是一个承载大量数据的队列，具体使用多少个队列取决于需求，例如，virtio 网络驱动程序（virtio-net）使用两个队列（一个用于接受，另一个用于发送），而 virtio 块驱动程序（virtio-blk）仅使用一个队列。</p>
 <pre><code>//VirtIO.h
 struct virtqueue &#123;
 VirtIODevice *vdev;
@@ -361,7 +357,7 @@ void virtqueue_disable_cb(struct virtqueue *vq)
 bool virtqueue_enable_cb(struct virtqueue *vq) 
 </code></pre>
 <p>virtio 的核心机制就是通过共享内存在前端驱动与后端实现间进行数据传输，共享内存区域被称作 vring。</p>
-<h2 id="七、virtio-传输机制：vring的构成与实现"><a href="#七、virtio-传输机制：vring的构成与实现" class="headerlink" title="七、virtio 传输机制：vring的构成与实现"></a>七、virtio 传输机制：vring的构成与实现</h2><p>vring 是 virtio 传输机制的实现，vring 引入 ring buffers 来作为数据传输的载体，包含三个部分:</p>
+<h2 id="virtio-传输机制：vring的构成与实现"><a href="#virtio-传输机制：vring的构成与实现" class="headerlink" title="virtio 传输机制：vring的构成与实现"></a>virtio 传输机制：vring的构成与实现</h2><p>vring 是 virtio 传输机制的实现，vring 引入 ring buffers 来作为数据传输的载体，包含三个部分:</p>
 <pre><code>// virtio_ring.h
 struct vring &#123;
 unsigned int num;
@@ -422,9 +418,8 @@ struct vring_used_elem ring[];
 <p>注意：相比 avail ring 结构多了 len 字段，用于表示设备侧写入的数据长度。对于只读数据类型，不改变 len 长度。</p>
 <p>vring 主要通过两个环形缓冲区来完成数据流的转发。</p>
 <p>当 guest 向 virtqueue 中写数据时，实际上是向 desc 结构指向的 buffer 中填充数据，完了会更新 available ring，然后再通知 host。<br>当 host 收到接收数据的通知时，首先从 desc 指向的 buffer 中找到 available ring 中添加的 buffer，映射内存，同时更新 used ring，并通知 guest 接收数据完毕。</p>
-<h2 id="八、qemu后端处理模块"><a href="#八、qemu后端处理模块" class="headerlink" title="八、qemu后端处理模块"></a>八、qemu后端处理模块</h2><p>下面以Virtio Network Device设备的初始化为例对qemu中virtio的实现进行说明。</p>
-<p>1.预定义结构体</p>
-<pre><code>//代码路径：QEMU/qom/object.c
+<h2 id="qemu后端处理模块"><a href="#qemu后端处理模块" class="headerlink" title="qemu后端处理模块"></a>qemu后端处理模块</h2><p>下面以Virtio Network Device设备的初始化为例对qemu中virtio的实现进行说明。</p>
+<h3 id="预定义结构体"><a href="#预定义结构体" class="headerlink" title="预定义结构体"></a>预定义结构体</h3><pre><code>//代码路径：QEMU/qom/object.c
 static TypeInfo object_info = &#123;
 .name = TYPE_OBJECT,
 .instance_size = sizeof(Object),
@@ -469,8 +464,7 @@ type_register_static(&amp;virtio_net_info);
 type_init(virtio_register_types)
 </code></pre>
 <p>Virtio Network Device这种类的定义是有多层继承关系的，TYPE_VIRTIO_NET的父类是TYPE_VIRTIO_DEVICE，TYPE_VIRTIO_DEVICE的父类是TYPE_DEVICE，TYPE_DEVICE的父类是TYPE_OBJECT，继承关系就到头了。type_init用于注册这种类，这里面每一层都有class_init，用于从TypeImpl生成xxxClass，也有instance_init，会将xxxClass初始化为实例。</p>
-<p>2.创建VirtQueue</p>
-<p>TYPE_VIRTIO_NET层的class_init函数是virtio_net_class_init，它定义了DeviceClass的realize函数为virtio_net_device_realize，如下所示：</p>
+<h3 id="创建VirtQueue"><a href="#创建VirtQueue" class="headerlink" title="创建VirtQueue"></a>创建VirtQueue</h3><p>TYPE_VIRTIO_NET层的class_init函数是virtio_net_class_init，它定义了DeviceClass的realize函数为virtio_net_device_realize，如下所示：</p>
 <pre><code>//代码路径：QEMU/hw/net/virtio-net.c
 static void virtio_net_class_init(ObjectClass *klass, void *data)
 &#123;
@@ -525,8 +519,7 @@ n-&gt;nic = qemu_new_nic(&amp;net_virtio_info, &amp;n-&gt;nic_conf,
 </code></pre>
 <p>上述代码创建了一个VirtIODevice，而virtio_init用来初始化这个设备。VirtIODevice结构里面有一个VirtQueue数组，这就是virtio前端和后端互相传数据的队列，最多有VIRTIO_QUEUE_MAX（1024）个。</p>
 <p>但是net设备也有与其他设备不一样的地方，即代码中存在这样的语句n-&gt;max_queues * 2 + 1 &gt; VIRTIO_QUEUE_MAX。为什么要乘以2呢？这是因为对于网络设备来讲，应该分发送队列和接收队列两个方向。</p>
-<p>3.VirtQueue队列初始化</p>
-<p>接下来调用virtio_net_add_queue来初始化队列，可以看出这里面就有发送tx_vq和接收rx_vq两个队列，如下所示：</p>
+<h3 id="VirtQueue队列初始化"><a href="#VirtQueue队列初始化" class="headerlink" title="VirtQueue队列初始化"></a>VirtQueue队列初始化</h3><p>接下来调用virtio_net_add_queue来初始化队列，可以看出这里面就有发送tx_vq和接收rx_vq两个队列，如下所示：</p>
 <pre><code>//代码路径：QEMU/hw/net/virtio-net.c
 static void virtio_net_add_queue(VirtIONet *n, int index)
 &#123;
@@ -551,8 +544,7 @@ n-&gt;vqs[index].n = n;
 &#125;
 </code></pre>
 <p>每个VirtQueue中，都有一个vring用来维护这个队列里面的数据；另外还有函数virtio_net_handle_rx用于处理网络包的接收；函数virtio_net_handle_tx_bh用于网络包的发送。</p>
-<p>4.创建虚拟机网卡</p>
-<p>qemu_new_nic会创建一个虚拟机里面的网卡，如下所示：</p>
+<h3 id="创建虚拟机网卡"><a href="#创建虚拟机网卡" class="headerlink" title="创建虚拟机网卡"></a>创建虚拟机网卡</h3><p>qemu_new_nic会创建一个虚拟机里面的网卡，如下所示：</p>
 <pre><code>//代码路径：QEMU/net/net.c
 NICState *qemu_new_nic(NetClientInfo *info,
    NICConf *conf,
@@ -601,9 +593,8 @@ nc-&gt;destructor = destructor;
 QTAILQ_INIT(&amp;nc-&gt;filters);
 &#125;
 </code></pre>
-<h2 id="九、kernel内核驱动程序"><a href="#九、kernel内核驱动程序" class="headerlink" title="九、kernel内核驱动程序"></a>九、kernel内核驱动程序</h2><p>在虚拟机里面的进程发送一个网络包，通过文件系统和Socket调用网络协议栈到达网络设备层，只不过这个不是普通的网络设备，而是virtio_net的驱动。virtio_net的驱动程序代码在Linux操作系统的源代码里面，文件名为linux&#x2F;drivers&#x2F;net&#x2F;virtio_net.c，如下所示：</p>
-<p>1.预定义结构体</p>
-<pre><code>static struct virtio_driver virtio_net_driver = &#123;
+<h2 id="kernel内核驱动程序"><a href="#kernel内核驱动程序" class="headerlink" title="kernel内核驱动程序"></a>kernel内核驱动程序</h2><p>在虚拟机里面的进程发送一个网络包，通过文件系统和Socket调用网络协议栈到达网络设备层，只不过这个不是普通的网络设备，而是virtio_net的驱动。virtio_net的驱动程序代码在Linux操作系统的源代码里面，文件名为linux&#x2F;drivers&#x2F;net&#x2F;virtio_net.c，如下所示：</p>
+<h3 id="预定义结构体-1"><a href="#预定义结构体-1" class="headerlink" title="预定义结构体"></a>预定义结构体</h3><pre><code>static struct virtio_driver virtio_net_driver = &#123;
     .feature_table = features,
     .feature_table_size = ARRAY_SIZE(features),
     .driver.name =	KBUILD_MODNAME,
@@ -622,8 +613,7 @@ MODULE_DEVICE_TABLE(virtio, id_table);
 MODULE_DESCRIPTION(&quot;Virtio network driver&quot;);
 MODULE_LICENSE(&quot;GPL&quot;);
 </code></pre>
-<p>2.模块初始化</p>
-<p>在virtio_net的驱动程序的初始化代码中，需要注册一个驱动函数virtio_net_driver。当一个设备驱动作为一个内核模块被初始化的时候，probe函数会被调用，因而来看一下virtnet_probe：</p>
+<h3 id="模块初始化"><a href="#模块初始化" class="headerlink" title="模块初始化"></a>模块初始化</h3><p>在virtio_net的驱动程序的初始化代码中，需要注册一个驱动函数virtio_net_driver。当一个设备驱动作为一个内核模块被初始化的时候，probe函数会被调用，因而来看一下virtnet_probe：</p>
 <pre><code>static int virtnet_probe(struct virtio_device *vdev)
 &#123;
     int i, err;
@@ -668,8 +658,7 @@ MODULE_LICENSE(&quot;GPL&quot;);
 &#125;
 </code></pre>
 <p>在virtnet_probe中会创建struct net_device，并且通过register_netdev注册这个网络设备，这样在客户机里面就能看到这个网卡了。</p>
-<p>3.初始化virtqueue</p>
-<p>在virtnet_probe中，还有一件重要的事情就是，init_vqs会初始化发送和接收的virtqueue，如下所示：</p>
+<h3 id="初始化virtqueue"><a href="#初始化virtqueue" class="headerlink" title="初始化virtqueue"></a>初始化virtqueue</h3><p>在virtnet_probe中，还有一件重要的事情就是，init_vqs会初始化发送和接收的virtqueue，如下所示：</p>
 <pre><code>static int init_vqs(struct virtnet_info *vi)
 &#123;
     int ret;
@@ -690,8 +679,7 @@ err:
     return ret;
 &#125;
 </code></pre>
-<p>4.Virtqueue实体查找</p>
-<p>按照之前的virtio原理，virtqueue是一个介于客户机前端和qemu后端的一个结构，用于在这两端之间传递数据，对于网络设备来讲有发送和接收两个方向的队列。这里建立的struct virtqueue是客户机前端对于队列管理的数据结构。队列的实体需要通过函数virtnet_find_vqs查找或者生成，这里还会指定接收队列的callback函数为skb_recv_done，发送队列的callback函数为skb_xmit_done。当buffer使用发生变化的时候，可以调用这个callback函数进行通知，如下所示：</p>
+<h3 id="Virtqueue实体查找"><a href="#Virtqueue实体查找" class="headerlink" title="Virtqueue实体查找"></a>Virtqueue实体查找</h3><p>按照之前的virtio原理，virtqueue是一个介于客户机前端和qemu后端的一个结构，用于在这两端之间传递数据，对于网络设备来讲有发送和接收两个方向的队列。这里建立的struct virtqueue是客户机前端对于队列管理的数据结构。队列的实体需要通过函数virtnet_find_vqs查找或者生成，这里还会指定接收队列的callback函数为skb_recv_done，发送队列的callback函数为skb_xmit_done。当buffer使用发生变化的时候，可以调用这个callback函数进行通知，如下所示：</p>
 <pre><code>static int virtnet_find_vqs(struct virtnet_info *vi)
 &#123;
     vq_callback_t **callbacks;
@@ -759,7 +747,7 @@ err_vq:
 <p>这里的find_vqs是在struct virtnet_info里的struct virtio_device里的struct virtio_config_ops *config里面定义的。</p>
 <p>根据virtio_config_ops的定义，find_vqs会调用vp_modern_find_vqs。在vp_modern_find_vqs 中，vp_find_vqs会调用vp_find_vqs_intx。在vp_find_vqs_intx 中，通过request_irq注册一个中断处理函数vp_interrupt，当设备向队列中写入信息时会产生一个中断，也就是vq中断。中断处理函数需要调用相应队列的回调函数，然后根据队列的数目，依次调用vp_setup_vq完成virtqueue、vring的分配和初始化。</p>
 <p>同样，这些数据结构会和virtio后端的VirtIODevice、VirtQueue、vring对应起来，都应该指向刚才创建的那一段内存。客户机同样会通过调用专门给外部设备发送指令的函数iowrite告诉外部的pci设备，这些共享内存的地址。至此前端设备驱动和后端设备驱动之间的两个收发队列就关联好了。</p>
-<h2 id="十、总结"><a href="#十、总结" class="headerlink" title="十、总结"></a>十、总结</h2><p>virtio 是 guest 与 host 之间通信的润滑剂，提供了一套通用框架和标准接口或协议来完成两者之间的交互过程，极大地解决了各种驱动程序和不同虚拟化解决方案之间的适配问题。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>virtio 是 guest 与 host 之间通信的润滑剂，提供了一套通用框架和标准接口或协议来完成两者之间的交互过程，极大地解决了各种驱动程序和不同虚拟化解决方案之间的适配问题。</p>
 
     </div>
 
@@ -862,7 +850,7 @@ err_vq:
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E4%BB%80%E4%B9%88%E6%98%AFvirtio"><span class="nav-number">1.</span> <span class="nav-text">一、什么是virtio</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81Virtio%E6%9E%B6%E6%9E%84"><span class="nav-number">2.</span> <span class="nav-text">二、Virtio架构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81vring%E5%85%B1%E4%BA%AB%E5%86%85%E5%AD%98%E5%9F%BA%E6%9C%AC%E5%8E%9F%E7%90%86"><span class="nav-number">3.</span> <span class="nav-text">三、vring共享内存基本原理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9B%E3%80%81PCI%E8%AE%BE%E5%A4%87%E6%A6%82%E8%BF%B0"><span class="nav-number">4.</span> <span class="nav-text">四、PCI设备概述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%94%E3%80%81guest%E5%89%8D%E7%AB%AF%E9%A9%B1%E5%8A%A8%E7%A8%8B%E5%BA%8F%E6%93%8D%E4%BD%9C%E6%8E%A5%E5%8F%A3"><span class="nav-number">5.</span> <span class="nav-text">五、guest前端驱动程序操作接口</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%AD%E3%80%81virtio-%E6%95%B0%E6%8D%AE%E6%B5%81%E4%BA%A4%E4%BA%92%E6%9C%BA%E5%88%B6%EF%BC%9Avirtqueue"><span class="nav-number">6.</span> <span class="nav-text">六、virtio 数据流交互机制：virtqueue</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%83%E3%80%81virtio-%E4%BC%A0%E8%BE%93%E6%9C%BA%E5%88%B6%EF%BC%9Avring%E7%9A%84%E6%9E%84%E6%88%90%E4%B8%8E%E5%AE%9E%E7%8E%B0"><span class="nav-number">7.</span> <span class="nav-text">七、virtio 传输机制：vring的构成与实现</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%AB%E3%80%81qemu%E5%90%8E%E7%AB%AF%E5%A4%84%E7%90%86%E6%A8%A1%E5%9D%97"><span class="nav-number">8.</span> <span class="nav-text">八、qemu后端处理模块</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B9%9D%E3%80%81kernel%E5%86%85%E6%A0%B8%E9%A9%B1%E5%8A%A8%E7%A8%8B%E5%BA%8F"><span class="nav-number">9.</span> <span class="nav-text">九、kernel内核驱动程序</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8D%81%E3%80%81%E6%80%BB%E7%BB%93"><span class="nav-number">10.</span> <span class="nav-text">十、总结</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AFvirtio"><span class="nav-number">1.</span> <span class="nav-text">什么是virtio</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Virtio%E6%9E%B6%E6%9E%84"><span class="nav-number">2.</span> <span class="nav-text">Virtio架构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#vring%E5%85%B1%E4%BA%AB%E5%86%85%E5%AD%98%E5%9F%BA%E6%9C%AC%E5%8E%9F%E7%90%86"><span class="nav-number">3.</span> <span class="nav-text">vring共享内存基本原理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#PCI%E8%AE%BE%E5%A4%87%E6%A6%82%E8%BF%B0"><span class="nav-number">4.</span> <span class="nav-text">PCI设备概述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#guest%E5%89%8D%E7%AB%AF%E9%A9%B1%E5%8A%A8%E7%A8%8B%E5%BA%8F%E6%93%8D%E4%BD%9C%E6%8E%A5%E5%8F%A3"><span class="nav-number">5.</span> <span class="nav-text">guest前端驱动程序操作接口</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AF%BB%E5%86%99%E9%85%8D%E7%BD%AE%E7%A9%BA%E9%97%B4"><span class="nav-number">5.1.</span> <span class="nav-text">读写配置空间</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AF%BB%E5%86%99-status-bits"><span class="nav-number">5.2.</span> <span class="nav-text">读写 status bits</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Device-reset"><span class="nav-number">5.3.</span> <span class="nav-text">Device reset</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Virtqueue%E7%9A%84%E5%88%9B%E5%BB%BA%E5%92%8C%E9%94%80%E6%AF%81"><span class="nav-number">5.4.</span> <span class="nav-text">Virtqueue的创建和销毁</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#virtio-%E6%95%B0%E6%8D%AE%E6%B5%81%E4%BA%A4%E4%BA%92%E6%9C%BA%E5%88%B6%EF%BC%9Avirtqueue"><span class="nav-number">6.</span> <span class="nav-text">virtio 数据流交互机制：virtqueue</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#virtio-%E4%BC%A0%E8%BE%93%E6%9C%BA%E5%88%B6%EF%BC%9Avring%E7%9A%84%E6%9E%84%E6%88%90%E4%B8%8E%E5%AE%9E%E7%8E%B0"><span class="nav-number">7.</span> <span class="nav-text">virtio 传输机制：vring的构成与实现</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#qemu%E5%90%8E%E7%AB%AF%E5%A4%84%E7%90%86%E6%A8%A1%E5%9D%97"><span class="nav-number">8.</span> <span class="nav-text">qemu后端处理模块</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%A2%84%E5%AE%9A%E4%B9%89%E7%BB%93%E6%9E%84%E4%BD%93"><span class="nav-number">8.1.</span> <span class="nav-text">预定义结构体</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%9B%E5%BB%BAVirtQueue"><span class="nav-number">8.2.</span> <span class="nav-text">创建VirtQueue</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#VirtQueue%E9%98%9F%E5%88%97%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="nav-number">8.3.</span> <span class="nav-text">VirtQueue队列初始化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%BD%91%E5%8D%A1"><span class="nav-number">8.4.</span> <span class="nav-text">创建虚拟机网卡</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#kernel%E5%86%85%E6%A0%B8%E9%A9%B1%E5%8A%A8%E7%A8%8B%E5%BA%8F"><span class="nav-number">9.</span> <span class="nav-text">kernel内核驱动程序</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%A2%84%E5%AE%9A%E4%B9%89%E7%BB%93%E6%9E%84%E4%BD%93-1"><span class="nav-number">9.1.</span> <span class="nav-text">预定义结构体</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A8%A1%E5%9D%97%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="nav-number">9.2.</span> <span class="nav-text">模块初始化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%9D%E5%A7%8B%E5%8C%96virtqueue"><span class="nav-number">9.3.</span> <span class="nav-text">初始化virtqueue</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Virtqueue%E5%AE%9E%E4%BD%93%E6%9F%A5%E6%89%BE"><span class="nav-number">9.4.</span> <span class="nav-text">Virtqueue实体查找</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">10.</span> <span class="nav-text">总结</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
