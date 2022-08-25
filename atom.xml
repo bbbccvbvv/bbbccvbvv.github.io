@@ -6,7 +6,7 @@
   <link href="http://example.com/atom.xml" rel="self"/>
   
   <link href="http://example.com/"/>
-  <updated>2022-08-18T08:47:13.769Z</updated>
+  <updated>2022-08-25T10:59:37.768Z</updated>
   <id>http://example.com/</id>
   
   <author>
@@ -17,19 +17,34 @@
   <generator uri="https://hexo.io/">Hexo</generator>
   
   <entry>
-    <title>Hello World</title>
-    <link href="http://example.com/2022/08/19/hello-world/"/>
-    <id>http://example.com/2022/08/19/hello-world/</id>
-    <published>2022-08-19T02:25:38.909Z</published>
-    <updated>2022-08-18T08:47:13.769Z</updated>
+    <title>【翻译】libvirt虚拟机xml配置文件格式（1）General metadata</title>
+    <link href="http://example.com/2022/08/20/domain_xml_format_general-metadata/"/>
+    <id>http://example.com/2022/08/20/domain_xml_format_general-metadata/</id>
+    <published>2022-08-20T07:56:10.000Z</published>
+    <updated>2022-08-25T10:59:37.768Z</updated>
     
-    <content type="html"><![CDATA[<p>Welcome to <a href="https://hexo.io/">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues">GitHub</a>.</p><span id="more"></span><h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">&quot;My New Post&quot;</span></span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/writing.html">Writing</a></p><h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/server.html">Server</a></p><h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/generating.html">Generating</a></p><h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/one-command-deployment.html">Deployment</a></p>]]></content>
-    
-    
-    <summary type="html">&lt;p&gt;Welcome to &lt;a href=&quot;https://hexo.io/&quot;&gt;Hexo&lt;/a&gt;! This is your very first post. Check &lt;a href=&quot;https://hexo.io/docs/&quot;&gt;documentation&lt;/a&gt; for more info. If you get any problems when using Hexo, you can find the answer in &lt;a href=&quot;https://hexo.io/docs/troubleshooting.html&quot;&gt;troubleshooting&lt;/a&gt; or you can ask me on &lt;a href=&quot;https://github.com/hexojs/hexo/issues&quot;&gt;GitHub&lt;/a&gt;.&lt;/p&gt;</summary>
+    <content type="html"><![CDATA[<p>原文网址：<a href="https://libvirt.org/formatdomain.html#id8" title="Domain XML format">https://libvirt.org/formatdomain.html#id8</a></p><p>所有的虚拟机都需要的根元素是domain。其包含两个属性项，typo属性项指明了被用来运行虚拟机的虚拟机管理程序（hypervisor）。该项允许的数值与驱动相关，包含了xen、kvm、hvf（从8.1.0和QEMU 2.12版本起）、qemu和lxc。第二个属性项是id，代表运行客户机（guest）的一个唯一数字标识符。不活跃的客户机没有id。</p><span id="more"></span><pre><code>&lt;domain type=&#39;kvm&#39; id=&#39;1&#39;&gt;  &lt;name&gt;MyGuest&lt;/name&gt;  &lt;uuid&gt;4dea22b3-1d52-d8f3-2516-782e98ab3fa0&lt;/uuid&gt;  &lt;genid&gt;43dc0cf8-809b-4adb-9bea-a9abb5f3d90e&lt;/genid&gt;  &lt;title&gt;A short description - title - of the domain&lt;/title&gt;  &lt;description&gt;Some human readable description&lt;/description&gt;  &lt;metadata&gt;    &lt;app1:foo xmlns:app1=&quot;http://app1.org/app1/&quot;&gt;..&lt;/app1:foo&gt;    &lt;app2:bar xmlns:app2=&quot;http://app1.org/app2/&quot;&gt;..&lt;/app2:bar&gt;  &lt;/metadata&gt;  ...</code></pre><h1 id="name名称"><a href="#name名称" class="headerlink" title="name名称"></a>name名称</h1><p>name元素的内容为虚拟机提供了一个小名。这个名称应该仅由字母或数字字符组成，同时在母机（host）范围内该名称必须是唯一的。该名称经常被用来生成文件以储存持久化配置文件。</p><h1 id="uuid统一唯一标识符"><a href="#uuid统一唯一标识符" class="headerlink" title="uuid统一唯一标识符"></a>uuid统一唯一标识符</h1><p>uuid属性项的内容为虚拟机提供了一个全局唯一标识符。uuid的格式必须符合RFC 4122标准，例如<em>3e3fce45-4f53-4fa7-bb32-11f34168b82b</em>。该属性项可以省略，那么当定义define或创建一个新的虚拟机时，会生成一个随机的uuid。也可以通过<br>SMBIOS System Information规范提供uuid。（uuid从libvirt 0.0.1版本起提供支持，sysinfo从libvirt 0.8.7版本起提供支持）</p><h1 id="genid代际id"><a href="#genid代际id" class="headerlink" title="genid代际id"></a>genid代际id</h1><p>从libvirt 4.4.0版本开始，genid属性项使用与uuid相同格式的一个128位、随机加密的整数数值标识符代表全局唯一标识符（Globally Unique Identifier，即GUID），为虚拟机增加一个代际id。当虚拟机重复运行之前已经运行的某些操作时，该值用来帮助通知客户机。例如：</p><ul><li>虚拟机开始执行一个快照</li><li>虚拟机从备份中恢复</li><li>虚拟机陷入到故障恢复操作中</li><li>虚拟机正在导入import、拷贝copy或克隆clone</li></ul><p>客户机操作系统注意到了这些变化，通过标记分布式数据库的拷贝为脏数据、重新初始化它的随机数生成器等操作做出正常的反应。</p><p>libvirt xml解析器既可以接受给定的GUID数值，也可以未配置的情况，这时会生成一个GUID并保存在xml文件中。对于上述的过渡性操作，libvirt将会在重新运行之前改变GUID。</p><h1 id="title标题"><a href="#title标题" class="headerlink" title="title标题"></a>title标题</h1><p>title是可选配置项，为domain提供了一个简短的描述空间。title中不应该包含任何换行。从libvirt 0.9.10版本开始提供对title的支持。</p><h1 id="description描述"><a href="#description描述" class="headerlink" title="description描述"></a>description描述</h1><p>description属性项为虚拟机提供了一个人类易读的描述。该数据不会被libvirt使用，但是却包含用户想要的所有内容。从libvirt 0.7.2版本开始提供支持。</p><h1 id="metadata元数据"><a href="#metadata元数据" class="headerlink" title="metadata元数据"></a>metadata元数据</h1><p>metadata节点可以被应用程序以xml节点（node）&#x2F;树（tree）的形式用来存储特定数据。应用程序必须使用xml节点（node）&#x2F;树（tree）中的特定命名空间（namespace），每一个命名空间只有一个顶层（top-level）元素（如果应用程序需要使用结构体，则在其命名空间元素下存在相应子元素）。从libvirt 0.9.10版本开始提供支持。</p><p>本章节描述了用来代表作用域的xml文件格式，根据运行的作用于种类的格式变化，有一些可选配置项用来加载文件。对于特定虚拟机的细节可以查看<br><a href="https://libvirt.org/drivers.html">相关文件</a>。</p>]]></content>
     
     
+    <summary type="html">&lt;p&gt;原文网址：&lt;a href=&quot;https://libvirt.org/formatdomain.html#id8&quot; title=&quot;Domain XML format&quot;&gt;https://libvirt.org/formatdomain.html#id8&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;所有的虚拟机都需要的根元素是domain。其包含两个属性项，typo属性项指明了被用来运行虚拟机的虚拟机管理程序（hypervisor）。该项允许的数值与驱动相关，包含了xen、kvm、hvf（从8.1.0和QEMU 2.12版本起）、qemu和lxc。第二个属性项是id，代表运行客户机（guest）的一个唯一数字标识符。不活跃的客户机没有id。&lt;/p&gt;</summary>
     
+    
+    
+    <category term="计算机科学" scheme="http://example.com/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A7%91%E5%AD%A6/"/>
+    
+    
+    <category term="虚拟化" scheme="http://example.com/tags/%E8%99%9A%E6%8B%9F%E5%8C%96/"/>
+    
+    <category term="kvm" scheme="http://example.com/tags/kvm/"/>
+    
+    <category term="libvirt" scheme="http://example.com/tags/libvirt/"/>
+    
+    <category term="虚拟机xml配置文件" scheme="http://example.com/tags/%E8%99%9A%E6%8B%9F%E6%9C%BAxml%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6/"/>
+    
+    <category term="翻译" scheme="http://example.com/tags/%E7%BF%BB%E8%AF%91/"/>
+    
+    <category term="General metadata" scheme="http://example.com/tags/General-metadata/"/>
     
   </entry>
   
