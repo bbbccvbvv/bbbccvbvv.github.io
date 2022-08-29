@@ -121,4 +121,52 @@
     
   </entry>
   
+  <entry>
+    <title>QFtp使用心得</title>
+    <link href="http://example.com/2020/10/22/QFtp_description/"/>
+    <id>http://example.com/2020/10/22/QFtp_description/</id>
+    <published>2020-10-22T02:15:41.000Z</published>
+    <updated>2022-08-29T03:00:56.511Z</updated>
+    
+    <content type="html"><![CDATA[<h2 id="编译时找不到-a后缀的静态库"><a href="#编译时找不到-a后缀的静态库" class="headerlink" title="编译时找不到.a后缀的静态库"></a>编译时找不到.a后缀的静态库</h2><p>大多数讲解QFtp配置的文章中都提到了讲pro文件中的config -&#x3D; static改为config +&#x3D; static以生成静态库。但是需注意一点，msvc编译器与gnu编译器生产的静态库文件是不同的，msvc下的静态库文件是.lib后缀，而gnu下的静态库文件是.a后缀。</p><span id="more"></span>​<h2 id="提示QFtp未进行login操作"><a href="#提示QFtp未进行login操作" class="headerlink" title="提示QFtp未进行login操作"></a>提示QFtp未进行login操作</h2><p>ftp服务器的登录分为匿名登录和非匿名登录，匿名登录情况下，在m_ftp-&gt;connectToHost(server_name)完成之后，需调用m_ftp-&gt;login()函数进行登录操作；而非匿名情况下，在m_ftp-&gt;connectToHost(server_name)完成之后，需调用m_ftp-&gt;login(user_account,user_password)函数进行登录操作（即login操作需配置用户账号与密码）。</p><h2 id="下载文件大小为0"><a href="#下载文件大小为0" class="headerlink" title="下载文件大小为0"></a>下载文件大小为0</h2><p>QFtp大部分操作为异步操作，在调用m_ftp-&gt;get(server_path,m_file)；后，文件其实并未开始下载，只有在QFtp::commandFinished信号中Get执行结束时，文件内容从服务器写入到了内存中，因此在对应的槽函数中需进行m_file-&gt;close()；操作，同时为进行下一文件的下载，需delete m_file;等到需要时重新实例化。而文件上传的put操作与此同理，需在QFtp::commandFinished信号中Put执行结束时进行m_file的关闭及删除操作。</p><h2 id="QFtp示例程序进度条异常弹出造成程序崩溃"><a href="#QFtp示例程序进度条异常弹出造成程序崩溃" class="headerlink" title="QFtp示例程序进度条异常弹出造成程序崩溃"></a>QFtp示例程序进度条异常弹出造成程序崩溃</h2><p>在QFtp中，官方提供了名为“example”的示例文件，在QFtp成功配置之后，该程序可以正常运行，但是程序启动之后，进度条总会异常弹出。这是由于进度条在实例化之后默认弹出，要解决这个问题，在进度条实例化代码之后加一行：progressDialog-&gt;reset();即可；</p><h2 id="QFtp示例程序乱码"><a href="#QFtp示例程序乱码" class="headerlink" title="QFtp示例程序乱码"></a>QFtp示例程序乱码</h2><p>原因为文件路径中含有中文字符，此问题在网上有很多叙述，而我在之前的博客QT使用FTP传输文件时的中文路径问题_皎然自若的博客-CSDN博客_ftp中文路径问题也可作为参考。</p><p>​</p>]]></content>
+    
+    
+    <summary type="html">&lt;h2 id=&quot;编译时找不到-a后缀的静态库&quot;&gt;&lt;a href=&quot;#编译时找不到-a后缀的静态库&quot; class=&quot;headerlink&quot; title=&quot;编译时找不到.a后缀的静态库&quot;&gt;&lt;/a&gt;编译时找不到.a后缀的静态库&lt;/h2&gt;&lt;p&gt;大多数讲解QFtp配置的文章中都提到了讲pro文件中的config -&amp;#x3D; static改为config +&amp;#x3D; static以生成静态库。但是需注意一点，msvc编译器与gnu编译器生产的静态库文件是不同的，msvc下的静态库文件是.lib后缀，而gnu下的静态库文件是.a后缀。&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="计算机科学" scheme="http://example.com/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A7%91%E5%AD%A6/"/>
+    
+    
+    <category term="QT" scheme="http://example.com/tags/QT/"/>
+    
+    <category term="QFtp" scheme="http://example.com/tags/QFtp/"/>
+    
+    <category term="FTP" scheme="http://example.com/tags/FTP/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>QT使用FTP传输文件时的中文路径问题</title>
+    <link href="http://example.com/2019/12/28/qt_ftp_chinese_path/"/>
+    <id>http://example.com/2019/12/28/qt_ftp_chinese_path/</id>
+    <published>2019-12-28T01:05:05.000Z</published>
+    <updated>2022-08-29T03:00:56.517Z</updated>
+    
+    <content type="html"><![CDATA[<p>最近有关于FTP文件传输的相关项目，因此查询相关资料编写了一个示例程序。程序运行正常，但在测试过程中使用含有中文的文件进行测试时，程序报错。</p><span id="more"></span>​<p>原以为是编码的问题，认为FTP不识别UTF-8编码，因此在FTP的配置项中查询，发现其对UTF斌吗是支持的。后面继续查找相关资料。找到了问题所在。（可参阅新浪博客）</p><p>Windows的本地默认编码为gbk（如果你用的是中文系统），Linux本地默认编码为UTF-8。而我们现在使用的QT编码一般设置为UTF-8，因此当进行文件传输时，FTP服务器将路径以gbk编码方式进行解码。当路径不含中文时，还没什么影响，但当路径含有中文时，无论是文件名含有中文，还是目标文件夹路径含有中文，都会发生以上路径无法被正确识别的问题。修改如下：</p><pre><code>//将gbk编码的字符串改为UTF-8编码，在获取FTP服务器下文件时使用QString FromSpecialEncoding(const QString &amp;InputStr)  &#123;      #ifdef Q_OS_WIN          return  QString::fromLocal8Bit(InputStr.toLatin1());      #else          QTextCodec *codec = QTextCodec::codecForName(&quot;gbk&quot;);          if (codec)          &#123;              return codec-&gt;toUnicode(InputStr.toLatin1());          &#125;          else          &#123;              return QString(&quot;&quot;);          &#125;      #endif  &#125;  //将UTF-8编码的字符串改为gbk编码，在由客户端上传或下载文件时使用QString ToSpecialEncoding(const QString &amp;InputStr)  &#123;      #ifdef Q_OS_WIN          return QString::fromLatin1(InputStr.toLocal8Bit());      #else      QTextCodec *codec= QTextCodec::codecForName(&quot;gbk&quot;);      if (codec)      &#123;          return QString::fromLatin1(codec-&gt;fromUnicode(InputStr));      &#125;      else      &#123;          return QString(&quot;&quot;);      &#125;      #endif  &#125;  </code></pre><p>这里以文件上传为例，在上传过程中，涉及到路径的代码为QURL中设置目标文件路径，假设原代码为：</p><pre><code>QUrl url;//设置通讯协议url.setScheme(&quot;ftp&quot;);//设置用户名url.setUserName(&quot;user&quot;);//设置密码url.setPassword(&quot;pwd&quot;);//设置主机，也可以是域名url.setHost(&quot;192.168.1.1&quot;);//设置端口号，一般为21url.setPort(21);//设置路径QString path=&quot;\\新建文件夹\\新建文本文档.txt&quot;;url.setPath(path);</code></pre><p>该代码旨在将新建文本文档.txt文件由客户端上传到服务器根目录下的子文件夹“新建文件夹”下，因为其原始文件名及目标路径都含有中文，因此直接使用以上代码会报错。修改如下：</p><pre><code>QUrl url;//设置通讯协议url.setScheme(&quot;ftp&quot;);//设置用户名url.setUserName(&quot;user&quot;);//设置密码url.setPassword(&quot;pwd&quot;);//设置主机，也可以是域名url.setHost(&quot;192.168.1.1&quot;);//设置端口号，一般为21url.setPort(21);//设置路径QString path=&quot;\\新建文件夹\\新建文本文档.txt&quot;;url.setPath(ToSpecialEncoding(path));</code></pre><p>​<br>​</p>]]></content>
+    
+    
+    <summary type="html">&lt;p&gt;最近有关于FTP文件传输的相关项目，因此查询相关资料编写了一个示例程序。程序运行正常，但在测试过程中使用含有中文的文件进行测试时，程序报错。&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="计算机科学" scheme="http://example.com/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A7%91%E5%AD%A6/"/>
+    
+    
+    <category term="QT" scheme="http://example.com/tags/QT/"/>
+    
+    <category term="FTP" scheme="http://example.com/tags/FTP/"/>
+    
+  </entry>
+  
 </feed>
