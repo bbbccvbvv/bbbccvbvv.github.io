@@ -22,22 +22,25 @@
     var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
   </script>
 
-  <meta name="description" content="编译时找不到.a后缀的静态库大多数讲解QFtp配置的文章中都提到了讲pro文件中的config -&#x3D; static改为config +&#x3D; static以生成静态库。但是需注意一点，msvc编译器与gnu编译器生产的静态库文件是不同的，msvc下的静态库文件是.lib后缀，而gnu下的静态库文件是.a后缀。">
+  <meta name="description" content="原文网址：https:&#x2F;&#x2F;libvirt.org&#x2F;formatdomain.html#id8">
 <meta property="og:type" content="article">
-<meta property="og:title" content="QFtp使用心得">
-<meta property="og:url" content="http://example.com/2020/10/22/QFtp_description/index.html">
+<meta property="og:title" content="【翻译】libvirt虚拟机xml配置文件格式（4）CPU Allocation">
+<meta property="og:url" content="http://example.com/2022/09/05/domain_xml_format_CPU-Allocation/index.html">
 <meta property="og:site_name" content="怀德维宁">
-<meta property="og:description" content="编译时找不到.a后缀的静态库大多数讲解QFtp配置的文章中都提到了讲pro文件中的config -&#x3D; static改为config +&#x3D; static以生成静态库。但是需注意一点，msvc编译器与gnu编译器生产的静态库文件是不同的，msvc下的静态库文件是.lib后缀，而gnu下的静态库文件是.a后缀。">
+<meta property="og:description" content="原文网址：https:&#x2F;&#x2F;libvirt.org&#x2F;formatdomain.html#id8">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2020-10-22T02:15:41.000Z">
-<meta property="article:modified_time" content="2022-08-29T03:00:56.511Z">
+<meta property="article:published_time" content="2022-09-05T11:01:10.000Z">
+<meta property="article:modified_time" content="2022-09-05T11:03:01.059Z">
 <meta property="article:author" content="杨维宁">
-<meta property="article:tag" content="QT">
-<meta property="article:tag" content="QFtp">
-<meta property="article:tag" content="FTP">
+<meta property="article:tag" content="虚拟化">
+<meta property="article:tag" content="kvm">
+<meta property="article:tag" content="libvirt">
+<meta property="article:tag" content="虚拟机xml配置文件">
+<meta property="article:tag" content="翻译">
+<meta property="article:tag" content="CPU Allocation">
 <meta name="twitter:card" content="summary">
 
-<link rel="canonical" href="http://example.com/2020/10/22/QFtp_description/">
+<link rel="canonical" href="http://example.com/2022/09/05/domain_xml_format_CPU-Allocation/">
 
 
 <script id="page-configurations">
@@ -50,7 +53,7 @@
   };
 </script>
 
-  <title>QFtp使用心得 | 怀德维宁</title>
+  <title>【翻译】libvirt虚拟机xml配置文件格式（4）CPU Allocation | 怀德维宁</title>
   
 
 
@@ -172,7 +175,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2020/10/22/QFtp_description/">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/09/05/domain_xml_format_CPU-Allocation/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -185,7 +188,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          QFtp使用心得
+          【翻译】libvirt虚拟机xml配置文件格式（4）CPU Allocation
         </h1>
 
         <div class="post-meta">
@@ -194,16 +197,10 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
+              
 
-              <time title="创建时间：2020-10-22 10:15:41" itemprop="dateCreated datePublished" datetime="2020-10-22T10:15:41+08:00">2020-10-22</time>
+              <time title="创建时间：2022-09-05 19:01:10 / 修改时间：19:03:01" itemprop="dateCreated datePublished" datetime="2022-09-05T19:01:10+08:00">2022-09-05</time>
             </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-08-29 11:00:56" itemprop="dateModified" datetime="2022-08-29T11:00:56+08:00">2022-08-29</time>
-              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="far fa-folder"></i>
@@ -219,13 +216,13 @@
               <span class="post-meta-item-icon">
                 <i class="far fa-file-word"></i>
               </span>
-              <span>926</span>
+              <span>1.8k</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
                 <i class="far fa-clock"></i>
               </span>
-              <span>2 分钟</span>
+              <span>3 分钟</span>
             </span>
 
         </div>
@@ -237,14 +234,25 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <h2 id="编译时找不到-a后缀的静态库"><a href="#编译时找不到-a后缀的静态库" class="headerlink" title="编译时找不到.a后缀的静态库"></a>编译时找不到.a后缀的静态库</h2><p>大多数讲解QFtp配置的文章中都提到了讲pro文件中的config -&#x3D; static改为config +&#x3D; static以生成静态库。但是需注意一点，msvc编译器与gnu编译器生产的静态库文件是不同的，msvc下的静态库文件是.lib后缀，而gnu下的静态库文件是.a后缀。</p>
-<span id="more"></span>​
+        <p>原文网址：<a target="_blank" rel="noopener" href="https://libvirt.org/formatdomain.html#id8" title="Domain XML format">https://libvirt.org/formatdomain.html#id8</a></p>
+<span id="more"></span>
 
-<h2 id="提示QFtp未进行login操作"><a href="#提示QFtp未进行login操作" class="headerlink" title="提示QFtp未进行login操作"></a>提示QFtp未进行login操作</h2><p>ftp服务器的登录分为匿名登录和非匿名登录，匿名登录情况下，在m_ftp-&gt;connectToHost(server_name)完成之后，需调用m_ftp-&gt;login()函数进行登录操作；而非匿名情况下，在m_ftp-&gt;connectToHost(server_name)完成之后，需调用m_ftp-&gt;login(user_account,user_password)函数进行登录操作（即login操作需配置用户账号与密码）。</p>
-<h2 id="下载文件大小为0"><a href="#下载文件大小为0" class="headerlink" title="下载文件大小为0"></a>下载文件大小为0</h2><p>QFtp大部分操作为异步操作，在调用m_ftp-&gt;get(server_path,m_file)；后，文件其实并未开始下载，只有在QFtp::commandFinished信号中Get执行结束时，文件内容从服务器写入到了内存中，因此在对应的槽函数中需进行m_file-&gt;close()；操作，同时为进行下一文件的下载，需delete m_file;等到需要时重新实例化。而文件上传的put操作与此同理，需在QFtp::commandFinished信号中Put执行结束时进行m_file的关闭及删除操作。</p>
-<h2 id="QFtp示例程序进度条异常弹出造成程序崩溃"><a href="#QFtp示例程序进度条异常弹出造成程序崩溃" class="headerlink" title="QFtp示例程序进度条异常弹出造成程序崩溃"></a>QFtp示例程序进度条异常弹出造成程序崩溃</h2><p>在QFtp中，官方提供了名为“example”的示例文件，在QFtp成功配置之后，该程序可以正常运行，但是程序启动之后，进度条总会异常弹出。这是由于进度条在实例化之后默认弹出，要解决这个问题，在进度条实例化代码之后加一行：progressDialog-&gt;reset();即可；</p>
-<h2 id="QFtp示例程序乱码"><a href="#QFtp示例程序乱码" class="headerlink" title="QFtp示例程序乱码"></a>QFtp示例程序乱码</h2><p>原因为文件路径中含有中文字符，此问题在网上有很多叙述，而我在之前的博客QT使用FTP传输文件时的中文路径问题_皎然自若的博客-CSDN博客_ftp中文路径问题也可作为参考。</p>
-<p>​</p>
+<pre><code>&lt;domain&gt;
+  ...
+  &lt;vcpu placement=&#39;static&#39; cpuset=&quot;1-4,^3,6&quot; current=&quot;1&quot;&gt;2&lt;/vcpu&gt;
+  &lt;vcpus&gt;
+    &lt;vcpu id=&#39;0&#39; enabled=&#39;yes&#39; hotpluggable=&#39;no&#39; order=&#39;1&#39;/&gt;
+    &lt;vcpu id=&#39;1&#39; enabled=&#39;no&#39; hotpluggable=&#39;yes&#39;/&gt;
+  &lt;/vcpus&gt;
+  ...
+&lt;/domain&gt;
+</code></pre>
+<h1 id="vcpu"><a href="#vcpu" class="headerlink" title="vcpu"></a>vcpu</h1><p>该元素定义了分配给客户机操作系统的虚拟cpu的最大数量，该值范围为1到虚拟机管理器支持的最大数量之间。</p>
+<h2 id="cpuset"><a href="#cpuset" class="headerlink" title="cpuset"></a>cpuset</h2><p>可选属性cpuset是以逗号分隔的物理CPU编号列表，默认情况下虚拟机进程和虚拟CPU可以固定到对应编号的物理CPU上。（注意：虚拟机进程和虚拟cpu的绑定（pinning）策略可以由cputune分别指定。如果cputune的属性项emulatorpin被设置，则vcpu指定的cpuset将会被忽略。对于vcpupin指定的虚拟cpu，cpuset制定的cpuset也会被忽略。vcpupin未指定的虚拟cpu，每一个都会被绑定到cpuset指定的物理cpu上）。列表中的每一个元素可以是一个单独的cpu编号、cpu编号范围或是插入符号后跟要从先前范围中排除的CPU编号。自0.4.4版本起支持。</p>
+<h2 id="current"><a href="#current" class="headerlink" title="current"></a>current</h2><p>可选属性current可用于指定是否应启用少于最大数量的虚拟CPU。从 0.8.5开始。</p>
+<h2 id="placement"><a href="#placement" class="headerlink" title="placement"></a>placement</h2><p>可选属性placement可用来表明虚拟机进程的cpu布局模式。该值可为static或auto，但是如果指定了cpuset，则默认numatune的placement设置为static。使用auto表示虚拟机进程将通过查询numa固定到咨询节点集，如果指定了属性cpuset的值，则将被忽略。如果cpuset和placement都没有指定或placement设置为static，但是cpuset为指定，则虚拟机进程将会被绑定到所有的可用物理cpu上。自0.9.11起（仅限于QEMU和KVM）。</p>
+<h1 id="vcpus"><a href="#vcpus" class="headerlink" title="vcpus"></a>vcpus</h1><p>vcpus元素项运行控制单个vCPU的状态。id属性项指定了libvirt在其他地方使用的vCPU id，例如vCPU绑定、调度程序信息和NUMA分配。请注意，在某些情况下，客户机中看到的vCPU ID可能与libvirt ID不同。有效ID 从0到vcpu元素设置的最大vCPU计数减 1。enabled属性项允许控制vCPU的状态。有效值为yes和no。hotpluggable控制在引导开机时启用CPU是否可以热插拔和热拔出给定的vCPU。请注意，所有禁用的vCPU必须是可热插拔的。有效值为yes和no。order允许指定在线vCPU的顺序。对于需要一次插入多个vCPU的虚拟机管理器&#x2F;平台，该顺序可能会在需要一次启用的所有 vCPU上重复。顺序不强制指定。然后以任意顺序添加vCPU。如果使用了顺序信息，它必须用于所有在线vCPU。虚拟机管理器可能在单一操作期间清理或更新顺序信息。请注意，虚拟机管理器可能会创建不同于引导vCPU的热插拔vCPU，因此可能需要进行特殊初始化。虚拟机管理器可能要求启动时启用的不可热插拔的vCPU在开始时从ID 0开始聚集。可能还需要vCPU 0始终存在且不可热插拔。请注意，可能需要为单个CPU提供状态以支持可寻址的 vCPU热插拔，并且此功能可能不受所有虚拟机管理器的支持。QEMU要求实现以下条件。vCPU 0需启用并设置为不可热插拔。在PPC64上，同样需要启用同一内核中的vCPU。引导开机时存在的所有非热插拔CPU都需要在vCPU 0 之后进行分组。自2.2.0起（仅限于QEMU）。</p>
+<p>本章节描述了用来代表作用域的xml文件格式，根据运行的作用于种类的格式变化，有一些可选配置项用来加载文件。对于特定虚拟机的细节可以查看<br><a target="_blank" rel="noopener" href="https://libvirt.org/drivers.html">相关文件</a>。</p>
 
     </div>
 
@@ -260,7 +268,7 @@
   </li>
   <li class="post-copyright-link">
     <strong>本文链接：</strong>
-    <a href="http://example.com/2020/10/22/QFtp_description/" title="QFtp使用心得">http://example.com/2020/10/22/QFtp_description/</a>
+    <a href="http://example.com/2022/09/05/domain_xml_format_CPU-Allocation/" title="【翻译】libvirt虚拟机xml配置文件格式（4）CPU Allocation">http://example.com/2022/09/05/domain_xml_format_CPU-Allocation/</a>
   </li>
   <li class="post-copyright-license">
     <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
@@ -271,9 +279,12 @@
 
       <footer class="post-footer">
           <div class="post-tags">
-              <a href="/tags/QT/" rel="tag"># QT</a>
-              <a href="/tags/QFtp/" rel="tag"># QFtp</a>
-              <a href="/tags/FTP/" rel="tag"># FTP</a>
+              <a href="/tags/%E8%99%9A%E6%8B%9F%E5%8C%96/" rel="tag"># 虚拟化</a>
+              <a href="/tags/kvm/" rel="tag"># kvm</a>
+              <a href="/tags/libvirt/" rel="tag"># libvirt</a>
+              <a href="/tags/%E8%99%9A%E6%8B%9F%E6%9C%BAxml%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6/" rel="tag"># 虚拟机xml配置文件</a>
+              <a href="/tags/%E7%BF%BB%E8%AF%91/" rel="tag"># 翻译</a>
+              <a href="/tags/CPU-Allocation/" rel="tag"># CPU Allocation</a>
           </div>
 
         
@@ -282,13 +293,10 @@
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/2019/12/28/qt_ftp_chinese_path/" rel="prev" title="QT使用FTP传输文件时的中文路径问题">
-      <i class="fa fa-chevron-left"></i> QT使用FTP传输文件时的中文路径问题
+    <a href="/2022/09/02/domain_xml_format_SMBIOS-System-Information/" rel="prev" title="【翻译】libvirt虚拟机xml配置文件格式（3）SMBIOS System Information">
+      <i class="fa fa-chevron-left"></i> 【翻译】libvirt虚拟机xml配置文件格式（3）SMBIOS System Information
     </a></div>
-      <div class="post-nav-item">
-    <a href="/2020/12/23/Ubuntu_offline_setup_gcc/" rel="next" title="Ubuntu离线情况下安装gcc编译器">
-      Ubuntu离线情况下安装gcc编译器 <i class="fa fa-chevron-right"></i>
-    </a></div>
+      <div class="post-nav-item"></div>
     </div>
       </footer>
     
@@ -347,7 +355,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BC%96%E8%AF%91%E6%97%B6%E6%89%BE%E4%B8%8D%E5%88%B0-a%E5%90%8E%E7%BC%80%E7%9A%84%E9%9D%99%E6%80%81%E5%BA%93"><span class="nav-number">1.</span> <span class="nav-text">编译时找不到.a后缀的静态库</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8F%90%E7%A4%BAQFtp%E6%9C%AA%E8%BF%9B%E8%A1%8Clogin%E6%93%8D%E4%BD%9C"><span class="nav-number">2.</span> <span class="nav-text">提示QFtp未进行login操作</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%8B%E8%BD%BD%E6%96%87%E4%BB%B6%E5%A4%A7%E5%B0%8F%E4%B8%BA0"><span class="nav-number">3.</span> <span class="nav-text">下载文件大小为0</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#QFtp%E7%A4%BA%E4%BE%8B%E7%A8%8B%E5%BA%8F%E8%BF%9B%E5%BA%A6%E6%9D%A1%E5%BC%82%E5%B8%B8%E5%BC%B9%E5%87%BA%E9%80%A0%E6%88%90%E7%A8%8B%E5%BA%8F%E5%B4%A9%E6%BA%83"><span class="nav-number">4.</span> <span class="nav-text">QFtp示例程序进度条异常弹出造成程序崩溃</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#QFtp%E7%A4%BA%E4%BE%8B%E7%A8%8B%E5%BA%8F%E4%B9%B1%E7%A0%81"><span class="nav-number">5.</span> <span class="nav-text">QFtp示例程序乱码</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#vcpu"><span class="nav-number">1.</span> <span class="nav-text">vcpu</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#cpuset"><span class="nav-number">1.1.</span> <span class="nav-text">cpuset</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#current"><span class="nav-number">1.2.</span> <span class="nav-text">current</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#placement"><span class="nav-number">1.3.</span> <span class="nav-text">placement</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#vcpus"><span class="nav-number">2.</span> <span class="nav-text">vcpus</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
