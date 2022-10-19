@@ -112,6 +112,38 @@
   </entry>
   
   <entry>
+    <title>【翻译】libvirt虚拟机xml配置文件格式（5）IOThreads Allocation</title>
+    <link href="http://example.com/2022/08/20/domain_xml_format_IOThreads-Allocation/"/>
+    <id>http://example.com/2022/08/20/domain_xml_format_IOThreads-Allocation/</id>
+    <published>2022-08-20T07:56:10.000Z</published>
+    <updated>2022-10-19T09:18:19.799Z</updated>
+    
+    <content type="html"><![CDATA[<p>原文网址：<a href="https://libvirt.org/formatdomain.html#id8" title="Domain XML format">https://libvirt.org/formatdomain.html#id8</a></p><p>IOThreads是支持磁盘设备的专用事件循环线程，用于执行块I&#x2F;O请求，以提高可伸缩性，尤其是在具有许多LUN的SMP主机&#x2F;客户机上。自1.2.8起（仅限于QEMU）。</p><span id="more"></span><pre><code>&lt;domain&gt;  ...  &lt;iothreads&gt;4&lt;/iothreads&gt;  ...&lt;/domain&gt;&lt;domain&gt;  ...  &lt;iothreadids&gt;    &lt;iothread id=&quot;2&quot;/&gt;    &lt;iothread id=&quot;4&quot;/&gt;    &lt;iothread id=&quot;6&quot;/&gt;    &lt;iothread id=&quot;8&quot; thread_pool_min=&quot;2&quot; thread_pool_max=&quot;32&quot;/&gt;  &lt;/iothreadids&gt;  &lt;defaultiothread thread_pool_min=&quot;8&quot; thread_pool_max=&quot;16&quot;/&gt;  ...&lt;/domain&gt;</code></pre><h1 id="iothreads"><a href="#iothreads" class="headerlink" title="iothreads"></a>iothreads</h1><p>此可选元素的内容定义要分配给虚拟机以供支持的目标存储设备使用的 IOThread数量。每一个主机CPU只有1个或2个IOThread。可能有多个受支持的设备分配给每个IOThread。自1.2.8起。</p><h1 id="iothreadids"><a href="#iothreadids" class="headerlink" title="iothreadids"></a>iothreadids</h1><p>可选的iothreadids元素提供了为虚拟机专门定义IOThread ID的能力。默认情况下，IOThread ID 是从1到为虚拟机定义的iothreads的数量顺序编号的。id属性项用于定义IOThread ID。id属性项必须是一个大于0的正整数。如果定义的iothreadids少于为虚拟机定义的iothreads，则libvirt将从1开始按顺序填充iothreadids，避免任何预定义的id。如果iothreadids大于为虚拟机定义的iothreads，iothreads的值将会相应调整。自1.2.15起。该元素有两个可选属性项thread_pool_min和thread_pool_max用于定义给定IOThread工作线程的上下限。前者可能是0，后者绝不会为0.自8.5.0起。</p><h1 id="defaultiothread"><a href="#defaultiothread" class="headerlink" title="defaultiothread"></a>defaultiothread</h1><p>该元素代表了虚拟机管理程序内部的默认事件循环，为指定特定IOThread的I&#x2F;O请求会被该循环处理。该元素可设置thread_pool_min和thread_pool_max属性项，指定了默认事件循环工作线程的上下限数量。模拟器可能是多线程的并按需生成所谓的工作线程。通常两个属性项都不会去设置（使得模拟器使用其自身的默认值），除非模拟器在实时工作负载中运行，因此无法承受生成新工作线程所需时间的不可预测性。自8.5.0起。</p><p>本章节描述了用来代表作用域的xml文件格式，根据运行的作用于种类的格式变化，有一些可选配置项用来加载文件。对于特定虚拟机的细节可以查看<br><a href="https://libvirt.org/drivers.html">相关文件</a>。</p>]]></content>
+    
+    
+    <summary type="html">&lt;p&gt;原文网址：&lt;a href=&quot;https://libvirt.org/formatdomain.html#id8&quot; title=&quot;Domain XML format&quot;&gt;https://libvirt.org/formatdomain.html#id8&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;IOThreads是支持磁盘设备的专用事件循环线程，用于执行块I&amp;#x2F;O请求，以提高可伸缩性，尤其是在具有许多LUN的SMP主机&amp;#x2F;客户机上。自1.2.8起（仅限于QEMU）。&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="计算机科学" scheme="http://example.com/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A7%91%E5%AD%A6/"/>
+    
+    
+    <category term="虚拟化" scheme="http://example.com/tags/%E8%99%9A%E6%8B%9F%E5%8C%96/"/>
+    
+    <category term="kvm" scheme="http://example.com/tags/kvm/"/>
+    
+    <category term="libvirt" scheme="http://example.com/tags/libvirt/"/>
+    
+    <category term="虚拟机xml配置文件" scheme="http://example.com/tags/%E8%99%9A%E6%8B%9F%E6%9C%BAxml%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6/"/>
+    
+    <category term="翻译" scheme="http://example.com/tags/%E7%BF%BB%E8%AF%91/"/>
+    
+    <category term="IOThreads Allocation" scheme="http://example.com/tags/IOThreads-Allocation/"/>
+    
+  </entry>
+  
+  <entry>
     <title>【翻译】libvirt虚拟机xml配置文件格式（1）General metadata</title>
     <link href="http://example.com/2022/08/20/domain_xml_format_general-metadata/"/>
     <id>http://example.com/2022/08/20/domain_xml_format_general-metadata/</id>
