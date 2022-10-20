@@ -6,7 +6,7 @@
   <link href="http://example.com/atom.xml" rel="self"/>
   
   <link href="http://example.com/"/>
-  <updated>2022-10-19T09:45:06.174Z</updated>
+  <updated>2022-10-20T07:41:10.991Z</updated>
   <id>http://example.com/</id>
   
   <author>
@@ -15,6 +15,34 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>_access函数32bit和64bit编译差异</title>
+    <link href="http://example.com/2022/10/20/access_usage/"/>
+    <id>http://example.com/2022/10/20/access_usage/</id>
+    <published>2022-10-20T07:00:10.000Z</published>
+    <updated>2022-10-20T07:41:10.991Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>最近，在进行软件开发工作中遇到了一个问题，觉得比较有趣，在此进行以下记录。</p><p>问题比较简单，需要检查windows系统下的C:\Windows\System32路径下是否存在特定的用户文件（dll格式）。在这里使用_access函数（C运行库函数）对文件进行检查，该函数主要用于检查文件或目录是否存在及其对应的读写权限。但是开发完成后，在自检过程中却发现使用_access函数无法达到预期，主要表现为文件已存在，但是函数返回结果却表明文件不存在。如果换用win32 API函数PathFileExistsA却正常，文件存在于对应目录。本文即对_access函数的异常进行分析。</p><span id="more"></span><h1 id="分析过程"><a href="#分析过程" class="headerlink" title="分析过程"></a>分析过程</h1><p>win32函数访问没问题，而使用C语言库函数存在问题，即系统调用没问题，主要问题应该出现在C语言库上。而最简单的修改项就是编译环境修改，之前为了兼容性考虑，代码选择的编译环境为32位，因此将编译环境改为64位。此时，_access函数正常执行，返回了符合预期的结果。</p><p>因此，针对这一点进行分析，最终在微软官网上找到相关说明，链接如下：<a href="https://learn.microsoft.com/en-us/windows/win32/winprog64/file-system-redirector?from_wecom=1" title="【Microsoft】文件系统重定向">https://learn.microsoft.com/en-us/windows/win32/winprog64/file-system-redirector?from_wecom&#x3D;1</a>；</p><p>微软在64位操作系统上，为64位应用程序保留了%windir%\System32（通常就是C:\Windows\System32）路径。因为通常情况下，32位dll和64位dll的文件名称完全相同，因此64位dll也保存在System32路径下，而32位dll则被保存在其他路径。这就使得64位操作系统下的32位应用程序访问对应dll时，直接访问%windir%\System32路径是错误的，因此微软为64位系统下的32位程序通过访问%windir%\System32路径做了重定向。而32位要想真正访问%windir%\System32路径，就可以使用%windir%\Sysnative路径替代，也可以使用Wow64DisableWow64FsRedirection函数禁用文件重定向功能。</p><p>示例程序：</p><pre><code>#include  &lt;io.h&gt;#include  &lt;stdio.h&gt;#include  &lt;stdlib.h&gt;#include &lt;Windows.h&gt;#include &lt;iostream&gt;#include &quot;Shlwapi.h&quot;#include &lt;errhandlingapi.h &gt;int main( void )&#123;    char *file_path = &quot;C:\\Windows\\System32\\test.dll&quot;;    char *file_path1 = &quot;C:\\Windows\\Sysnative\\test.dll&quot;;    // Check for existence.    printf_s( &quot;1.access system32.\n&quot;);    if( (_access( file_path, 0 )) != -1 )    &#123;        printf_s( &quot;File %s is exists.\n&quot;, file_path);    &#125;    else    &#123;        printf_s( &quot;File %s isn&#39;t exists.\n&quot;, file_path);    &#125;    printf_s( &quot;2.access sysnative.\n&quot;);    if( (_access( file_path1, 0 )) != -1 )    &#123;        printf_s( &quot;File %s is exists.\n&quot;, file_path1);    &#125;    else    &#123;        printf_s( &quot;File %s isn&#39;t exists.\n&quot;, file_path1);    &#125;    PVOID OldValue = NULL;    //  Disable redirection immediately prior to the native API function call.    printf_s( &quot;3.Disable Redirection.\n&quot;);    bool flag = Wow64DisableWow64FsRedirection(&amp;OldValue);    printf(&quot;Wow64DisableWow64FsRedirection return value is %d.\n&quot;, flag);    if (!flag)    &#123;        DWORD dw = GetLastError();        printf(&quot;Errorcode is %d.\n&quot;, dw);    &#125;    if( (_access( file_path, 0 )) != -1 )    &#123;        printf_s( &quot;File %s is exists.\n&quot;, file_path);    &#125;    else    &#123;        printf_s( &quot;File %s isn&#39;t exists.\n&quot;, file_path);    &#125;    return 0;&#125;</code></pre><p>在32位编译环境下输出如下：</p><pre><code>1.access system32.File C:\Windows\System32\test.dll isn&#39;t exists.2.access sysnative.File C:\Windows\Sysnative\test.dll is exists.3.Disable Redirection.Wow64DisableWow64FsRedirection return value is 1.File C:\Windows\System32\test.dll is exists.</code></pre><p>（1）C:\Windows\System32路径无法直接访问；</p><p>（2）C:\Windows\Sysnative路径会被重定位到C:\Windows\System32；</p><p>（3）Wow64DisableWow64FsRedirection函数返回1代表函数正常运行，此后再使用C:\Windows\System32路径，则无重定向操作，获取到了正确的结果；</p><p>在64位编译环境下输出如下：</p><pre><code>1.access system32.File C:\Windows\System32\test.dll is exists.2.access sysnative.File C:\Windows\Sysnative\test.dll isn&#39;t exists.3.Disable Redirection.Wow64DisableWow64FsRedirection return value is 0.Errorcode is 1.File C:\Windows\System32\test.dll is exists.</code></pre><p>（1）C:\Windows\System32路径可以直接访问；</p><p>（2）C:\Windows\Sysnative路径不会被重定位到C:\Windows\System32；</p><p>（3）Wow64DisableWow64FsRedirection函数返回0代表函数异常运行，但不影响后续使用C:\Windows\System32路径获取正确的结果；</p><h1 id="结论"><a href="#结论" class="headerlink" title="结论"></a>结论</h1><p>_access函数在32bit和64bit编译环境下输出结果存在差异，主要原因即为64位windows操作系统下，%windir%\System32被保留给了对应的64位应用程序，而32位应用程序访问%windir%\System32路径时就会被重定向到系统指定的其他路径上。而使用32bit编译环境最终生成的是32位应用程序，因此对应路径被重定向，直接访问%windir%\System32路径下的文件时就会出现异常。</p><p>因此建议在64位操作系统中使用64位的应用程序，而非32位的应用程序，虽然64位操作系统兼容32位应用程序，而32位操作系统不兼容64位应用程序，因此32位具有更广泛的兼容性。</p><p>如果不确定目标程序运行环境或程序存在运行于两种系统的使用场景，则在使用文件访问相关函数时：</p><p>（1）直接使用win32函数PathFileExistsA；</p><p>（2）使用_access函数前，先使用Wow64DisableWow64FsRedirection函数禁用文件重定向功能；</p><h1 id="参考链接"><a href="#参考链接" class="headerlink" title="参考链接"></a>参考链接</h1><p>（1）<a href="https://learn.microsoft.com/en-us/windows/win32/winprog64/file-system-redirector?from_wecom=1" title="【Microsoft】文件系统重定向">https://learn.microsoft.com/en-us/windows/win32/winprog64/file-system-redirector?from_wecom&#x3D;1</a>；<br>（2）<a href="https://learn.microsoft.com/en-us/windows/win32/api/wow64apiset/nf-wow64apiset-wow64disablewow64fsredirection?from_wecom=1" title="【Microsoft】Wow64DisableWow64FsRedirection函数">https://learn.microsoft.com/en-us/windows/win32/api/wow64apiset/nf-wow64apiset-wow64disablewow64fsredirection?from_wecom&#x3D;1</a>；<br>（3）<a href="https://learn.microsoft.com/en-us/cpp/c-runtime-library/reference/access-waccess?view=msvc-170&from_wecom=1" title="【Microsoft】_access函数">https://learn.microsoft.com/en-us/cpp/c-runtime-library/reference/access-waccess?view=msvc-170&from_wecom&#x3D;1</a>；<br>（4）<a href="https://learn.microsoft.com/en-us/windows/win32/api/shlwapi/nf-shlwapi-pathfileexistsa?from_wecom=1" title="【Microsoft】PathFileExistsA函数">https://learn.microsoft.com/en-us/windows/win32/api/shlwapi/nf-shlwapi-pathfileexistsa?from_wecom&#x3D;1</a>；</p>]]></content>
+    
+    
+    <summary type="html">&lt;h1 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h1&gt;&lt;p&gt;最近，在进行软件开发工作中遇到了一个问题，觉得比较有趣，在此进行以下记录。&lt;/p&gt;
+&lt;p&gt;问题比较简单，需要检查windows系统下的C:\Windows\System32路径下是否存在特定的用户文件（dll格式）。在这里使用_access函数（C运行库函数）对文件进行检查，该函数主要用于检查文件或目录是否存在及其对应的读写权限。但是开发完成后，在自检过程中却发现使用_access函数无法达到预期，主要表现为文件已存在，但是函数返回结果却表明文件不存在。如果换用win32 API函数PathFileExistsA却正常，文件存在于对应目录。本文即对_access函数的异常进行分析。&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="计算机科学" scheme="http://example.com/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A7%91%E5%AD%A6/"/>
+    
+    
+    <category term="C语言" scheme="http://example.com/tags/C%E8%AF%AD%E8%A8%80/"/>
+    
+    <category term="_access函数" scheme="http://example.com/tags/access%E5%87%BD%E6%95%B0/"/>
+    
+    <category term="编译环境" scheme="http://example.com/tags/%E7%BC%96%E8%AF%91%E7%8E%AF%E5%A2%83/"/>
+    
+    <category term="文件检查" scheme="http://example.com/tags/%E6%96%87%E4%BB%B6%E6%A3%80%E6%9F%A5/"/>
+    
+  </entry>
   
   <entry>
     <title>【翻译】libvirt虚拟机xml配置文件格式（5）IOThreads Allocation</title>
