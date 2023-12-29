@@ -1,0 +1,982 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="什么是virtiovirtio 是一种 I&#x2F;O 半虚拟化解决方案，是一套通用 I&#x2F;O 设备虚拟化的程序，是对半虚拟化 Hypervisor 中的一组通用 I&#x2F;O 设备的抽象。提供了一套上层应用与各 Hypervisor 虚拟化设备（KVM，Xen，VMware等）之间的通信框架和编程接口，减少跨平台所带来的兼容性问题，大大提高驱动程序开发效率。virtio 协议定义了">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Virtio-设备模拟详解">
+<meta property="og:url" content="http://example.com/2021/11/09/virtio-202111091100/index.html">
+<meta property="og:site_name" content="怀德维宁">
+<meta property="og:description" content="什么是virtiovirtio 是一种 I&#x2F;O 半虚拟化解决方案，是一套通用 I&#x2F;O 设备虚拟化的程序，是对半虚拟化 Hypervisor 中的一组通用 I&#x2F;O 设备的抽象。提供了一套上层应用与各 Hypervisor 虚拟化设备（KVM，Xen，VMware等）之间的通信框架和编程接口，减少跨平台所带来的兼容性问题，大大提高驱动程序开发效率。virtio 协议定义了">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-11-09T03:00:00.000Z">
+<meta property="article:modified_time" content="2023-12-29T02:38:41.453Z">
+<meta property="article:author" content="杨维宁">
+<meta property="article:tag" content="虚拟化">
+<meta property="article:tag" content="kvm">
+<meta property="article:tag" content="virtio">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://example.com/2021/11/09/virtio-202111091100/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Virtio-设备模拟详解 | 怀德维宁</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="怀德维宁" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">怀德维宁</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">大邦维屏，大宗维翰。怀德维宁，宗子维城。</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/11/09/virtio-202111091100/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="杨维宁">
+      <meta itemprop="description" content="天行健，君子以自强不息。地势坤，君子以厚德载物。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="怀德维宁">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Virtio-设备模拟详解
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-11-09 11:00:00" itemprop="dateCreated datePublished" datetime="2021-11-09T11:00:00+08:00">2021-11-09</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2023-12-29 10:38:41" itemprop="dateModified" datetime="2023-12-29T10:38:41+08:00">2023-12-29</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A7%91%E5%AD%A6/" itemprop="url" rel="index"><span itemprop="name">计算机科学</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>18k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>30 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="什么是virtio"><a href="#什么是virtio" class="headerlink" title="什么是virtio"></a>什么是virtio</h2><p>virtio 是一种 I&#x2F;O 半虚拟化解决方案，是一套通用 I&#x2F;O 设备虚拟化的程序，是对半虚拟化 Hypervisor 中的一组通用 I&#x2F;O 设备的抽象。提供了一套上层应用与各 Hypervisor 虚拟化设备（KVM，Xen，VMware等）之间的通信框架和编程接口，减少跨平台所带来的兼容性问题，大大提高驱动程序开发效率。<br>virtio 协议定义了各类设备与驱动，定义了它们如何初始化，如何通信，如何通知等。其中，最核心的是设备与驱动的通信机制，避免了每次访问外设寄存器都要 vm_exit&#x2F;vm_enter 的问题。</p>
+<span id="more"></span>
+<h2 id="Virtio架构"><a href="#Virtio架构" class="headerlink" title="Virtio架构"></a>Virtio架构</h2><p>从总体上看，virtio 可以分为四层，包括前端 guest 中各种驱动程序模块，后端 Hypervisor （实现在Qemu上）上的处理程序模块，中间用于前后端通信的 virtio 层和 virtio-ring 层，virtio 这一层实现的是虚拟队列接口，算是前后端通信的桥梁，而 virtio-ring 则是该桥梁的具体实现，它实现了两个环形缓冲区，分别用于保存前端驱动程序和后端处理程序执行的信息。</p>
+<p>严格来说，virtio 和 virtio-ring 可以看做是一层，virtio-ring 实现了 virtio 的具体通信机制和数据流程。或者这么理解可能更好，virtio 层属于控制层，负责前后端之间的通知机制（kick，notify）和控制流程，而 virtio-vring 则负责具体数据流转发。</p>
+<h2 id="vring共享内存基本原理"><a href="#vring共享内存基本原理" class="headerlink" title="vring共享内存基本原理"></a>vring共享内存基本原理</h2><p>virtio vring 本质是共享内存，要求使用共享内存的软件模块可以访问这段内存。在虚拟化场景，guest&#x2F;host 如何实现共享内存呢？</p>
+<p>第一个问题：vring 描述符中存放的内存地址是什么？</p>
+<p>vring 由 guest 驱动申请，所以 vring 描述符内存放的地址是 GPA。</p>
+<p>第二个问题：guest&#x2F;host 如何实现共享？</p>
+<p>总体看有三种情况：</p>
+<ol>
+<li>通过 qemu 模拟的设备，GPA 位于 qemu 的进程地址空间，qemu 天然可以访问。</li>
+<li>qemu 外部模拟的设备，比如 vhost-net&#x2F;vhost-user，需要建立新的内存映射。</li>
+<li>对于一个真实的硬件设备，需要使用 IOMMU 辅助完成地址转换。</li>
+</ol>
+<p>以 vhost-net 为例简要说明：</p>
+<p>(1)初始化过程中，qemu 通过 ioctl 命令字将 vring 的内存信息通知 vhost-net 内核模块。内存信息包括：GPA&#x2F;userspace_addr&#x2F;size 等。</p>
+<p>(2)vhost-net 内核模块会记录 GPA 与 userspace_addr（qemu 进程上下文虚拟地址） 的内存映射。</p>
+<p>(3)vhost-net 内核模块在启动内核线程时记录此线程为哪个 qemu 虚拟机服务，同时记录 qemu 虚拟机进程的页表信息，在内核线程运行时，使用对应的 qemu 虚拟机进程页表。这样 vhost-net 内核模块就可以访问 qemu 进程上下文的虚拟地址。</p>
+<h2 id="PCI设备概述"><a href="#PCI设备概述" class="headerlink" title="PCI设备概述"></a>PCI设备概述</h2><p>PCI即Peripheral Component Interconnect，中文意思是“外围器件互联”，是由PCISIG (PCI Special Interest Group)推出的一种局部并行总线标准。PCI总线是由ISA(Industy Standard Architecture)总线发展而来的，是一种同步的独立于处理器的32位或64位局部总线。从结构上看，PCI是在CPU的供应商和原来的系统总线之间插入的一级总线，具体由一个桥接电路实现对这一层的管理，并实现上下之间的接口以协调数据的传送。</p>
+<p>PCI总线是一种共享总线，所以需要特定的仲裁器（Arbiter）来决定当前时刻的总线的控制权。一般该仲裁器位于北桥中，而仲裁器（主机）则通过一对引脚，REQ#（request） 和GNT# （grant）来与各个从机连接。<br>CPU可以直接通过load&#x2F;store指令来访问PCI设备，PCI设备有如下三种不同内存：</p>
+<ul>
+<li>MMIO</li>
+<li>PCI IO space</li>
+<li>PCI configuration space</li>
+</ul>
+<h2 id="guest前端驱动程序操作接口"><a href="#guest前端驱动程序操作接口" class="headerlink" title="guest前端驱动程序操作接口"></a>guest前端驱动程序操作接口</h2><p>驱动程序对PCI 配置的操作可以分成以下几个部分：</p>
+<p>读写 feature bits<br>定义了 Guest 和 Host 支持的功能，例如 VIRTIO_NET_F_CSUM bit 表示网络设备是否支持 checksum offload。feature bits 机制提供了未来扩充功能的灵活性，以及兼容旧设备的能力。</p>
+<h3 id="读写配置空间"><a href="#读写配置空间" class="headerlink" title="读写配置空间"></a>读写配置空间</h3><p>一般通过一个数据结构和一个虚拟设备关联，Guest 可以读写此空间。</p>
+<h3 id="读写-status-bits"><a href="#读写-status-bits" class="headerlink" title="读写 status bits"></a>读写 status bits</h3><p>这是一个8bits的长度，Guest用来标识device probe的状态，当 VIRIO_CONFIG_S_DRIVE_OK被设置，那么Guest已经完成了feature协商，可以跟host进行数据交互了。</p>
+<h3 id="Device-reset"><a href="#Device-reset" class="headerlink" title="Device reset"></a>Device reset</h3><p>重置设备，配置status bits。</p>
+<h3 id="Virtqueue的创建和销毁"><a href="#Virtqueue的创建和销毁" class="headerlink" title="Virtqueue的创建和销毁"></a>Virtqueue的创建和销毁</h3><p>提供了分配virtqueue内存和Host的IO空间的初始化操作。</p>
+<p>对应的代码如下：</p>
+<pre><code>//代码路径virtio-win/VirtIO/windows/VirtIOPCIModern.c
+static const struct virtio_device_ops virtio_pci_device_ops = &#123;
+.get_config = vio_modern_get_config,
+.set_config = vio_modern_set_config,
+.get_config_generation = vio_modern_get_generation,
+.get_status = vio_modern_get_status,
+.set_status = vio_modern_set_status,
+.reset = vio_modern_reset,
+.get_features = vio_modern_get_features,
+.set_features = vio_modern_set_features,
+.set_config_vector = vio_modern_set_config_vector,
+.set_queue_vector = vio_modern_set_queue_vector,
+.query_queue_alloc = vio_modern_query_vq_alloc,
+.setup_queue = vio_modern_setup_vq,
+.delete_queue = vio_modern_del_vq,
+&#125;;
+//代码路径virtio-win/virtio/virtio_pci.h
+struct virtio_device_ops
+&#123;
+// read/write device config and read config generation counter
+void (*get_config)(VirtIODevice *vdev, unsigned offset, void *buf, unsigned len);
+void (*set_config)(VirtIODevice *vdev, unsigned offset, const void *buf, unsigned len);
+u32 (*get_config_generation)(VirtIODevice *vdev);
+// read/write device status byte and reset the device
+u8 (*get_status)(VirtIODevice *vdev);
+void (*set_status)(VirtIODevice *vdev, u8 status);
+void (*reset)(VirtIODevice *vdev);
+// get/set device feature bits
+u64 (*get_features)(VirtIODevice *vdev);
+NTSTATUS (*set_features)(VirtIODevice *vdev, u64 features);
+// set config/queue MSI interrupt vector, returns the new vector
+u16 (*set_config_vector)(VirtIODevice *vdev, u16 vector);
+u16 (*set_queue_vector)(struct virtqueue *vq, u16 vector);
+// query virtual queue size and memory requirements
+NTSTATUS (*query_queue_alloc)(VirtIODevice *vdev,
+unsigned index, unsigned short *pNumEntries,
+unsigned long *pRingSize,
+unsigned long *pHeapSize);
+// allocate and initialize a queue
+NTSTATUS (*setup_queue)(struct virtqueue **queue,
+VirtIODevice *vdev, VirtIOQueueInfo *info,
+unsigned idx, u16 msix_vec);
+// tear down and deallocate a queue
+void (*delete_queue)(VirtIOQueueInfo *info);
+&#125;;
+</code></pre>
+<h2 id="virtio-数据流交互机制：virtqueue"><a href="#virtio-数据流交互机制：virtqueue" class="headerlink" title="virtio 数据流交互机制：virtqueue"></a>virtio 数据流交互机制：virtqueue</h2><p>Virtio 使用 virtqueue 来实现 I&#x2F;O 机制，每个 virtqueue 就是一个承载大量数据的队列，具体使用多少个队列取决于需求，例如，virtio 网络驱动程序（virtio-net）使用两个队列（一个用于接受，另一个用于发送），而 virtio 块驱动程序（virtio-blk）仅使用一个队列。</p>
+<pre><code>//VirtIO.h
+struct virtqueue &#123;
+VirtIODevice *vdev;
+struct vring vring;
+struct &#123;
+u16 flags;
+u16 idx;
+&#125; master_vring_avail;
+unsigned int index;
+unsigned int num_unused;
+unsigned int num_added_since_kick;
+u16 first_unused;
+u16 last_used;
+void *notification_addr;
+void (*notification_cb)(struct virtqueue *vq);
+void *opaque[];
+&#125;;
+</code></pre>
+<p>针对Virtqueue的具体操作包含：</p>
+<p>1.向queue中添加一个新的buffer，opaque为一个非空的令牌，用于识别buffer，当buffer内容被消耗后，opaque会返回。</p>
+<pre><code>//VirtIORing.c
+int virtqueue_add_buf(
+struct virtqueue *vq,/* 虚拟化队列 */
+struct scatterlist sg[],   /* 缓存区描述符数组，长度为驱动程序-&gt;设备缓冲区描述符（in）+设备-&gt;驱动程序缓冲区描述符（out）*/
+unsigned int out,/* sg中驱动程序到设备缓冲区描述符数量 */
+unsigned int in, /* sg中设备到驱动程序缓冲区描述符数量 */
+void *opaque,/* virtqueue_get_buf 函数返回值（used ring缓冲区起始描述符指针）*/
+void *va_indirect,   /* 间接页的虚拟地址或空指针*/
+ULONGLONG phys_indirect) /*间接页的物理地址或空指针*/
+</code></pre>
+<p>2.Guest 通知 host 单个或者多个 buffer 已经添加到 queue 中,调用 virtqueue_notify()，notify 函数会向 queue notify(VIRTIO_PCI_QUEUE_NOTIFY)寄存器写入 queue index 来通知 host。</p>
+<pre><code> //VirtIOPCICommon.c
+void virtqueue_kick(struct virtqueue *vq)
+&#123;
+if (virtqueue_kick_prepare(vq)) &#123;
+virtqueue_notify(vq);
+&#125;
+&#125;
+</code></pre>
+<p>3.返回使用过的 buffer，len 为写入到 buffer 中数据的长度。获取数据，释放 buffer,更新 vring 描述符表格中的 index。</p>
+<pre><code>//VirtIORing.c
+void *virtqueue_get_buf(
+struct virtqueue *vq, /* the queue */
+unsigned int *len)/* number of bytes returned by the device */
+</code></pre>
+<p>4.示意 guest 不再需要再知道一个 buffer 已经使用了，也就是关闭 device 的中断。驱动会在初始化时注册一个回调函数，disable_cb()通常在这个 virtqueue 回调函数中使用，用于关闭再次的回调发生。</p>
+<pre><code>//VirtIORing.c
+void virtqueue_disable_cb(struct virtqueue *vq)
+</code></pre>
+<p>5.与 disable_cb()刚好相反，用于重新开启设备中断的上报。</p>
+<pre><code>//VirtIORing.c
+bool virtqueue_enable_cb(struct virtqueue *vq) 
+</code></pre>
+<p>virtio 的核心机制就是通过共享内存在前端驱动与后端实现间进行数据传输，共享内存区域被称作 vring。</p>
+<h2 id="virtio-传输机制：vring的构成与实现"><a href="#virtio-传输机制：vring的构成与实现" class="headerlink" title="virtio 传输机制：vring的构成与实现"></a>virtio 传输机制：vring的构成与实现</h2><p>vring 是 virtio 传输机制的实现，vring 引入 ring buffers 来作为数据传输的载体，包含三个部分:</p>
+<pre><code>// virtio_ring.h
+struct vring &#123;
+unsigned int num;
+struct vring_desc *desc;
+struct vring_avail *avail;
+struct vring_used *used;
+&#125;;
+</code></pre>
+<p>Descriptor Table： 描述内存 buffer，主要包括 addr&#x2F;len 等信息。</p>
+<pre><code>// virtio_ring.h
+/* This marks a buffer as continuing via the next field. */
+#define VIRTQ_DESC_F_NEXT	1
+/* This marks a buffer as write-only (otherwise read-only). */
+#define VIRTQ_DESC_F_WRITE	2
+/* This means the buffer contains a list of buffer descriptors. */
+#define VIRTQ_DESC_F_INDIRECT	4
+/* Virtio ring: 16 bytes.  These can chain together via &quot;next&quot;. */
+struct vring_desc &#123;
+/* Address (guest-physical). */
+__virtio64 addr;
+/* Length. */
+__virtio32 len;
+/* The flags as indicated above. */
+__virtio16 flags;
+/* We chain unused descriptors via this, too */
+__virtio16 next;
+&#125;;
+</code></pre>
+<p>Available Ring： 用于驱动通知设备有新的可用的描述符。比如，通知后端设备，有一个待发送的报文描述符。</p>
+<p>注意：驱动提供了新的可用描述符后，设备侧不一定要立即使用，比如 virtio-net 会提供一些描述符用于报文接收，当报文到达后按需使用这些描述符即可。</p>
+<pre><code>// virtio_ring.h
+#define VIRTQ_AVAIL_F_NO_INTERRUPT	1
+struct vring_avail &#123;
+    //控制信息，比如 VIRTQ_AVAIL_F_NO_INTERRUPT 表示驱动侧不想接收通知
+__virtio16 flags;
+//idx：驱动将把下一个描述符放在哪里，即 ring 数组的下标
+__virtio16 idx;
+    //ring[]：avail 描述符在 Descriptor Table 中的 id
+__virtio16 ring[];
+&#125;;
+</code></pre>
+<p>Used Ring： 用于通知驱动设备侧已用的描述符。比如，后端设备收到一个报文，需要将报文数据放入可用的描述符，并更新Used Ring，同时通知前端驱动。</p>
+<pre><code>// virtio_ring.h
+#define VIRTQ_USED_F_NO_NOTIFY	1
+struct vring_used_elem &#123;
+/* Index of start of used descriptor chain. */
+__virtio32 id;
+/* Total length of the descriptor chain which was used (written to) */
+__virtio32 len;
+&#125;;
+
+struct vring_used &#123;
+__virtio16 flags;
+__virtio16 idx;
+struct vring_used_elem ring[];
+&#125;;
+</code></pre>
+<p>注意：相比 avail ring 结构多了 len 字段，用于表示设备侧写入的数据长度。对于只读数据类型，不改变 len 长度。</p>
+<p>vring 主要通过两个环形缓冲区来完成数据流的转发。</p>
+<p>当 guest 向 virtqueue 中写数据时，实际上是向 desc 结构指向的 buffer 中填充数据，完了会更新 available ring，然后再通知 host。<br>当 host 收到接收数据的通知时，首先从 desc 指向的 buffer 中找到 available ring 中添加的 buffer，映射内存，同时更新 used ring，并通知 guest 接收数据完毕。</p>
+<h2 id="qemu后端处理模块"><a href="#qemu后端处理模块" class="headerlink" title="qemu后端处理模块"></a>qemu后端处理模块</h2><p>下面以Virtio Network Device设备的初始化为例对qemu中virtio的实现进行说明。</p>
+<h3 id="预定义结构体"><a href="#预定义结构体" class="headerlink" title="预定义结构体"></a>预定义结构体</h3><pre><code>//代码路径：QEMU/qom/object.c
+static TypeInfo object_info = &#123;
+.name = TYPE_OBJECT,
+.instance_size = sizeof(Object),
+.instance_init = object_instance_init,
+.abstract = true,
+&#125;;
+//代码路径：QEMU/hw/core/qdev.c
+static const TypeInfo device_type_info = &#123;
+.name = TYPE_DEVICE,
+.parent = TYPE_OBJECT,
+.instance_size = sizeof(DeviceState),
+.instance_init = device_initfn,
+.instance_post_init = device_post_init,
+.instance_finalize = device_finalize,
+.class_base_init = device_class_base_init,
+.class_init = device_class_init,
+.abstract = true,
+.class_size = sizeof(DeviceClass),
+&#125;;
+//代码路径：QEMU/hw/virtio/virtio.c
+static const TypeInfo virtio_device_info = &#123;
+.name = TYPE_VIRTIO_DEVICE,
+.parent = TYPE_DEVICE,
+.instance_size = sizeof(VirtIODevice),
+.class_init = virtio_device_class_init,
+.instance_finalize = virtio_device_instance_finalize,
+.abstract = true,
+.class_size = sizeof(VirtioDeviceClass),
+&#125;;
+//代码路径：QEMU/hw/net/virtio-net.c
+static const TypeInfo virtio_net_info = &#123;
+.name = TYPE_VIRTIO_NET,
+.parent = TYPE_VIRTIO_DEVICE,
+.instance_size = sizeof(VirtIONet),
+.instance_init = virtio_net_instance_init,
+.class_init = virtio_net_class_init,
+&#125;;
+static void virtio_register_types(void)
+&#123;
+type_register_static(&amp;virtio_net_info);
+&#125;
+type_init(virtio_register_types)
+</code></pre>
+<p>Virtio Network Device这种类的定义是有多层继承关系的，TYPE_VIRTIO_NET的父类是TYPE_VIRTIO_DEVICE，TYPE_VIRTIO_DEVICE的父类是TYPE_DEVICE，TYPE_DEVICE的父类是TYPE_OBJECT，继承关系就到头了。type_init用于注册这种类，这里面每一层都有class_init，用于从TypeImpl生成xxxClass，也有instance_init，会将xxxClass初始化为实例。</p>
+<h3 id="创建VirtQueue"><a href="#创建VirtQueue" class="headerlink" title="创建VirtQueue"></a>创建VirtQueue</h3><p>TYPE_VIRTIO_NET层的class_init函数是virtio_net_class_init，它定义了DeviceClass的realize函数为virtio_net_device_realize，如下所示：</p>
+<pre><code>//代码路径：QEMU/hw/net/virtio-net.c
+static void virtio_net_class_init(ObjectClass *klass, void *data)
+&#123;
+DeviceClass *dc = DEVICE_CLASS(klass);
+VirtioDeviceClass *vdc = VIRTIO_DEVICE_CLASS(klass);
+dc-&gt;props = virtio_net_properties;
+set_bit(DEVICE_CATEGORY_NETWORK, dc-&gt;categories);
+vdc-&gt;realize = virtio_net_device_realize;
+vdc-&gt;unrealize = virtio_net_device_unrealize;
+vdc-&gt;get_config = virtio_net_get_config;
+vdc-&gt;set_config = virtio_net_set_config;
+vdc-&gt;get_features = virtio_net_get_features;
+vdc-&gt;set_features = virtio_net_set_features;
+vdc-&gt;bad_features = virtio_net_bad_features;
+vdc-&gt;reset = virtio_net_reset;
+vdc-&gt;set_status = virtio_net_set_status;
+vdc-&gt;preset_dma_map = virtio_net_preset_dma_map;
+vdc-&gt;set_host_notifier = virtio_net_set_host_notifier;
+vdc-&gt;unset_host_notifier = virtio_net_unset_host_notifier;
+vdc-&gt;guest_notifier_mask = virtio_net_guest_notifier_mask;
+vdc-&gt;guest_notifier_pending = virtio_net_guest_notifier_pending;
+vdc-&gt;load = virtio_net_load_device;
+vdc-&gt;save = virtio_net_save_device;
+&#125;
+static void virtio_net_device_realize(DeviceState *dev, Error **errp)
+&#123;
+VirtIODevice *vdev = VIRTIO_DEVICE(dev);
+VirtIONet *n = VIRTIO_NET(dev);
+NetClientState *nc;
+int i;
+         … …
+n-&gt;max_queues = MAX(n-&gt;nic_conf.peers.queues, 1);
+… …
+for (i = 0; i &lt; n-&gt;max_queues; i++) &#123;
+virtio_net_add_queue(n, i);
+&#125;
+n-&gt;ctrl_vq = virtio_add_queue(vdev, 64, virtio_net_handle_ctrl);
+qemu_macaddr_default_if_unset(&amp;n-&gt;nic_conf.macaddr);
+memcpy(&amp;n-&gt;mac[0], &amp;n-&gt;nic_conf.macaddr, sizeof(n-&gt;mac));
+n-&gt;status = VIRTIO_NET_S_LINK_UP;
+n-&gt;announce_timer = timer_new_ms(QEMU_CLOCK_VIRTUAL,
+ virtio_net_announce_timer, n);
+if (n-&gt;netclient_type) &#123;
+n-&gt;nic = qemu_new_nic(&amp;net_virtio_info, &amp;n-&gt;nic_conf,
+  n-&gt;netclient_type, n-&gt;netclient_name, n);
+&#125; else &#123;
+n-&gt;nic = qemu_new_nic(&amp;net_virtio_info, &amp;n-&gt;nic_conf,
+  object_get_typename(OBJECT(dev)), dev-&gt;id, n);
+&#125;
+… …
+&#125;
+</code></pre>
+<p>上述代码创建了一个VirtIODevice，而virtio_init用来初始化这个设备。VirtIODevice结构里面有一个VirtQueue数组，这就是virtio前端和后端互相传数据的队列，最多有VIRTIO_QUEUE_MAX（1024）个。</p>
+<p>但是net设备也有与其他设备不一样的地方，即代码中存在这样的语句n-&gt;max_queues * 2 + 1 &gt; VIRTIO_QUEUE_MAX。为什么要乘以2呢？这是因为对于网络设备来讲，应该分发送队列和接收队列两个方向。</p>
+<h3 id="VirtQueue队列初始化"><a href="#VirtQueue队列初始化" class="headerlink" title="VirtQueue队列初始化"></a>VirtQueue队列初始化</h3><p>接下来调用virtio_net_add_queue来初始化队列，可以看出这里面就有发送tx_vq和接收rx_vq两个队列，如下所示：</p>
+<pre><code>//代码路径：QEMU/hw/net/virtio-net.c
+static void virtio_net_add_queue(VirtIONet *n, int index)
+&#123;
+VirtIODevice *vdev = VIRTIO_DEVICE(n);
+n-&gt;vqs[index].rx_vq = virtio_add_queue(vdev, n-&gt;net_conf.rx_queue_size,
+   virtio_net_handle_rx);
+if (n-&gt;net_conf.tx &amp;&amp; !strcmp(n-&gt;net_conf.tx, &quot;timer&quot;)) &#123;
+n-&gt;vqs[index].tx_vq =
+virtio_add_queue(vdev, n-&gt;net_conf.tx_queue_size,
+ virtio_net_handle_tx_timer);
+n-&gt;vqs[index].tx_timer = timer_new_ns(QEMU_CLOCK_VIRTUAL,
+  virtio_net_tx_timer,
+  &amp;n-&gt;vqs[index]);
+&#125; else &#123;
+n-&gt;vqs[index].tx_vq =
+virtio_add_queue(vdev, n-&gt;net_conf.tx_queue_size,
+ virtio_net_handle_tx_bh);
+n-&gt;vqs[index].tx_bh = qemu_bh_new(virtio_net_tx_bh, &amp;n-&gt;vqs[index]);
+&#125;
+n-&gt;vqs[index].tx_waiting = 0;
+n-&gt;vqs[index].n = n;
+&#125;
+</code></pre>
+<p>每个VirtQueue中，都有一个vring用来维护这个队列里面的数据；另外还有函数virtio_net_handle_rx用于处理网络包的接收；函数virtio_net_handle_tx_bh用于网络包的发送。</p>
+<h3 id="创建虚拟机网卡"><a href="#创建虚拟机网卡" class="headerlink" title="创建虚拟机网卡"></a>创建虚拟机网卡</h3><p>qemu_new_nic会创建一个虚拟机里面的网卡，如下所示：</p>
+<pre><code>//代码路径：QEMU/net/net.c
+NICState *qemu_new_nic(NetClientInfo *info,
+   NICConf *conf,
+   const char *model,
+   const char *name,
+   void *opaque)
+&#123;
+NetClientState **peers = conf-&gt;peers.ncs;
+NICState *nic;
+int i, queues = MAX(1, conf-&gt;peers.queues);
+assert(info-&gt;type == NET_CLIENT_OPTIONS_KIND_NIC);
+assert(info-&gt;size &gt;= sizeof(NICState));
+nic = g_malloc0(info-&gt;size + sizeof(NetClientState) * queues);
+nic-&gt;ncs = (void *)nic + info-&gt;size;
+nic-&gt;conf = conf;
+nic-&gt;opaque = opaque;
+for (i = 0; i &lt; queues; i++) &#123;
+qemu_net_client_setup(&amp;nic-&gt;ncs[i], info, peers[i], model, name,
+  NULL);
+nic-&gt;ncs[i].queue_index = i;
+&#125;
+return nic;
+&#125;
+static void qemu_net_client_setup(NetClientState *nc,
+  NetClientInfo *info,
+  NetClientState *peer,
+  const char *model,
+  const char *name,
+  NetClientDestructor *destructor)
+&#123;
+nc-&gt;info = info;
+nc-&gt;model = g_strdup(model);
+if (name) &#123;
+nc-&gt;name = g_strdup(name);
+&#125; else &#123;
+nc-&gt;name = assign_name(nc, model);
+&#125;
+if (peer) &#123;
+assert(!peer-&gt;peer);
+nc-&gt;peer = peer;
+peer-&gt;peer = nc;
+&#125;
+QTAILQ_INSERT_TAIL(&amp;net_clients, nc, next);
+nc-&gt;incoming_queue = qemu_new_net_queue(qemu_deliver_packet_iov, nc);
+nc-&gt;destructor = destructor;
+QTAILQ_INIT(&amp;nc-&gt;filters);
+&#125;
+</code></pre>
+<h2 id="kernel内核驱动程序"><a href="#kernel内核驱动程序" class="headerlink" title="kernel内核驱动程序"></a>kernel内核驱动程序</h2><p>在虚拟机里面的进程发送一个网络包，通过文件系统和Socket调用网络协议栈到达网络设备层，只不过这个不是普通的网络设备，而是virtio_net的驱动。virtio_net的驱动程序代码在Linux操作系统的源代码里面，文件名为linux&#x2F;drivers&#x2F;net&#x2F;virtio_net.c，如下所示：</p>
+<h3 id="预定义结构体-1"><a href="#预定义结构体-1" class="headerlink" title="预定义结构体"></a>预定义结构体</h3><pre><code>static struct virtio_driver virtio_net_driver = &#123;
+    .feature_table = features,
+    .feature_table_size = ARRAY_SIZE(features),
+    .driver.name =	KBUILD_MODNAME,
+    .driver.owner =	THIS_MODULE,
+    .id_table =	id_table,
+    .probe =	virtnet_probe,
+    .remove =	virtnet_remove,
+    .config_changed = virtnet_config_changed,
+#ifdef CONFIG_PM_SLEEP
+    .freeze =	virtnet_freeze,
+    .restore =	virtnet_restore,
+#endif
+&#125;;
+module_virtio_driver(virtio_net_driver);
+MODULE_DEVICE_TABLE(virtio, id_table);
+MODULE_DESCRIPTION(&quot;Virtio network driver&quot;);
+MODULE_LICENSE(&quot;GPL&quot;);
+</code></pre>
+<h3 id="模块初始化"><a href="#模块初始化" class="headerlink" title="模块初始化"></a>模块初始化</h3><p>在virtio_net的驱动程序的初始化代码中，需要注册一个驱动函数virtio_net_driver。当一个设备驱动作为一个内核模块被初始化的时候，probe函数会被调用，因而来看一下virtnet_probe：</p>
+<pre><code>static int virtnet_probe(struct virtio_device *vdev)
+&#123;
+    int i, err;
+    struct net_device *dev;
+    struct virtnet_info *vi;
+    u16 max_queue_pairs;
+    int mtu;
+    … …
+    dev = alloc_etherdev_mq(sizeof(struct virtnet_info), max_queue_pairs);
+    if (!dev)
+        return -ENOMEM;
+    /* Set up network device as normal. */
+    dev-&gt;priv_flags |= IFF_UNICAST_FLT | IFF_LIVE_ADDR_CHANGE;
+    dev-&gt;netdev_ops = &amp;virtnet_netdev;
+    dev-&gt;features = NETIF_F_HIGHDMA;
+    SET_ETHTOOL_OPS(dev, &amp;virtnet_ethtool_ops);
+    SET_NETDEV_DEV(dev, &amp;vdev-&gt;dev);
+    … …
+    /* Set up our device-specific information */
+    vi = netdev_priv(dev);
+    vi-&gt;dev = dev;
+    vi-&gt;vdev = vdev;
+    vdev-&gt;priv = vi;
+    vi-&gt;stats = alloc_percpu(struct virtnet_stats);
+    err = -ENOMEM;
+    … …
+    err = init_vqs(vi);
+    if (err)
+        goto free_index;
+    netif_set_real_num_tx_queues(dev, vi-&gt;curr_queue_pairs);
+    netif_set_real_num_rx_queues(dev, vi-&gt;curr_queue_pairs);
+    virtnet_init_settings(dev);
+    err = register_netdev(dev);
+    if (err) &#123;
+        pr_debug(&quot;virtio_net: registering device failed\n&quot;);
+        goto free_vqs;
+    &#125;
+    virtio_device_ready(vdev);
+    … …
+    virtnet_set_queues(vi, vi-&gt;curr_queue_pairs);
+    … …
+&#125;
+</code></pre>
+<p>在virtnet_probe中会创建struct net_device，并且通过register_netdev注册这个网络设备，这样在客户机里面就能看到这个网卡了。</p>
+<h3 id="初始化virtqueue"><a href="#初始化virtqueue" class="headerlink" title="初始化virtqueue"></a>初始化virtqueue</h3><p>在virtnet_probe中，还有一件重要的事情就是，init_vqs会初始化发送和接收的virtqueue，如下所示：</p>
+<pre><code>static int init_vqs(struct virtnet_info *vi)
+&#123;
+    int ret;
+    /* Allocate send &amp; receive queues */
+    ret = virtnet_alloc_queues(vi);
+    if (ret)
+        goto err;
+    ret = virtnet_find_vqs(vi);
+    if (ret)
+        goto err_free;
+    get_online_cpus();
+    virtnet_set_affinity(vi);
+    put_online_cpus();
+    return 0;
+err_free:
+    virtnet_free_queues(vi);
+err:
+    return ret;
+&#125;
+</code></pre>
+<h3 id="Virtqueue实体查找"><a href="#Virtqueue实体查找" class="headerlink" title="Virtqueue实体查找"></a>Virtqueue实体查找</h3><p>按照之前的virtio原理，virtqueue是一个介于客户机前端和qemu后端的一个结构，用于在这两端之间传递数据，对于网络设备来讲有发送和接收两个方向的队列。这里建立的struct virtqueue是客户机前端对于队列管理的数据结构。队列的实体需要通过函数virtnet_find_vqs查找或者生成，这里还会指定接收队列的callback函数为skb_recv_done，发送队列的callback函数为skb_xmit_done。当buffer使用发生变化的时候，可以调用这个callback函数进行通知，如下所示：</p>
+<pre><code>static int virtnet_find_vqs(struct virtnet_info *vi)
+&#123;
+    vq_callback_t **callbacks;
+    struct virtqueue **vqs;
+    int ret = -ENOMEM;
+    int i, total_vqs;
+    const char **names;
+    /* We expect 1 RX virtqueue followed by 1 TX virtqueue, followed by
+     * possible N-1 RX/TX queue pairs used in multiqueue mode, followed by
+     * possible control vq.
+     */
+    total_vqs = vi-&gt;max_queue_pairs * 2 +
+        virtio_has_feature(vi-&gt;vdev, VIRTIO_NET_F_CTRL_VQ);
+    /* Allocate space for find_vqs parameters */
+    vqs = kzalloc(total_vqs * sizeof(*vqs), GFP_KERNEL);
+    if (!vqs)
+        goto err_vq;
+    callbacks = kmalloc(total_vqs * sizeof(*callbacks), GFP_KERNEL);
+    if (!callbacks)
+        goto err_callback;
+    names = kmalloc(total_vqs * sizeof(*names), GFP_KERNEL);
+    if (!names)
+        goto err_names;
+    /* Parameters for control virtqueue, if any */
+    if (vi-&gt;has_cvq) &#123;
+        callbacks[total_vqs - 1] = NULL;
+        names[total_vqs - 1] = &quot;control&quot;;
+    &#125;
+    /* Allocate/initialize parameters for send/receive virtqueues */
+    for (i = 0; i &lt; vi-&gt;max_queue_pairs; i++) &#123;
+        callbacks[rxq2vq(i)] = skb_recv_done;
+        callbacks[txq2vq(i)] = skb_xmit_done;
+        sprintf(vi-&gt;rq[i].name, &quot;input.%d&quot;, i);
+        sprintf(vi-&gt;sq[i].name, &quot;output.%d&quot;, i);
+        names[rxq2vq(i)] = vi-&gt;rq[i].name;
+        names[txq2vq(i)] = vi-&gt;sq[i].name;
+    &#125;
+    ret = vi-&gt;vdev-&gt;config-&gt;find_vqs(vi-&gt;vdev, total_vqs, vqs, callbacks,
+                     names);
+    if (ret)
+        goto err_find;
+    if (vi-&gt;has_cvq) &#123;
+        vi-&gt;cvq = vqs[total_vqs - 1];
+        if (virtio_has_feature(vi-&gt;vdev, VIRTIO_NET_F_CTRL_VLAN))
+            vi-&gt;dev-&gt;features |= NETIF_F_HW_VLAN_CTAG_FILTER;
+    &#125;
+    for (i = 0; i &lt; vi-&gt;max_queue_pairs; i++) &#123;
+        vi-&gt;rq[i].vq = vqs[rxq2vq(i)];
+        vi-&gt;sq[i].vq = vqs[txq2vq(i)];
+    &#125;
+    kfree(names);
+    kfree(callbacks);
+    kfree(vqs);
+    return 0;
+err_find:
+    kfree(names);
+err_names:
+    kfree(callbacks);
+err_callback:
+    kfree(vqs);
+err_vq:
+    return ret;
+&#125;
+</code></pre>
+<p>这里的find_vqs是在struct virtnet_info里的struct virtio_device里的struct virtio_config_ops *config里面定义的。</p>
+<p>根据virtio_config_ops的定义，find_vqs会调用vp_modern_find_vqs。在vp_modern_find_vqs 中，vp_find_vqs会调用vp_find_vqs_intx。在vp_find_vqs_intx 中，通过request_irq注册一个中断处理函数vp_interrupt，当设备向队列中写入信息时会产生一个中断，也就是vq中断。中断处理函数需要调用相应队列的回调函数，然后根据队列的数目，依次调用vp_setup_vq完成virtqueue、vring的分配和初始化。</p>
+<p>同样，这些数据结构会和virtio后端的VirtIODevice、VirtQueue、vring对应起来，都应该指向刚才创建的那一段内存。客户机同样会通过调用专门给外部设备发送指令的函数iowrite告诉外部的pci设备，这些共享内存的地址。至此前端设备驱动和后端设备驱动之间的两个收发队列就关联好了。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>virtio 是 guest 与 host 之间通信的润滑剂，提供了一套通用框架和标准接口或协议来完成两者之间的交互过程，极大地解决了各种驱动程序和不同虚拟化解决方案之间的适配问题。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E8%99%9A%E6%8B%9F%E5%8C%96/" rel="tag"># 虚拟化</a>
+              <a href="/tags/kvm/" rel="tag"># kvm</a>
+              <a href="/tags/virtio/" rel="tag"># virtio</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/08/17/kvm_windows_vm_dump-202208171626-karlqyang/" rel="prev" title="kvm windows虚拟机dmp文件转储">
+      <i class="fa fa-chevron-left"></i> kvm windows虚拟机dmp文件转储
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2022/08/18/who_am_i-202208181900/" rel="next" title="哲学三思之一：我是谁">
+      哲学三思之一：我是谁 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AFvirtio"><span class="nav-number">1.</span> <span class="nav-text">什么是virtio</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Virtio%E6%9E%B6%E6%9E%84"><span class="nav-number">2.</span> <span class="nav-text">Virtio架构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#vring%E5%85%B1%E4%BA%AB%E5%86%85%E5%AD%98%E5%9F%BA%E6%9C%AC%E5%8E%9F%E7%90%86"><span class="nav-number">3.</span> <span class="nav-text">vring共享内存基本原理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#PCI%E8%AE%BE%E5%A4%87%E6%A6%82%E8%BF%B0"><span class="nav-number">4.</span> <span class="nav-text">PCI设备概述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#guest%E5%89%8D%E7%AB%AF%E9%A9%B1%E5%8A%A8%E7%A8%8B%E5%BA%8F%E6%93%8D%E4%BD%9C%E6%8E%A5%E5%8F%A3"><span class="nav-number">5.</span> <span class="nav-text">guest前端驱动程序操作接口</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AF%BB%E5%86%99%E9%85%8D%E7%BD%AE%E7%A9%BA%E9%97%B4"><span class="nav-number">5.1.</span> <span class="nav-text">读写配置空间</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AF%BB%E5%86%99-status-bits"><span class="nav-number">5.2.</span> <span class="nav-text">读写 status bits</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Device-reset"><span class="nav-number">5.3.</span> <span class="nav-text">Device reset</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Virtqueue%E7%9A%84%E5%88%9B%E5%BB%BA%E5%92%8C%E9%94%80%E6%AF%81"><span class="nav-number">5.4.</span> <span class="nav-text">Virtqueue的创建和销毁</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#virtio-%E6%95%B0%E6%8D%AE%E6%B5%81%E4%BA%A4%E4%BA%92%E6%9C%BA%E5%88%B6%EF%BC%9Avirtqueue"><span class="nav-number">6.</span> <span class="nav-text">virtio 数据流交互机制：virtqueue</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#virtio-%E4%BC%A0%E8%BE%93%E6%9C%BA%E5%88%B6%EF%BC%9Avring%E7%9A%84%E6%9E%84%E6%88%90%E4%B8%8E%E5%AE%9E%E7%8E%B0"><span class="nav-number">7.</span> <span class="nav-text">virtio 传输机制：vring的构成与实现</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#qemu%E5%90%8E%E7%AB%AF%E5%A4%84%E7%90%86%E6%A8%A1%E5%9D%97"><span class="nav-number">8.</span> <span class="nav-text">qemu后端处理模块</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%A2%84%E5%AE%9A%E4%B9%89%E7%BB%93%E6%9E%84%E4%BD%93"><span class="nav-number">8.1.</span> <span class="nav-text">预定义结构体</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%9B%E5%BB%BAVirtQueue"><span class="nav-number">8.2.</span> <span class="nav-text">创建VirtQueue</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#VirtQueue%E9%98%9F%E5%88%97%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="nav-number">8.3.</span> <span class="nav-text">VirtQueue队列初始化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%BD%91%E5%8D%A1"><span class="nav-number">8.4.</span> <span class="nav-text">创建虚拟机网卡</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#kernel%E5%86%85%E6%A0%B8%E9%A9%B1%E5%8A%A8%E7%A8%8B%E5%BA%8F"><span class="nav-number">9.</span> <span class="nav-text">kernel内核驱动程序</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%A2%84%E5%AE%9A%E4%B9%89%E7%BB%93%E6%9E%84%E4%BD%93-1"><span class="nav-number">9.1.</span> <span class="nav-text">预定义结构体</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A8%A1%E5%9D%97%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="nav-number">9.2.</span> <span class="nav-text">模块初始化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%9D%E5%A7%8B%E5%8C%96virtqueue"><span class="nav-number">9.3.</span> <span class="nav-text">初始化virtqueue</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Virtqueue%E5%AE%9E%E4%BD%93%E6%9F%A5%E6%89%BE"><span class="nav-number">9.4.</span> <span class="nav-text">Virtqueue实体查找</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">10.</span> <span class="nav-text">总结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">杨维宁</p>
+  <div class="site-description" itemprop="description">天行健，君子以自强不息。地势坤，君子以厚德载物。</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">22</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">42</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/bbbccvbvv" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;bbbccvbvv" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:nanjiecunxiaozu@163.com" title="E-Mail → mailto:nanjiecunxiaozu@163.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">杨维宁</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">71k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">1:58</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

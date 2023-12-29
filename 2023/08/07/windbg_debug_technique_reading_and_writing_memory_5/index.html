@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="大多数调试器命令都是用虚拟地址而非物理地址作为输出及输出参数。然而，也同时存在物理地址起作用的场景。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="windbg标准调试技巧-读写内存（5）：将虚拟地址转换为物理地址">
+<meta property="og:url" content="http://example.com/2023/08/07/windbg_debug_technique_reading_and_writing_memory_5/index.html">
+<meta property="og:site_name" content="怀德维宁">
+<meta property="og:description" content="大多数调试器命令都是用虚拟地址而非物理地址作为输出及输出参数。然而，也同时存在物理地址起作用的场景。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2023-08-07T10:30:00.000Z">
+<meta property="article:modified_time" content="2023-12-29T02:38:41.469Z">
+<meta property="article:author" content="杨维宁">
+<meta property="article:tag" content="windbg">
+<meta property="article:tag" content="convert virtual address to physical address">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://example.com/2023/08/07/windbg_debug_technique_reading_and_writing_memory_5/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>windbg标准调试技巧-读写内存（5）：将虚拟地址转换为物理地址 | 怀德维宁</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="怀德维宁" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">怀德维宁</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">大邦维屏，大宗维翰。怀德维宁，宗子维城。</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2023/08/07/windbg_debug_technique_reading_and_writing_memory_5/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="杨维宁">
+      <meta itemprop="description" content="天行健，君子以自强不息。地势坤，君子以厚德载物。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="怀德维宁">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          windbg标准调试技巧-读写内存（5）：将虚拟地址转换为物理地址
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2023-08-07 18:30:00" itemprop="dateCreated datePublished" datetime="2023-08-07T18:30:00+08:00">2023-08-07</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2023-12-29 10:38:41" itemprop="dateModified" datetime="2023-12-29T10:38:41+08:00">2023-12-29</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A7%91%E5%AD%A6/" itemprop="url" rel="index"><span itemprop="name">计算机科学</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A7%91%E5%AD%A6/windbg%E5%AE%98%E6%96%B9%E6%96%87%E6%A1%A3%E7%BF%BB%E8%AF%91/" itemprop="url" rel="index"><span itemprop="name">windbg官方文档翻译</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>3.3k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>5 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>大多数调试器命令都是用虚拟地址而非物理地址作为输出及输出参数。然而，也同时存在物理地址起作用的场景。</p>
+<span id="more"></span>
+
+<p>这里有两种方式将虚拟地址转换为物理地址：使用!vtop扩展或使用!pte扩展。</p>
+<p>#1 使用!vtop进行地址转换</p>
+<ol>
+<li><p>确保在16禁止之下进行操作。如果必要的话，通过N 16指令设置当前环境为16进制；</p>
+</li>
+<li><p>确定地址的字节索引。该数字等同于虚拟地址的低12位。因此，虚拟地址0x0012f980的字节索引为0x980；</p>
+</li>
+<li><p>通过使用!process扩展确定地址的字典进制：</p>
+<pre><code> kd&gt; !process 0 0
+ **** NT ACTIVE PROCESS DUMP ****
+ ....
+ PROCESS ff779190  SessionId: 0  Cid: 04fcPeb: 7ffdf000  ParentCid: 0394
+ DirBase: 098fd000  ObjectTable: e1646b30 TableSize:   8.
+ Image: MyApp.exe
+</code></pre>
+</li>
+<li><p>决定目录基址的页框号。这只是没有三个尾随十六进制零的目录基址。在本例中，目录基址为0x098FD000，因此页框号为0x098FD。</p>
+</li>
+<li><p>使用!vtop扩展。该扩展的第一个参数是页框号。!vtop的第二个参数就是问题中的虚拟地址：</p>
+<p> kd&gt; !vtop 98fd 12f980<br> Pdi 0 Pti 12f<br> 0012f980 09de9000 pfn(09de9)</p>
+</li>
+</ol>
+<p>最后一行中展示的第二个数字是物理页的起始物理地址。</p>
+<ol start="6">
+<li>在页的开始出加上地址的字节索引：0x09DE9000 + 0x980 &#x3D; 0x09DE9980。这就是目标物理地址。</li>
+</ol>
+<p>也可以通过显示每个地址的内存来验证此计算是否正确完成。!d*扩展显示指定物理地址处的内存：</p>
+<pre><code>kd&gt; !dc 9de9980
+# 9de9980 6d206e49 726f6d65 00120079 0012f9f4 In memory.......
+# 9de9990 0012f9f8 77e57119 77e8e618 ffffffff .....q.w...w....
+# 9de99a0 77e727e0 77f6f13e 77f747e0 ffffffff .&#39;.w&gt;..w.G.w....
+# 9de99b0 .....
+</code></pre>
+<p>d*（展示内存）质量使用虚拟地址作为其参数：</p>
+<pre><code>kd&gt; dc 12f980
+0012f980  6d206e49 726f6d65 00120079 0012f9f4  In memory.......
+0012f990  0012f9f8 77e57119 77e8e618 ffffffff  .....q.w...w....
+0012f9a0  77e727e0 77f6f13e 77f747e0 ffffffff  .&#39;.w&gt;..w.G.w....
+0012f9b0  .....
+</code></pre>
+<p>因为结果相同，这就表明物理地址0x09DE9980确实代表了虚拟地址0x0012F980。</p>
+<p>#2 使用!pte进行地址转换</p>
+<p>假设客户正在调查属于MyApp.exe进程的虚拟地址0x0012F980。在使用!pte扩展指令获取其对应的物理地址过程中，操作如下：</p>
+<ol>
+<li><p>确保子啊16进制下进行运算。如果有必要，通过N 16指令设置当前环境为16进制；</p>
+</li>
+<li><p>获取地址的字节索引。该数字等同于虚拟地址的低12位。因此，虚拟地址0x0012f980的字节索引为0x980；</p>
+</li>
+<li><p>将进程上下文环境设置到目标进程中：</p>
+<pre><code> kd&gt; !process 0 0
+ **** NT ACTIVE PROCESS DUMP ****
+ ....
+ PROCESS ff779190  SessionId: 0  Cid: 04fcPeb: 7ffdf000  ParentCid: 0394
+ DirBase: 098fd000  ObjectTable: e1646b30  TableSize:   8.
+ Image: MyApp.exe
+ 
+ kd&gt; .process /p ff779190
+ Implicit process is now ff779190
+ .cache forcedecodeuser done
+</code></pre>
+</li>
+<li><p>使用!pte指令时以虚拟地址作为参数。输出信息以两列形式展示出来。左边的一列描述了地址对应的页目录条目（page directory entry，pe），右边列展示了页表条目（page table entry，pte）：</p>
+<pre><code> kd&gt; !pte 12f980
+    VA 0012f980
+ PDE at   C0300000PTE at C00004BC
+ contains 0BA58067  contains 09DE9067
+ pfn ba58 ---DA--UWVpfn 9de9 ---DA--UWV
+</code></pre>
+</li>
+<li><p>查看右边列的最后一行。符号”pfn 9de9”出现了。pte的页框号（page frame number，pfn）是0x9de9.页框号乘以0x1000（例如，左移12位）。结果0x09DE9000就是内存也的起始物理地址；</p>
+</li>
+<li><p>在页的开始出加上地址的字节索引：0x09DE9000 + 0x980 &#x3D; 0x09DE9980。这就是目标物理地址；</p>
+</li>
+</ol>
+<p>与之前的方法得到了相同的结果。</p>
+<p>#3 手动进行地址转换</p>
+<p>尽管!ptov和pte指令提供了将虚拟地址转换为物理地址的最快方式，但是也可以人工完成这一转换过程。对该过程的描述将阐明虚拟内存体系结构的一些细节。</p>
+<p>内存结构因其处理器和硬件配置的不同而会在大小方面发生变化。例子来源于一个没有启用物理地址扩展（physical address extension，pae）功能的x86系统。</p>
+<p>使用0x0012F980作为虚拟地址，首先需要将该地址转换为2进制，可以手动转换，也可以使用.formats（dhow number formats，展示数字格式）指令实现：</p>
+<pre><code>kd&gt; .formats 12f980
+Evaluate expression:
+  Hex:     0012f980
+  Decimal: 1243520
+  Octal:   00004574600
+  Binary:  00000000 00010010 11111001 10000000
+  Chars:   ....
+  Time:    Thu Jan 15 01:25:20 1970
+  Float:   low 1.74254e-039 high 0
+  Double:  6.14381e-318
+</code></pre>
+<p>虚拟地址有3个字段组成。第0位到第11位是字节索引。第12位到第21位是页表索引。第22位到第31位是页目录索引。将对应字段进行拆分，实现如下：</p>
+<pre><code>0x0012F980  =  0y  00000000 00   010010 1111   1001 10000000
+</code></pre>
+<p>导出虚拟地址的3个字段：</p>
+<ul>
+<li>页目录索引&#x3D;0y0000000000&#x3D;0x0</li>
+<li>页表索引&#x3D;0y0100101111&#x3D;0x12F</li>
+<li>字节索引&#x3D;0y100110000000&#x3D;0x980</li>
+</ul>
+<p>之后系统需要3个额外的信息：</p>
+<ul>
+<li>每一个pte的大小。在非pae x86系统中是4个字节。</li>
+<li>页大小。是0x1000字节。</li>
+<li>PTE_BASE虚拟地址。在非pae系统中，是0xC0000000.</li>
+</ul>
+<p>使用这些数据，可以计算pte自身的地址：</p>
+<pre><code>PTE address   =   PTE_BASE  
+                + (page directory index) * PAGE_SIZE
+                + (page table index) * sizeof(MMPTE)
+  			  =   0xc0000000
+                + 0x0   * 0x1000
+                + 0x12F * 4
+              =   0xC00004BC
+</code></pre>
+<p>这就是pte的地址。pte是一个32位的双字变量。其内容如下：</p>
+<pre><code>kd&gt; dd 0xc00004bc L1
+c00004bc  09de9067
+</code></pre>
+<p>pte数值是0x09DE9067。其由两个字段组成。</p>
+<ul>
+<li>pte的低12位是状态标志（status flags）。在这种情况下，这些标志位等于0x067–或者二进制的0y000001100111.对于状态标志位的解释，可以查看!pte指令参考页。</li>
+<li>pte的高20位等于pte的页框号pfn。在这种情况下，pfn是0x09DE9.</li>
+</ul>
+<p>物理页上的第一个物理地址是pfn乘以0x1000（即左移12位）。字节索引就是页上的偏移。因此，查找的物理地址就是0x09DE9000+0x980&#x3D;0x09DE9980。与之前的计算方式获取的结果一致。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/windbg/" rel="tag"># windbg</a>
+              <a href="/tags/convert-virtual-address-to-physical-address/" rel="tag"># convert virtual address to physical address</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2023/08/07/windbg_debug_technique_reading_and_writing_memory_4/" rel="prev" title="windbg标准调试技巧-读写内存（4）：访问局部变量">
+      <i class="fa fa-chevron-left"></i> windbg标准调试技巧-读写内存（4）：访问局部变量
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">杨维宁</p>
+  <div class="site-description" itemprop="description">天行健，君子以自强不息。地势坤，君子以厚德载物。</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">22</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">42</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/bbbccvbvv" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;bbbccvbvv" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:nanjiecunxiaozu@163.com" title="E-Mail → mailto:nanjiecunxiaozu@163.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">杨维宁</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">71k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">1:58</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="kvm下的windows虚拟机转储可从子机侧和母机侧两方面进行。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="kvm windows虚拟机dmp文件转储">
+<meta property="og:url" content="http://example.com/2021/08/17/kvm_windows_vm_dump-202208171626-karlqyang/index.html">
+<meta property="og:site_name" content="怀德维宁">
+<meta property="og:description" content="kvm下的windows虚拟机转储可从子机侧和母机侧两方面进行。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-08-17T08:34:10.000Z">
+<meta property="article:modified_time" content="2023-12-29T02:38:41.453Z">
+<meta property="article:author" content="杨维宁">
+<meta property="article:tag" content="虚拟化">
+<meta property="article:tag" content="kvm">
+<meta property="article:tag" content="windows">
+<meta property="article:tag" content="coredump">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://example.com/2021/08/17/kvm_windows_vm_dump-202208171626-karlqyang/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>kvm windows虚拟机dmp文件转储 | 怀德维宁</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="怀德维宁" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">怀德维宁</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">大邦维屏，大宗维翰。怀德维宁，宗子维城。</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/08/17/kvm_windows_vm_dump-202208171626-karlqyang/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="杨维宁">
+      <meta itemprop="description" content="天行健，君子以自强不息。地势坤，君子以厚德载物。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="怀德维宁">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          kvm windows虚拟机dmp文件转储
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-08-17 16:34:10" itemprop="dateCreated datePublished" datetime="2021-08-17T16:34:10+08:00">2021-08-17</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2023-12-29 10:38:41" itemprop="dateModified" datetime="2023-12-29T10:38:41+08:00">2023-12-29</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A7%91%E5%AD%A6/" itemprop="url" rel="index"><span itemprop="name">计算机科学</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>3.9k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>6 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>kvm下的windows虚拟机转储可从子机侧和母机侧两方面进行。</p>
+<span id="more"></span>
+<h3 id="子机侧"><a href="#子机侧" class="headerlink" title="子机侧"></a>子机侧</h3><p>子机侧转储windows子机信息，主要是在主机内部执行virsh inject-nmi UUID指令，通过人为模拟nmi中断实现的，之后子机触发BSOD（蓝屏），继而执行核心文件转储和重启操作。转储的文件名为MEMORY.dmp，根据设置的windows内存核心转储方式不同，该文件一般存储于c:\Windows目录或c:\Windows\Minidump目录下。</p>
+<h3 id="母机侧"><a href="#母机侧" class="headerlink" title="母机侧"></a>母机侧</h3><h4 id="qemu-monitor-command指令"><a href="#qemu-monitor-command指令" class="headerlink" title="qemu-monitor-command指令"></a>qemu-monitor-command指令</h4><p>virsh qemu-monitor-command domain<br>使用该类指令时，需安装qemu-monitor相关组件，否则无法使用相关指令</p>
+<pre><code>#故意让windows蓝屏
+virsh qemu-monitor-command instance-00000b2e --hmp  nmi
+#导出guest内存
+virsh qemu-monitor-command instance-00000b2e --hmp  dump-guest-memory  /home/qemu/instance-00000b2e.dump
+</code></pre>
+<h4 id="dump指令"><a href="#dump指令" class="headerlink" title="dump指令"></a>dump指令</h4><p>对应语法如下：</p>
+<pre><code>#virsh dump指令语法
+virsh dump domain corefilepath [--bypass-cache]
+   &#123; [--live] | [--crash] | [--reset] &#125;
+   [--verbose] [--memory-only] [--format string]
+</code></pre>
+<p>–live ：使用该参数后，qemu进程在内核转储完成后继续运行</p>
+<p>–crash ：使用该参数后，qemu进程在内核转储完成后因crash事件而暂停</p>
+<p>–reset：使用该参数后，qemu进程在内核转储完成后重启<br>若没有使用上述三个参数，则进程在内核转储完成后保持pause状态</p>
+<p>-bypass-cache：使用该参数后，转储文件不会保存os文件系统缓存文件</p>
+<p>–memory-only：使用该参数后，转储文件为elf格式文件，且仅包含虚拟机内存及cpu通用寄存器数值</p>
+<p>–format：该参数与memory-only绑定使用，指定保存的转储文件的格式，其支持的文件格式（即string的参数值）包含elf、kdump-zlib（使用zlib压缩的kdump压缩格式）、kdump-lzo（使用lzo压缩的kdump压缩格式）、kdump-sbappy（使用sbappy压缩的kdump压缩格式）、win-dmp（windows的完全转储格式）</p>
+<p>如果仅使用最简单的dump语法：virsh dump domain corefilepath，则生成的转储文件格式如下：</p>
+<pre><code>windows_dump_no-memory-only.dmp:QEMU suspend to disk image
+</code></pre>
+<p>如果使用memory-only语法，但不指定format，则默认格式如下：</p>
+<pre><code>windows_dump_memory-only.dmp:ELF 64-bit LSB core file x86-64, version 1 (SYSV)
+</code></pre>
+<h3 id="转储文件格式转换"><a href="#转储文件格式转换" class="headerlink" title="转储文件格式转换"></a>转储文件格式转换</h3><p>virsh dump指令在低版本不支持win-dmp格式，因此生成的dump文件的格式以elf文件为主，而windbg是无法直接使用并分析elf文件的，因此需进行转换，将elf文件转换为windows的dmp格式文件。</p>
+<p>文件格式的转换主要使用<a target="_blank" rel="noopener" href="https://github.com/volatilityfoundation/volatility">volatility</a>和<a target="_blank" rel="noopener" href="https://github.com/gdabah/distorm">distorm</a>两个python库。</p>
+<pre><code>#安装工具
+git clone https://github.com/volatilityfoundation/volatility
+python setup.py install
+#有inline失败的问题，把函数把inline变为非inline
+git clone https://github.com/gdabah/distorm
+python setup.py install
+#复制distorm目录下的_distorm3.so库到python sys.path否则报错
+cp build/lib.linux-x86_64-2.7/_distorm3.so  /usr/lib64/python2.7/
+
+#分析guest内存布局
+[root@rg1-ostack37 /home/huiwei]# file instance-00000b2e.dump
+instance-00000b2e.dump: ELF 64-bit LSB core file x86-64, version 1 (SYSV), SVR4-style
+
+[root@rg1-ostack37 /home/huiwei]# /bin/vol.py imageinfo -f instance-00000b2e.dump
+Volatility Foundation Volatility Framework 2.6.1
+INFO: volatility.debug: Determining profile based on KDBG search...
+  Suggested Profile(s) : Win7SP1x64, Win7SP0x64, Win2008R2SP0x64, Win2008R2SP1x64_24000, Win2008R2SP1x64_23418, Win2008R2SP1x64, Win7SP1x64_24000, Win7SP1x64_23418
+ AS Layer1 : WindowsAMD64PagedMemory (Kernel AS)
+ AS Layer2 : QemuCoreDumpElf (Unnamed AS)
+ AS Layer3 : FileAddressSpace (/home/huiwei/instance-00000b2e.dump)
+  PAE type : No PAE
+   DTB : 0x187000L
+  KDBG : 0xf8000164f110L
+  Number of Processors : 2
+ Image Type (Service Pack) : 1
+KPCR for CPU 0 : 0xfffff80001650d00L
+KPCR for CPU 1 : 0xfffff880009c5000L
+ KUSER_SHARED_DATA : 0xfffff78000000000L
+   Image date and time : 2020-10-22 09:37:00 UTC+0000
+ Image local date and time : 2020-10-22 17:37:00 +0800
+#进行转换
+[root@rg1-ostack37 /home/huiwei]# /bin/vol.py -f instance-00000b2e.dump --profile Win2008R2SP1x64  raw2dmp -O   instance-00000b2e.dmp
+Volatility Foundation Volatility Framework 2.6.1
+Writing data (5.00 MB chunks): |..................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................|
+[root@rg1-ostack37 /home/huiwei]# file instance-00000b2e.dmp
+instance-00000b2e.dmp: MS Windows 64bit crash dump, full dump, 1310720 pages
+</code></pre>
+<p>windows目标文件的格式需选择，可通过&#x2F;bin&#x2F;vol.py -f XXX.dump –profile相关指令获取本机相关库支持的windows格式进行参数填写。</p>
+<p>经过上述处理之后，即可使用windbg工具对相关dmp文件进行分析，以查找系统异常原因。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E8%99%9A%E6%8B%9F%E5%8C%96/" rel="tag"># 虚拟化</a>
+              <a href="/tags/kvm/" rel="tag"># kvm</a>
+              <a href="/tags/windows/" rel="tag"># windows</a>
+              <a href="/tags/coredump/" rel="tag"># coredump</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/12/23/Ubuntu_offline_setup_gcc/" rel="prev" title="Ubuntu离线情况下安装gcc编译器">
+      <i class="fa fa-chevron-left"></i> Ubuntu离线情况下安装gcc编译器
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2021/11/09/virtio-202111091100/" rel="next" title="Virtio-设备模拟详解">
+      Virtio-设备模拟详解 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AD%90%E6%9C%BA%E4%BE%A7"><span class="nav-number">1.</span> <span class="nav-text">子机侧</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%AF%8D%E6%9C%BA%E4%BE%A7"><span class="nav-number">2.</span> <span class="nav-text">母机侧</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#qemu-monitor-command%E6%8C%87%E4%BB%A4"><span class="nav-number">2.1.</span> <span class="nav-text">qemu-monitor-command指令</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#dump%E6%8C%87%E4%BB%A4"><span class="nav-number">2.2.</span> <span class="nav-text">dump指令</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BD%AC%E5%82%A8%E6%96%87%E4%BB%B6%E6%A0%BC%E5%BC%8F%E8%BD%AC%E6%8D%A2"><span class="nav-number">3.</span> <span class="nav-text">转储文件格式转换</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">杨维宁</p>
+  <div class="site-description" itemprop="description">天行健，君子以自强不息。地势坤，君子以厚德载物。</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">22</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">42</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/bbbccvbvv" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;bbbccvbvv" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:nanjiecunxiaozu@163.com" title="E-Mail → mailto:nanjiecunxiaozu@163.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">杨维宁</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">71k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">1:58</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

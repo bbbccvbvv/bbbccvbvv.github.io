@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="原文网址：https:&#x2F;&#x2F;libvirt.org&#x2F;formatdomain.html#id8">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【翻译】libvirt虚拟机xml配置文件格式（4）CPU Allocation">
+<meta property="og:url" content="http://example.com/2022/09/05/domain_xml_format_CPU-Allocation/index.html">
+<meta property="og:site_name" content="怀德维宁">
+<meta property="og:description" content="原文网址：https:&#x2F;&#x2F;libvirt.org&#x2F;formatdomain.html#id8">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2022-09-05T11:01:10.000Z">
+<meta property="article:modified_time" content="2023-12-29T02:38:41.453Z">
+<meta property="article:author" content="杨维宁">
+<meta property="article:tag" content="虚拟化">
+<meta property="article:tag" content="kvm">
+<meta property="article:tag" content="libvirt">
+<meta property="article:tag" content="虚拟机xml配置文件">
+<meta property="article:tag" content="翻译">
+<meta property="article:tag" content="CPU Allocation">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://example.com/2022/09/05/domain_xml_format_CPU-Allocation/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>【翻译】libvirt虚拟机xml配置文件格式（4）CPU Allocation | 怀德维宁</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="怀德维宁" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">怀德维宁</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">大邦维屏，大宗维翰。怀德维宁，宗子维城。</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/09/05/domain_xml_format_CPU-Allocation/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="杨维宁">
+      <meta itemprop="description" content="天行健，君子以自强不息。地势坤，君子以厚德载物。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="怀德维宁">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          【翻译】libvirt虚拟机xml配置文件格式（4）CPU Allocation
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-09-05 19:01:10" itemprop="dateCreated datePublished" datetime="2022-09-05T19:01:10+08:00">2022-09-05</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2023-12-29 10:38:41" itemprop="dateModified" datetime="2023-12-29T10:38:41+08:00">2023-12-29</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A7%91%E5%AD%A6/" itemprop="url" rel="index"><span itemprop="name">计算机科学</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>1.8k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>3 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>原文网址：<a target="_blank" rel="noopener" href="https://libvirt.org/formatdomain.html#id8" title="Domain XML format">https://libvirt.org/formatdomain.html#id8</a></p>
+<span id="more"></span>
+
+<pre><code>&lt;domain&gt;
+  ...
+  &lt;vcpu placement=&#39;static&#39; cpuset=&quot;1-4,^3,6&quot; current=&quot;1&quot;&gt;2&lt;/vcpu&gt;
+  &lt;vcpus&gt;
+    &lt;vcpu id=&#39;0&#39; enabled=&#39;yes&#39; hotpluggable=&#39;no&#39; order=&#39;1&#39;/&gt;
+    &lt;vcpu id=&#39;1&#39; enabled=&#39;no&#39; hotpluggable=&#39;yes&#39;/&gt;
+  &lt;/vcpus&gt;
+  ...
+&lt;/domain&gt;
+</code></pre>
+<h1 id="vcpu"><a href="#vcpu" class="headerlink" title="vcpu"></a>vcpu</h1><p>该元素定义了分配给客户机操作系统的虚拟cpu的最大数量，该值范围为1到虚拟机管理器支持的最大数量之间。</p>
+<h2 id="cpuset"><a href="#cpuset" class="headerlink" title="cpuset"></a>cpuset</h2><p>可选属性cpuset是以逗号分隔的物理CPU编号列表，默认情况下虚拟机进程和虚拟CPU可以固定到对应编号的物理CPU上。（注意：虚拟机进程和虚拟cpu的绑定（pinning）策略可以由cputune分别指定。如果cputune的属性项emulatorpin被设置，则vcpu指定的cpuset将会被忽略。对于vcpupin指定的虚拟cpu，cpuset制定的cpuset也会被忽略。vcpupin未指定的虚拟cpu，每一个都会被绑定到cpuset指定的物理cpu上）。列表中的每一个元素可以是一个单独的cpu编号、cpu编号范围或是插入符号后跟要从先前范围中排除的CPU编号。自0.4.4版本起支持。</p>
+<h2 id="current"><a href="#current" class="headerlink" title="current"></a>current</h2><p>可选属性current可用于指定是否应启用少于最大数量的虚拟CPU。从 0.8.5开始。</p>
+<h2 id="placement"><a href="#placement" class="headerlink" title="placement"></a>placement</h2><p>可选属性placement可用来表明虚拟机进程的cpu布局模式。该值可为static或auto，但是如果指定了cpuset，则默认numatune的placement设置为static。使用auto表示虚拟机进程将通过查询numa固定到咨询节点集，如果指定了属性cpuset的值，则将被忽略。如果cpuset和placement都没有指定或placement设置为static，但是cpuset为指定，则虚拟机进程将会被绑定到所有的可用物理cpu上。自0.9.11起（仅限于QEMU和KVM）。</p>
+<h1 id="vcpus"><a href="#vcpus" class="headerlink" title="vcpus"></a>vcpus</h1><p>vcpus元素项运行控制单个vCPU的状态。id属性项指定了libvirt在其他地方使用的vCPU id，例如vCPU绑定、调度程序信息和NUMA分配。请注意，在某些情况下，客户机中看到的vCPU ID可能与libvirt ID不同。有效ID 从0到vcpu元素设置的最大vCPU计数减 1。enabled属性项允许控制vCPU的状态。有效值为yes和no。hotpluggable控制在引导开机时启用CPU是否可以热插拔和热拔出给定的vCPU。请注意，所有禁用的vCPU必须是可热插拔的。有效值为yes和no。order允许指定在线vCPU的顺序。对于需要一次插入多个vCPU的虚拟机管理器&#x2F;平台，该顺序可能会在需要一次启用的所有 vCPU上重复。顺序不强制指定。然后以任意顺序添加vCPU。如果使用了顺序信息，它必须用于所有在线vCPU。虚拟机管理器可能在单一操作期间清理或更新顺序信息。请注意，虚拟机管理器可能会创建不同于引导vCPU的热插拔vCPU，因此可能需要进行特殊初始化。虚拟机管理器可能要求启动时启用的不可热插拔的vCPU在开始时从ID 0开始聚集。可能还需要vCPU 0始终存在且不可热插拔。请注意，可能需要为单个CPU提供状态以支持可寻址的 vCPU热插拔，并且此功能可能不受所有虚拟机管理器的支持。QEMU要求实现以下条件。vCPU 0需启用并设置为不可热插拔。在PPC64上，同样需要启用同一内核中的vCPU。引导开机时存在的所有非热插拔CPU都需要在vCPU 0 之后进行分组。自2.2.0起（仅限于QEMU）。</p>
+<p>本章节描述了用来代表作用域的xml文件格式，根据运行的作用于种类的格式变化，有一些可选配置项用来加载文件。对于特定虚拟机的细节可以查看<br><a target="_blank" rel="noopener" href="https://libvirt.org/drivers.html">相关文件</a>。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E8%99%9A%E6%8B%9F%E5%8C%96/" rel="tag"># 虚拟化</a>
+              <a href="/tags/kvm/" rel="tag"># kvm</a>
+              <a href="/tags/libvirt/" rel="tag"># libvirt</a>
+              <a href="/tags/%E8%99%9A%E6%8B%9F%E6%9C%BAxml%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6/" rel="tag"># 虚拟机xml配置文件</a>
+              <a href="/tags/%E7%BF%BB%E8%AF%91/" rel="tag"># 翻译</a>
+              <a href="/tags/CPU-Allocation/" rel="tag"># CPU Allocation</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/09/02/domain_xml_format_SMBIOS-System-Information/" rel="prev" title="【翻译】libvirt虚拟机xml配置文件格式（3）SMBIOS System Information">
+      <i class="fa fa-chevron-left"></i> 【翻译】libvirt虚拟机xml配置文件格式（3）SMBIOS System Information
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2022/10/19/domain_xml_format_IOThreads-Allocation/" rel="next" title="【翻译】libvirt虚拟机xml配置文件格式（5）IOThreads Allocation">
+      【翻译】libvirt虚拟机xml配置文件格式（5）IOThreads Allocation <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#vcpu"><span class="nav-number">1.</span> <span class="nav-text">vcpu</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#cpuset"><span class="nav-number">1.1.</span> <span class="nav-text">cpuset</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#current"><span class="nav-number">1.2.</span> <span class="nav-text">current</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#placement"><span class="nav-number">1.3.</span> <span class="nav-text">placement</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#vcpus"><span class="nav-number">2.</span> <span class="nav-text">vcpus</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">杨维宁</p>
+  <div class="site-description" itemprop="description">天行健，君子以自强不息。地势坤，君子以厚德载物。</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">22</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">42</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/bbbccvbvv" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;bbbccvbvv" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:nanjiecunxiaozu@163.com" title="E-Mail → mailto:nanjiecunxiaozu@163.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">杨维宁</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">71k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">1:58</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

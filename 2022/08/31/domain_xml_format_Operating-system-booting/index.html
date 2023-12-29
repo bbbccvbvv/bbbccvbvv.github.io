@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="原文网址：https:&#x2F;&#x2F;libvirt.org&#x2F;formatdomain.html#id8 这里有很多不同的方法用来引导操作系统开机，每一个都有优点与缺点。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【翻译】libvirt虚拟机xml配置文件格式（2）Operating system booting">
+<meta property="og:url" content="http://example.com/2022/08/31/domain_xml_format_Operating-system-booting/index.html">
+<meta property="og:site_name" content="怀德维宁">
+<meta property="og:description" content="原文网址：https:&#x2F;&#x2F;libvirt.org&#x2F;formatdomain.html#id8 这里有很多不同的方法用来引导操作系统开机，每一个都有优点与缺点。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2022-08-31T11:00:10.000Z">
+<meta property="article:modified_time" content="2023-12-29T02:38:41.453Z">
+<meta property="article:author" content="杨维宁">
+<meta property="article:tag" content="虚拟化">
+<meta property="article:tag" content="kvm">
+<meta property="article:tag" content="libvirt">
+<meta property="article:tag" content="虚拟机xml配置文件">
+<meta property="article:tag" content="翻译">
+<meta property="article:tag" content="Operating system booting">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://example.com/2022/08/31/domain_xml_format_Operating-system-booting/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>【翻译】libvirt虚拟机xml配置文件格式（2）Operating system booting | 怀德维宁</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="怀德维宁" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">怀德维宁</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">大邦维屏，大宗维翰。怀德维宁，宗子维城。</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/08/31/domain_xml_format_Operating-system-booting/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="杨维宁">
+      <meta itemprop="description" content="天行健，君子以自强不息。地势坤，君子以厚德载物。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="怀德维宁">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          【翻译】libvirt虚拟机xml配置文件格式（2）Operating system booting
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-08-31 19:00:10" itemprop="dateCreated datePublished" datetime="2022-08-31T19:00:10+08:00">2022-08-31</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2023-12-29 10:38:41" itemprop="dateModified" datetime="2023-12-29T10:38:41+08:00">2023-12-29</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A7%91%E5%AD%A6/" itemprop="url" rel="index"><span itemprop="name">计算机科学</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>8.4k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>14 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>原文网址：<a target="_blank" rel="noopener" href="https://libvirt.org/formatdomain.html#id8" title="Domain XML format">https://libvirt.org/formatdomain.html#id8</a></p>
+<p>这里有很多不同的方法用来引导操作系统开机，每一个都有优点与缺点。</p>
+<span id="more"></span>
+
+<h1 id="BIOS-bootloader"><a href="#BIOS-bootloader" class="headerlink" title="BIOS bootloader"></a>BIOS bootloader</h1><p>支持全虚拟化（full virtualization）的虚拟机管理程序可以通过BIOS引导开机。在这种情况下，BIOS存在开机顺序优先级（软盘floppy、硬盘harddisk、光盘cdrom、网络network）决定到哪里去获取&#x2F;查找开机镜像（boot image）。</p>
+<pre><code>&lt;!-- Xen with fullvirt loader --&gt;
+&lt;!-- 使用全虚拟化加载器的Xen--&gt;
+...
+&lt;os&gt;
+  &lt;type&gt;hvm&lt;/type&gt;
+  &lt;loader&gt;/usr/lib/xen/boot/hvmloader&lt;/loader&gt;
+  &lt;boot dev=&#39;hd&#39;/&gt;
+&lt;/os&gt;
+...
+
+&lt;!-- QEMU with default firmware, serial console and SMBIOS --&gt;
+&lt;!-- 使用默认的硬件、串行控制台和SMBIOS的QEMU--&gt;
+...
+&lt;os&gt;
+  &lt;type&gt;hvm&lt;/type&gt;
+  &lt;boot dev=&#39;cdrom&#39;/&gt;
+  &lt;bootmenu enable=&#39;yes&#39; timeout=&#39;3000&#39;/&gt;
+  &lt;smbios mode=&#39;sysinfo&#39;/&gt;
+  &lt;bios useserial=&#39;yes&#39; rebootTimeout=&#39;0&#39;/&gt;
+&lt;/os&gt;
+...
+
+&lt;!-- QEMU with UEFI manual firmware and secure boot --&gt;
+&lt;!-- 使用UEFI手动固件和安全启动的QEMU--&gt;
+...
+&lt;os&gt;
+  &lt;type&gt;hvm&lt;/type&gt;
+  &lt;loader readonly=&#39;yes&#39; secure=&#39;yes&#39; type=&#39;pflash&#39;&gt;/usr/share/OVMF/OVMF_CODE.fd&lt;/loader&gt;
+  &lt;nvram template=&#39;/usr/share/OVMF/OVMF_VARS.fd&#39;&gt;/var/lib/libvirt/nvram/guest_VARS.fd&lt;/nvram&gt;
+  &lt;boot dev=&#39;hd&#39;/&gt;
+&lt;/os&gt;
+...
+
+&lt;!-- QEMU with UEFI manual firmware, secure boot and with NVRAM type &#39;file&#39;--&gt;
+&lt;!-- 使用UEFI手动固件、安全启动和NVRAM类型文件的QEMU--&gt;
+...
+&lt;os&gt;
+  &lt;type&gt;hvm&lt;/type&gt;
+  &lt;loader readonly=&#39;yes&#39; secure=&#39;yes&#39; type=&#39;pflash&#39;&gt;/usr/share/OVMF/OVMF_CODE.fd&lt;/loader&gt;
+  &lt;nvram type=&#39;file&#39; template=&#39;/usr/share/OVMF/OVMF_VARS.fd&#39;&gt;
+    &lt;source file=&#39;/var/lib/libvirt/nvram/guest_VARS.fd&#39;/&gt;
+  &lt;/nvram&gt;
+  &lt;boot dev=&#39;hd&#39;/&gt;
+&lt;/os&gt;
+...
+
+&lt;!-- QEMU with UEFI manual firmware, secure boot and with network backed NVRAM&#39;--&gt;
+&lt;!-- 使用UEFI手动固件、安全启动和网络支持的NVRAM的QEMU--&gt;
+...
+&lt;os&gt;
+  &lt;type&gt;hvm&lt;/type&gt;
+  &lt;loader readonly=&#39;yes&#39; secure=&#39;yes&#39; type=&#39;pflash&#39;&gt;/usr/share/OVMF/OVMF_CODE.fd&lt;/loader&gt;
+  &lt;nvram type=&#39;network&#39;&gt;
+    &lt;source protocol=&#39;iscsi&#39; name=&#39;iqn.2013-07.com.example:iscsi-nopool/0&#39;&gt;
+      &lt;host name=&#39;example.com&#39; port=&#39;6000&#39;/&gt;
+      &lt;auth username=&#39;myname&#39;&gt;
+        &lt;secret type=&#39;iscsi&#39; usage=&#39;mycluster_myname&#39;/&gt;
+      &lt;/auth&gt;
+    &lt;/source&gt;
+  &lt;/nvram&gt;
+  &lt;boot dev=&#39;hd&#39;/&gt;
+&lt;/os&gt;
+...
+
+&lt;!-- QEMU with automatic UEFI firmware and secure boot --&gt;
+&lt;!-- 使用自动UEFI固件和安全启动的QEMU--&gt;
+...
+&lt;os firmware=&#39;efi&#39;&gt;
+  &lt;type&gt;hvm&lt;/type&gt;
+  &lt;loader secure=&#39;yes&#39;/&gt;
+  &lt;boot dev=&#39;hd&#39;/&gt;
+&lt;/os&gt;
+...
+
+&lt;!-- QEMU with automatic UEFI stateless firmware for AMD SEV --&gt;
+&lt;!-- 使用适用于AMD SEV的自动UEFI无状态固件的QEMU--&gt;
+...
+&lt;os firmware=&#39;efi&#39;&gt;
+  &lt;type&gt;hvm&lt;/type&gt;
+  &lt;loader stateless=&#39;yes&#39;/&gt;
+  &lt;boot dev=&#39;hd&#39;/&gt;
+&lt;/os&gt;
+...
+</code></pre>
+<h2 id="firmware固件"><a href="#firmware固件" class="headerlink" title="firmware固件"></a>firmware固件</h2><p>firmware属性项允许管理程序自动填充<loader/>和<nvram/>元素，通过选择的固件可以使能启用一些必须的特征项。可接受的值为bios和efi。选择过程扫描在特定位置的描述已安装固件镜像的文件，使用最具体的一个填充domain的需求。选择的位置（从通用到最具体的一个）如下：</p>
+<ul>
+<li>&#x2F;usr&#x2F;share&#x2F;qemu&#x2F;firmware</li>
+<li>&#x2F;etc&#x2F;qemu&#x2F;firmware</li>
+<li>$XDG_CONFIG_HOME&#x2F;qemu&#x2F;firmware</li>
+</ul>
+<p>对于更多信息，可以参考QEMU代码库中的docs&#x2F;interop&#x2F;firmware.json描述的固件元数据规范。常规用户可不关心这一点。从libvirt 5.2.0（仅限于QEMU和KVM）版本开始。</p>
+<p>对于VMware客户机，当客户机使用UEFI时则必须设置为efi，使用BIOS时可以不设置。从libvirt 5.3.0（VMware ESX和Workstation&#x2F;Player）版本开始。</p>
+<h2 id="type类型"><a href="#type类型" class="headerlink" title="type类型"></a>type类型</h2><p>type属性项指明了在虚拟机中启动的操作系统的类型。</p>
+<ul>
+<li>hvm表明操作系统被设计用来在裸机（bare metal）上运行，因此需要全虚拟化。</li>
+<li>linux（糟糕的命名）表明是一个支持Xen 3虚拟机管理程序客户机ABI的操作系统。</li>
+<li>【可选】arch表明了需要虚拟化的CPU架构。</li>
+<li>【可选】machine表明了机器类型。</li>
+</ul>
+<p>xml功能（Capabilities XML）章节描述了允许值得详细信息。大多数虚拟机管理程序的驱动程序都省略了arch的设置，则所在主机host的架构就会被选择。对于test、ESX和VMWare虚拟机管理程序驱动程序，在x86_64主机上通常会选择i686架构。从libvirt 0.0.1版本开始提供支持。</p>
+<h2 id="firmware固件-1"><a href="#firmware固件-1" class="headerlink" title="firmware固件"></a>firmware固件</h2><p>从libvirt 7.2.0版本开始仅对QEMU&#x2F;KVM提供支持。</p>
+<p>当使用固件自动选择功能时，固件中存在不同的可用特征。特征列表限制了为虚拟机自动选择的固件。特征列表也可以通过使用0或更多的feature元素进行指定。选择硬件时，libvirt只会考虑列表中的特征，忽略其他特征项。</p>
+<h3 id="feature"><a href="#feature" class="headerlink" title="feature"></a>feature</h3><p>强制属性列表：</p>
+<ul>
+<li><p>enabled：可用值为<strong>yes</strong>和<strong>no</strong>，告诉libvirt在自动选择固件时是否要启用或禁用对应特征项</p>
+</li>
+<li><p>name：特征项名称，特征值如下表所示：</p>
+<ul>
+<li><p>enrolled-keys:选择的nvram模板是否有默认证书注册。带有安全启动（Secure Boot）特征的固件如果没有注册密钥，将会以无签名二进制文件成功开机。仅针对带有安全启动（Secure Boot）特征的固件进行校验。</p>
+</li>
+<li><p>secure-boot:固件是否实现UEFI安全启动（Secure Boot）特征。</p>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="loader"><a href="#loader" class="headerlink" title="loader"></a>loader</h2><p>可选配置项loader标签指的是固件blob，通过绝对路径指定，被用来辅助domain创建过程。该标签为Xen全虚拟化domain使用，也被用来为QEMU&#x2F;KVM domain设置QEMU BIOS文件路径。Xen自libvirt 0.1.0版本后被支持，QEMU&#x2F;KVM自libvirt 0.9.12版本后被支持。该元素有两个可选的属性项：readonly（可用值为yes或no）表明镜像是可写的还是只读的。第二个属性项type可用值为rom和pflash。其告诉虚拟机管理程序文件应该被映射到客户机内存的什么位置上。例如，如果loader的路径指向一个UEFI镜像，type就应该是pflash。此外，一些固件会实现安全启动（Secure Boot）功能。属性项secure可以向虚拟机管理程序表明固件是否兼容安全启动（Secure Boot）功能。它不能用于在固件中启用或禁用功能本身。自libvirt 2.1.0版本后被支持.如果loader被标记为只读（read-only），之后在UEFI环境下，其会假定这里存在一个可用的可写NVRAM。在某些情况下，loader更倾向于在无 NVRAM环境下运行，在关机时丢弃任何配置变化。stateless标识（自libvirt 8.6.0版本后被支持）可被用来控制这种行为，如果设置为n，o则NVRAM将永远不会被创建。</p>
+<h2 id="nvram"><a href="#nvram" class="headerlink" title="nvram"></a>nvram</h2><p>一些UEFI固件可能想要使用一个非易失性存储器去保存一些变量。在主机中，这表示为一个文件，文件的绝对路径被保存在这一元素中。此外，当domain启动时，libvirt复制在qemu.conf中定义的所谓的主NVRAM存储文件。如果必要的话，template属性可用于配置文件中主NVRAM存储的每个域的覆盖映射。对于非持久性domain，如果NVRAM文件已由libvirt创建，则它会被留下，并且管理程序有责任保存和删除文件（如果需要持久保存）。自1.2.8起。</p>
+<p>自8.5.0版本起，该元素拥有type属性项（可用值为file、block和network）。在这种情况下，NVRAM存储器被<source>子元素使用和disk源相同的语法进行阐述。详情可参阅Hard drives, floppy disks, CDROMs章节。</p>
+<p>注意：network支持的NVRAM不是从template中实例化的，因此使用者需人为提供一个可用的NVRAM镜像。</p>
+<p>如果loader被标记为stateless，则提供该元素是无效的。</p>
+<h2 id="boot"><a href="#boot" class="headerlink" title="boot"></a>boot</h2><p>dev属性项使用fd、hd、cdrom和network等值。用于指定下一个要考虑的引导设备。boot元素可以重复多次以安装用于轮流尝试的引导设备优先级列表。多个相同类型的设备根据它们的目标进行排序，同时保留总线的顺序。在define完domain后，libvirt返回XML配置（通过virDomainGetXMLDesc）列出已排好序的设备。排序完成之后，第一个设备被标记为可引导的（bootable）。配置为从“hd”引导且分配有vdb、hda、vda和hdc磁盘的域将从vda引导启动（排序列表为vda、vdb、hda、hdc）。类似的带有hdc、vda、vdb和hda磁盘的domain竟会从hda（磁盘排序为：hda、hdc、vda和vdb）引导启动。以所需方式进行配置将会十分麻烦，这就是引入每个设备引导元素的原因，也是提供对引导顺序的完全控制的首选方式。boot元素和每个设备引导元素是互斥的。boot元素自0.1.3起提供支持，per-device boot自0.8.8起提供支持。</p>
+<h2 id="smbios"><a href="#smbios" class="headerlink" title="smbios"></a>smbios</h2><p>如何填充客户机中可见的SMBIOS信息。mode属性项必须被指定，其值为emulate（虚拟机管理程序生成所有值）、host（从主机的SMBIOS值中复制除UUID之外的全部Block 0 和Block 1；virConnectGetSysinfo函数调用可以被用来查看哪些值被复制）或sysinfo（使用 SMBIOS System Information元素中的值）。如果未制定，则虚拟机管理程序默认使用。从0.8.7版本起提供支持。</p>
+<p>到目前为止，BIOS&#x2F;UEFI配置旋钮足够通用，可以由大多数（不是全部）固件实现。然而，从现在开始，并不是每一个单项配置都对所有固件起作用。例如，rebootTimeout对UEFI无作用，useserial可能对不产生输出到串行行的BIOS固件有影响等等。此外，固件经常不能导出其功能以便libvirt（或使用者）进行检查。固件功能的集合会随着新版本而发生变化。因此，建议用户在生产中依赖它们之前尝试他们使用的设置。</p>
+<h2 id="bootmenu"><a href="#bootmenu" class="headerlink" title="bootmenu"></a>bootmenu</h2><p>在客户机启动时是否启用交互式引导菜单提示。enable属性项可以是yes或no。如果没有指明，虚拟机见识程序默认使用该功能。自0.8.3版本提供支持。额外的属性项timeout指明需要多少毫秒等待启动菜单，直到它超时。允许的值是 [0, 65535] 范围内的数字，除非 enable 设置为“yes”，否则该属性项会被忽略。自1.2.8版本提供支持。</p>
+<h2 id="bios"><a href="#bios" class="headerlink" title="bios"></a>bios</h2><p>该元素属性项useserial可用值为yes或no。该属性项启用或禁用串行图形适配器（Serial Graphics Adapter）功能，该功能可以使得用户在串口上看到BIOS信息。因此，需定义串口。自0.9.4版本起。自0.10.2版本起（仅限于QEMU）。还有另外一个属性项rebootTimeout，当引导启动失败时，该属性想决定是否重启以及间隔多长时间后再次尝试引导启动。该值以毫秒为单位，最大值为65535，特殊值-1禁用重启功能。</p>
+<h1 id="Host-bootloader"><a href="#Host-bootloader" class="headerlink" title="Host bootloader"></a>Host bootloader</h1><p>采用半虚拟化的管理程序通常不会模拟BIOS，而是主机负责启动操作系统引导。在主机中使用pseudo-bootloader提供接口以便为客户机选择一个内核。一个例子便是Xen的pygrub。而Bhyve虚拟机管理程序也使用主机bootloader方式，bhyveload或grub-bhyve。</p>
+<h2 id="bootloader"><a href="#bootloader" class="headerlink" title="bootloader"></a>bootloader</h2><p>bootloader提供了主机操作系统中引导加载程序可执行文件的完全限定路径。运行bootloader选择要引导的内核。引导加载程序所需的输出取决于使用的管理程序。自0.1.1起。</p>
+<h2 id="bootloader-args"><a href="#bootloader-args" class="headerlink" title="bootloader_args"></a>bootloader_args</h2><p>可选配置项bootloader_args允许将命令行参数传递给bootloader。自0.2.3起。</p>
+<h1 id="Direct-kernel-boot"><a href="#Direct-kernel-boot" class="headerlink" title="Direct kernel boot"></a>Direct kernel boot</h1><p>安装一个新的客户机操作系统时，直接从存储在主机操作系统中的内核和 initrd引导通常很有用，可以将命令行参数直接传递给安装程序。该功能可在半虚拟化和全虚拟化客户机中使用。</p>
+<pre><code>...
+&lt;os&gt;
+  &lt;type&gt;hvm&lt;/type&gt;
+  &lt;loader&gt;/usr/lib/xen/boot/hvmloader&lt;/loader&gt;
+  &lt;kernel&gt;/root/f8-i386-vmlinuz&lt;/kernel&gt;
+  &lt;initrd&gt;/root/f8-i386-initrd&lt;/initrd&gt;
+  &lt;cmdline&gt;console=ttyS0 ks=http://example.com/f8-i386/os/&lt;/cmdline&gt;
+  &lt;dtb&gt;/root/ppc.dtb&lt;/dtb&gt;
+  &lt;acpi&gt;
+    &lt;table type=&#39;slic&#39;&gt;/path/to/slic.dat&lt;/table&gt;
+  &lt;/acpi&gt;
+&lt;/os&gt;
+...
+</code></pre>
+<h2 id="type"><a href="#type" class="headerlink" title="type"></a>type</h2><p>该属性项与之前在BIOS bootloader中的描述有相同的语义。</p>
+<h2 id="loader-1"><a href="#loader-1" class="headerlink" title="loader"></a>loader</h2><p>该属性项与之前在BIOS bootloader中的描述有相同的语义。</p>
+<h2 id="kernel"><a href="#kernel" class="headerlink" title="kernel"></a>kernel</h2><p>该属性项指明了主机中内核镜像的全限定路径。</p>
+<h2 id="initrd"><a href="#initrd" class="headerlink" title="initrd"></a>initrd</h2><p>该属性项指明了主机中ramdisk镜像（可选项）的全限定路径。</p>
+<h2 id="cmdline"><a href="#cmdline" class="headerlink" title="cmdline"></a>cmdline</h2><p>该属性项指明了引导启动时传递给内核（或安装程序）的参数。这经常被用来指定备用主控制台（或串口）、安装媒体源&#x2F;kickstart 文件。</p>
+<h2 id="dtb"><a href="#dtb" class="headerlink" title="dtb"></a>dtb</h2><p>该元素项指明了主机中的设备树二进制（device tree binary，dtb）镜像的全限定路径。从1.0.4版本起提供支持。</p>
+<h2 id="acpi"><a href="#acpi" class="headerlink" title="acpi"></a>acpi</h2><p>table元素包含了ACPI（Advanced Configuration and Power Interface，高级配置和电源接口）表。type属性项包含ACPI表类型（当前只有slic被支持）。自1.3.5支持QEMU。自5.9.0支持Xen。</p>
+<h1 id="Container-boot"><a href="#Container-boot" class="headerlink" title="Container boot"></a>Container boot</h1><p>当使用基于虚拟化的容器引导启动一个虚拟机时，可不使用内核&#x2F;引导镜像，使用init元素指定init二进制文件的路径。默认无参数加载。为指明初始化参数，使用initarg参数项，根据需要重复多次。如果设置了cmdline元素，将会被用来提供一个&#x2F;proc&#x2F;cmdline的替代项，但是却不会影响初始化参数（init argv）。</p>
+<p>使用initenv元素设置环境变量，一个元素代表一个变量。</p>
+<p>使用initdir元素为初始化设置特定的工作目录。</p>
+<p>以给定的用户或用户组运行初始化命令，分别使用inituser或initgroup。两个元素可以被用来提供用户id或用户名称。使用**a+**前缀用户或组ID将强制将其视为数值。如果没有该项，它将首先作为用户名或组名进行尝试。</p>
+<pre><code>&lt;os&gt;
+  &lt;type arch=&#39;x86_64&#39;&gt;exe&lt;/type&gt;
+  &lt;init&gt;/bin/systemd&lt;/init&gt;
+  &lt;initarg&gt;--unit&lt;/initarg&gt;
+  &lt;initarg&gt;emergency.service&lt;/initarg&gt;
+  &lt;initenv name=&#39;MYENV&#39;&gt;some value&lt;/initenv&gt;
+  &lt;initdir&gt;/my/custom/cwd&lt;/initdir&gt;
+  &lt;inituser&gt;tester&lt;/inituser&gt;
+  &lt;initgroup&gt;1000&lt;/initgroup&gt;
+&lt;/os&gt;
+</code></pre>
+<p>如果想要使用用户命名空间，设置idmap属性项。uid和gid元素有3个属性项：</p>
+<ul>
+<li><p>start：容器的第一个用户ID。其值为0.</p>
+</li>
+<li><p>target：容器的第一个用户ID将会映射到主机中的目标用户ID。</p>
+</li>
+<li><p>count：映射到主机中的用户的容器用户数量。</p>
+  <idmap>
+    <uid start='0' target='1000' count='10'/>
+    <gid start='0' target='1000' count='10'/>
+  </idmap></li>
+</ul>
+<p>本章节描述了用来代表作用域的xml文件格式，根据运行的作用于种类的格式变化，有一些可选配置项用来加载文件。对于特定虚拟机的细节可以查看<br><a target="_blank" rel="noopener" href="https://libvirt.org/drivers.html">相关文件</a>。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E8%99%9A%E6%8B%9F%E5%8C%96/" rel="tag"># 虚拟化</a>
+              <a href="/tags/kvm/" rel="tag"># kvm</a>
+              <a href="/tags/libvirt/" rel="tag"># libvirt</a>
+              <a href="/tags/%E8%99%9A%E6%8B%9F%E6%9C%BAxml%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6/" rel="tag"># 虚拟机xml配置文件</a>
+              <a href="/tags/%E7%BF%BB%E8%AF%91/" rel="tag"># 翻译</a>
+              <a href="/tags/Operating-system-booting/" rel="tag"># Operating system booting</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/08/20/domain_xml_format_general-metadata/" rel="prev" title="【翻译】libvirt虚拟机xml配置文件格式（1）General metadata">
+      <i class="fa fa-chevron-left"></i> 【翻译】libvirt虚拟机xml配置文件格式（1）General metadata
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2022/09/02/domain_xml_format_SMBIOS-System-Information/" rel="next" title="【翻译】libvirt虚拟机xml配置文件格式（3）SMBIOS System Information">
+      【翻译】libvirt虚拟机xml配置文件格式（3）SMBIOS System Information <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#BIOS-bootloader"><span class="nav-number">1.</span> <span class="nav-text">BIOS bootloader</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#firmware%E5%9B%BA%E4%BB%B6"><span class="nav-number">1.1.</span> <span class="nav-text">firmware固件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#type%E7%B1%BB%E5%9E%8B"><span class="nav-number">1.2.</span> <span class="nav-text">type类型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#firmware%E5%9B%BA%E4%BB%B6-1"><span class="nav-number">1.3.</span> <span class="nav-text">firmware固件</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#feature"><span class="nav-number">1.3.1.</span> <span class="nav-text">feature</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#loader"><span class="nav-number">1.4.</span> <span class="nav-text">loader</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#nvram"><span class="nav-number">1.5.</span> <span class="nav-text">nvram</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#boot"><span class="nav-number">1.6.</span> <span class="nav-text">boot</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#smbios"><span class="nav-number">1.7.</span> <span class="nav-text">smbios</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#bootmenu"><span class="nav-number">1.8.</span> <span class="nav-text">bootmenu</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#bios"><span class="nav-number">1.9.</span> <span class="nav-text">bios</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Host-bootloader"><span class="nav-number">2.</span> <span class="nav-text">Host bootloader</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#bootloader"><span class="nav-number">2.1.</span> <span class="nav-text">bootloader</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#bootloader-args"><span class="nav-number">2.2.</span> <span class="nav-text">bootloader_args</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Direct-kernel-boot"><span class="nav-number">3.</span> <span class="nav-text">Direct kernel boot</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#type"><span class="nav-number">3.1.</span> <span class="nav-text">type</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#loader-1"><span class="nav-number">3.2.</span> <span class="nav-text">loader</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#kernel"><span class="nav-number">3.3.</span> <span class="nav-text">kernel</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#initrd"><span class="nav-number">3.4.</span> <span class="nav-text">initrd</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#cmdline"><span class="nav-number">3.5.</span> <span class="nav-text">cmdline</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#dtb"><span class="nav-number">3.6.</span> <span class="nav-text">dtb</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#acpi"><span class="nav-number">3.7.</span> <span class="nav-text">acpi</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Container-boot"><span class="nav-number">4.</span> <span class="nav-text">Container boot</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">杨维宁</p>
+  <div class="site-description" itemprop="description">天行健，君子以自强不息。地势坤，君子以厚德载物。</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">22</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">42</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/bbbccvbvv" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;bbbccvbvv" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:nanjiecunxiaozu@163.com" title="E-Mail → mailto:nanjiecunxiaozu@163.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">杨维宁</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">71k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">1:58</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="原文网址：https:&#x2F;&#x2F;libvirt.org&#x2F;formatdomain.html#id8">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【翻译】libvirt虚拟机xml配置文件格式（6）CPU Tuning">
+<meta property="og:url" content="http://example.com/2022/11/04/domain_xml_format_CPU-tuning/index.html">
+<meta property="og:site_name" content="怀德维宁">
+<meta property="og:description" content="原文网址：https:&#x2F;&#x2F;libvirt.org&#x2F;formatdomain.html#id8">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2022-11-04T06:35:10.000Z">
+<meta property="article:modified_time" content="2023-12-29T02:38:41.453Z">
+<meta property="article:author" content="杨维宁">
+<meta property="article:tag" content="虚拟化">
+<meta property="article:tag" content="kvm">
+<meta property="article:tag" content="libvirt">
+<meta property="article:tag" content="虚拟机xml配置文件">
+<meta property="article:tag" content="翻译">
+<meta property="article:tag" content="CPU Tuning">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://example.com/2022/11/04/domain_xml_format_CPU-tuning/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>【翻译】libvirt虚拟机xml配置文件格式（6）CPU Tuning | 怀德维宁</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="怀德维宁" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">怀德维宁</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">大邦维屏，大宗维翰。怀德维宁，宗子维城。</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/11/04/domain_xml_format_CPU-tuning/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="杨维宁">
+      <meta itemprop="description" content="天行健，君子以自强不息。地势坤，君子以厚德载物。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="怀德维宁">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          【翻译】libvirt虚拟机xml配置文件格式（6）CPU Tuning
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-11-04 14:35:10" itemprop="dateCreated datePublished" datetime="2022-11-04T14:35:10+08:00">2022-11-04</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2023-12-29 10:38:41" itemprop="dateModified" datetime="2023-12-29T10:38:41+08:00">2023-12-29</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A7%91%E5%AD%A6/" itemprop="url" rel="index"><span itemprop="name">计算机科学</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>5.4k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>9 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>原文网址：<a target="_blank" rel="noopener" href="https://libvirt.org/formatdomain.html#id8" title="Domain XML format">https://libvirt.org/formatdomain.html#id8</a></p>
+<span id="more"></span>
+
+<pre><code>&lt;domain&gt;
+  ...
+  &lt;cputune&gt;
+    &lt;vcpupin vcpu=&quot;0&quot; cpuset=&quot;1-4,^2&quot;/&gt;
+    &lt;vcpupin vcpu=&quot;1&quot; cpuset=&quot;0,1&quot;/&gt;
+    &lt;vcpupin vcpu=&quot;2&quot; cpuset=&quot;2,3&quot;/&gt;
+    &lt;vcpupin vcpu=&quot;3&quot; cpuset=&quot;0,4&quot;/&gt;
+    &lt;emulatorpin cpuset=&quot;1-3&quot;/&gt;
+    &lt;iothreadpin iothread=&quot;1&quot; cpuset=&quot;5,6&quot;/&gt;
+    &lt;iothreadpin iothread=&quot;2&quot; cpuset=&quot;7,8&quot;/&gt;
+    &lt;shares&gt;2048&lt;/shares&gt;
+    &lt;period&gt;1000000&lt;/period&gt;
+    &lt;quota&gt;-1&lt;/quota&gt;
+    &lt;global_period&gt;1000000&lt;/global_period&gt;
+    &lt;global_quota&gt;-1&lt;/global_quota&gt;
+    &lt;emulator_period&gt;1000000&lt;/emulator_period&gt;
+    &lt;emulator_quota&gt;-1&lt;/emulator_quota&gt;
+    &lt;iothread_period&gt;1000000&lt;/iothread_period&gt;
+    &lt;iothread_quota&gt;-1&lt;/iothread_quota&gt;
+    &lt;vcpusched vcpus=&#39;0-4,^3&#39; scheduler=&#39;fifo&#39; priority=&#39;1&#39;/&gt;
+    &lt;iothreadsched iothreads=&#39;2&#39; scheduler=&#39;batch&#39;/&gt;
+    &lt;cachetune vcpus=&#39;0-3&#39;&gt;
+      &lt;cache id=&#39;0&#39; level=&#39;3&#39; type=&#39;both&#39; size=&#39;3&#39; unit=&#39;MiB&#39;/&gt;
+      &lt;cache id=&#39;1&#39; level=&#39;3&#39; type=&#39;both&#39; size=&#39;3&#39; unit=&#39;MiB&#39;/&gt;
+      &lt;monitor level=&#39;3&#39; vcpus=&#39;1&#39;/&gt;
+      &lt;monitor level=&#39;3&#39; vcpus=&#39;0-3&#39;/&gt;
+    &lt;/cachetune&gt;
+    &lt;cachetune vcpus=&#39;4-5&#39;&gt;
+      &lt;monitor level=&#39;3&#39; vcpus=&#39;4&#39;/&gt;
+      &lt;monitor level=&#39;3&#39; vcpus=&#39;5&#39;/&gt;
+    &lt;/cachetune&gt;
+    &lt;memorytune vcpus=&#39;0-3&#39;&gt;
+      &lt;node id=&#39;0&#39; bandwidth=&#39;60&#39;/&gt;
+    &lt;/memorytune&gt;
+
+  &lt;/cputune&gt;
+  ...
+&lt;/domain&gt;
+</code></pre>
+<h1 id="cputune"><a href="#cputune" class="headerlink" title="cputune"></a>cputune</h1><p>可选元素项cputune为虚拟机提供与cpu可调参数相关的细节设置。注意：对于qemu驱动而言，可选的vcpupin和emulatorpin绑定设置需要考虑模拟器启动和NUMA限制后再进行设置。这就意味着主机的其他物理cpu在这段时间内会被虚拟机使用，这也可以从virsh cpu-stats的输出中反映出来。自0.9.0起。</p>
+<h1 id="vcpupin"><a href="#vcpupin" class="headerlink" title="vcpupin"></a>vcpupin</h1><p>可选元素项vcpupin指明了虚拟机的vCPU将会被绑定到主机的哪一个物理CPU上。如果忽略该设置项，vcpu元素的cpuset属性项也没有设置，则vcpu会默认绑定到全部的物理cpu上。其包含两个所需的属性项，属性项vcpu指明了vcpu id，属性项cpuset与vcpu元素的cpuset属性项是完全一致的。qemu自0.9.0起被支持，xen自0.9.1起被支持。</p>
+<h1 id="emulatorpin"><a href="#emulatorpin" class="headerlink" title="emulatorpin"></a>emulatorpin</h1><p>可选元素项emulatorpin元素指明了主机的拿个物理cpu是模拟器，这是不包含虚拟机的vcpu和iothreads绑定的cpu的子集。如果忽略该项设置，也没有设置vcpu的cpuset属性项，模拟器将会默认绑定到全部的物理cpu上。emulatorpin包含了一个必须的属性项cpuset用于指明要绑定到哪一个物理cpu中。</p>
+<h1 id="iothreadpin"><a href="#iothreadpin" class="headerlink" title="iothreadpin"></a>iothreadpin</h1><p>可选元素项iothreadpin指明了IOThreads将会被绑定到哪一个物理cpu上。如果忽略该设置，且vcpu元素项的cpuset属性项也没有设置，IOThreads将会默认绑定到全部的物理cpu上。这里存在两个必须的属性项，属性项iothread指明了IOThread ID，属性项cpuset指明了绑定的物理cpu。可查看IOThreads Allocation章节查看iothread的有效值。自1.2.9起。</p>
+<h1 id="shares"><a href="#shares" class="headerlink" title="shares"></a>shares</h1><p>可选元素项shares指明了虚拟机的比例加权份额。如果忽略该项设置，默认使用操作系统提供的默认值。注意，这个值没有单位，是建立在其他虚拟机设置上的相对量度。一个设置为2048的虚拟机将会相对另一个设置为1024的虚拟机得到两倍长的cpu时间。这个值得范围是2-262144.自0.9.0起。</p>
+<h1 id="period"><a href="#period" class="headerlink" title="period"></a>period</h1><p>可选元素项period指明了执行间隔（单位：毫秒）。在该元素项内，虚拟机的每一个vcpu都不允许消耗超过配额的运行时间。该值的范围是1000-1000000.设置为0则意味着未设置数值。qemu自0.9.4起支持，lxc自0.9.10起支持。</p>
+<h1 id="quota"><a href="#quota" class="headerlink" title="quota"></a>quota</h1><p>可选元素项quota指定了最大允许带宽（单位：毫秒）。quota设置为负值的虚拟机表明对于其vcpu线程具有无限制的带宽，即其不受带宽控制。该值的范围是1000-17592186044415或小于0.quota为0意味着未设置数值。可使用该特征确保所有的vcpu以相同速度运行。qemu自0.9.4起支持，lxc自0.9.10起支持。</p>
+<h1 id="global-period"><a href="#global-period" class="headerlink" title="global_period"></a>global_period</h1><p>可选元素项global_period指定整个虚拟机的强制CFS调度程序间隔（单位：微秒），与强制每个vCPU间隔的period形成对比。该值的范围是1000-1000000.global_period设置为0意味着未设置数值。qemu自1.3.3起支持。</p>
+<h1 id="global-quota"><a href="#global-quota" class="headerlink" title="global_quota"></a>global_quota</h1><p>可选元素项global_quota指明了全虚拟机在周期时间内的最大允许带宽（单位：毫秒）。global_quota设置为负值的虚拟机表明虚拟机具有无限制的带宽，即其不受带宽控制。该值的范围是1000-17592186044415或小于0.global_quota为0意味着未设置数值。qemu自1.3.3起支持。</p>
+<h1 id="emulator-period"><a href="#emulator-period" class="headerlink" title="emulator_period"></a>emulator_period</h1><p>可选元素项emulator_period指明了强制间隔（单位：毫秒）。使用emulator_period设置，则虚拟机的模拟器线程（包括vcpu）不允许消耗超过emulator_quota的运行时间。该值的范围是1000-1000000.为0意味着未设置数值。qemu自0.10.0起支持.</p>
+<h1 id="emulator-quota"><a href="#emulator-quota" class="headerlink" title="emulator_quota"></a>emulator_quota</h1><p>可选元素项emulator_quota指明了虚拟机模拟器线程（包括vcpu）最大允许带宽（单位：毫秒）。带有负值emulator_quota设置的虚拟机的模拟器线程（包括vcpu）拥有无限带宽，即其不受带宽控制。值范围是1000-17592186044415或小于0.quota设置为0意味着未设置值。qemu自0.10.0起支持.</p>
+<h1 id="iothread-period"><a href="#iothread-period" class="headerlink" title="iothread_period"></a>iothread_period</h1><p>可选元素项iothread_period指明了IOThreads的强制间隔（单位：毫秒）。使用iothread_period，虚拟机的每一个IOThreads不允许消耗超过iothread_quota设置的运行时间。该值的范围是1000-1000000.设置为0意味着未设置该值。自2.1.0起支持qemu。</p>
+<h1 id="iothread-quota"><a href="#iothread-quota" class="headerlink" title="iothread_quota"></a>iothread_quota</h1><p>可选元素项iothread_quota指明了IOThreads的最大允许带宽（单位：毫秒）。iothread_quota为负值的虚拟机表明虚拟机IOThreads具有无限带宽，即其不受带宽控制。该值的范围是1000-17592186044415或小于0.设置为0意味着未设置该值。可使用该特征确保全部IOThreads以相同速度运行。自2.1.0起支持qemu。</p>
+<h1 id="vcpusched-x2F-iothreadsched-x2F-emulatorsched"><a href="#vcpusched-x2F-iothreadsched-x2F-emulatorsched" class="headerlink" title="vcpusched&#x2F;iothreadsched&#x2F;emulatorsched"></a>vcpusched&#x2F;iothreadsched&#x2F;emulatorsched</h1><p>可选元素项vcpusched、iothreadsched和emulatorsched分别指明了特定vcpu、iothread和模拟器线程的调度类型（值为batch、idle、fifo和rr）。对于vcpusched和iothreadsched，属性项vcpus和iothreads选择了该设置适用于哪些vCPUs&#x2F;IOThreads，其余的设置为默认值。元素项emulatorsched不具有该属性。vcpus的有效值为0到虚拟机中设置的vcpu数量减一。iothreads的有效值在IOThreads Allocation章节中有过描述。如果未定义iothreadids，然后libvirt将IOThreads编号从1到虚拟机可用的iothreads进行计数。对于实时调度（fifo、rr），也需指定优先级（非实时调度可忽略）。优先级的范围依赖于主机内核（通常为1-99）。自1.2.13起。emulatorsched自5.3.0起。</p>
+<h1 id="cachetune（自4-1-0起）"><a href="#cachetune（自4-1-0起）" class="headerlink" title="cachetune（自4.1.0起）"></a>cachetune（自4.1.0起）</h1><p>可选元素项cachetune使用主机上的restctrl控制cpu缓存分配。是否支持此功能可以从一些限制（如最小尺寸和所需粒度）的功能中获取。必需的属性项vcpus指定了本次分配适用于哪一个vcpu。一个vcpu只能是一个cachetune元素分配项的成员。cachetune指定的vCPU可以与memorytune 中的vCPU相同，但不允许重复指定。可选的、仅输出的id属性唯一标识缓存。支持以下子元素：</p>
+<h2 id="cache"><a href="#cache" class="headerlink" title="cache"></a>cache</h2><p>该可选元素项控制cpu缓存分配并具有以下属性项：</p>
+<h3 id="level"><a href="#level" class="headerlink" title="level"></a>level</h3><p>用于分配的主机缓存等级。</p>
+<h3 id="id"><a href="#id" class="headerlink" title="id"></a>id</h3><p>用于分配的主机缓存id。</p>
+<h3 id="type"><a href="#type" class="headerlink" title="type"></a>type</h3><p>分配的类型。code代表指令，data代表数据。both则同时代表两者。当前分配类型只能与主机支持的类型保持一致，意味着不能在启用cdp（指令、数据优先级）的主机上使用both类型。</p>
+<h3 id="size"><a href="#size" class="headerlink" title="size"></a>size</h3><p>分配区域大小。默认值以字节为单位，但是unit属性项可用来缩放该值。</p>
+<h3 id="unit-可选"><a href="#unit-可选" class="headerlink" title="unit(可选)"></a>unit(可选)</h3><p>如果unit设置为KiB、MiB、GiB或TiB（在Memory Allocation中的memory元素中描述），则size的默认值为字节。</p>
+<h2 id="monitor（自4-10-0起）"><a href="#monitor（自4-10-0起）" class="headerlink" title="monitor（自4.10.0起）"></a>monitor（自4.10.0起）</h2><p>可选元素项monitor为当前缓存分配创建缓存管理器并拥有如下所需属性：</p>
+<h3 id="level-1"><a href="#level-1" class="headerlink" title="level"></a>level</h3><p>monitor所属的主机缓存等级。</p>
+<h3 id="vcpus"><a href="#vcpus" class="headerlink" title="vcpus"></a>vcpus</h3><p>vcpu列出了monitor的适用范围。一个monitor的vcpu列表只能是相关分配的vcpu列表的一部分。默认的管理器与相关的分配具有相同的vcpu列表。对于非默认monitor，不允许重复定义vcpu。</p>
+<h1 id="memorytune（自4-7-0起）"><a href="#memorytune（自4-7-0起）" class="headerlink" title="memorytune（自4.7.0起）"></a>memorytune（自4.7.0起）</h1><p>可选元素项memorytune可使用主机上的resctrl控制内存带宽分配。是否支持此功能可以从一些限制（如最小尺寸和所需粒度）功能中获取。必需的属性项vcpus指定了本次分配适用于哪一个vcpu。一个vcpu只能是一个memorytune元素分配项的成员。memorytune指定的vCPU可以与cachetune中的vCPU相同，但不允许重复指定。支持以下子元素：</p>
+<h2 id="node"><a href="#node" class="headerlink" title="node"></a>node</h2><p>该元素控制cpu内存带宽分配，拥有以下属性。</p>
+<h3 id="id-1"><a href="#id-1" class="headerlink" title="id"></a>id</h3><p>分配内存带宽的主机节点id。</p>
+<h3 id="bandwidth"><a href="#bandwidth" class="headerlink" title="bandwidth"></a>bandwidth</h3><p>节点中用于分配的内存带宽。该值默认以百分比为单位。</p>
+<p>本章节描述了用来代表作用域的xml文件格式，根据运行的作用于种类的格式变化，有一些可选配置项用来加载文件。对于特定虚拟机的细节可以查看<br><a target="_blank" rel="noopener" href="https://libvirt.org/drivers.html">相关文件</a>。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E8%99%9A%E6%8B%9F%E5%8C%96/" rel="tag"># 虚拟化</a>
+              <a href="/tags/kvm/" rel="tag"># kvm</a>
+              <a href="/tags/libvirt/" rel="tag"># libvirt</a>
+              <a href="/tags/%E8%99%9A%E6%8B%9F%E6%9C%BAxml%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6/" rel="tag"># 虚拟机xml配置文件</a>
+              <a href="/tags/%E7%BF%BB%E8%AF%91/" rel="tag"># 翻译</a>
+              <a href="/tags/CPU-Tuning/" rel="tag"># CPU Tuning</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/10/20/access_usage/" rel="prev" title="_access函数32bit和64bit编译差异">
+      <i class="fa fa-chevron-left"></i> _access函数32bit和64bit编译差异
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2022/11/10/domain_xml_format7_memory_allocation/" rel="next" title="【翻译】libvirt虚拟机xml配置文件格式（7）Memory Allocation、Memory Backing和Memory Tuning">
+      【翻译】libvirt虚拟机xml配置文件格式（7）Memory Allocation、Memory Backing和Memory Tuning <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#cputune"><span class="nav-number">1.</span> <span class="nav-text">cputune</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#vcpupin"><span class="nav-number">2.</span> <span class="nav-text">vcpupin</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#emulatorpin"><span class="nav-number">3.</span> <span class="nav-text">emulatorpin</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#iothreadpin"><span class="nav-number">4.</span> <span class="nav-text">iothreadpin</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#shares"><span class="nav-number">5.</span> <span class="nav-text">shares</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#period"><span class="nav-number">6.</span> <span class="nav-text">period</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#quota"><span class="nav-number">7.</span> <span class="nav-text">quota</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#global-period"><span class="nav-number">8.</span> <span class="nav-text">global_period</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#global-quota"><span class="nav-number">9.</span> <span class="nav-text">global_quota</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#emulator-period"><span class="nav-number">10.</span> <span class="nav-text">emulator_period</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#emulator-quota"><span class="nav-number">11.</span> <span class="nav-text">emulator_quota</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#iothread-period"><span class="nav-number">12.</span> <span class="nav-text">iothread_period</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#iothread-quota"><span class="nav-number">13.</span> <span class="nav-text">iothread_quota</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#vcpusched-x2F-iothreadsched-x2F-emulatorsched"><span class="nav-number">14.</span> <span class="nav-text">vcpusched&#x2F;iothreadsched&#x2F;emulatorsched</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#cachetune%EF%BC%88%E8%87%AA4-1-0%E8%B5%B7%EF%BC%89"><span class="nav-number">15.</span> <span class="nav-text">cachetune（自4.1.0起）</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#cache"><span class="nav-number">15.1.</span> <span class="nav-text">cache</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#level"><span class="nav-number">15.1.1.</span> <span class="nav-text">level</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#id"><span class="nav-number">15.1.2.</span> <span class="nav-text">id</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#type"><span class="nav-number">15.1.3.</span> <span class="nav-text">type</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#size"><span class="nav-number">15.1.4.</span> <span class="nav-text">size</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#unit-%E5%8F%AF%E9%80%89"><span class="nav-number">15.1.5.</span> <span class="nav-text">unit(可选)</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#monitor%EF%BC%88%E8%87%AA4-10-0%E8%B5%B7%EF%BC%89"><span class="nav-number">15.2.</span> <span class="nav-text">monitor（自4.10.0起）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#level-1"><span class="nav-number">15.2.1.</span> <span class="nav-text">level</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#vcpus"><span class="nav-number">15.2.2.</span> <span class="nav-text">vcpus</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#memorytune%EF%BC%88%E8%87%AA4-7-0%E8%B5%B7%EF%BC%89"><span class="nav-number">16.</span> <span class="nav-text">memorytune（自4.7.0起）</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#node"><span class="nav-number">16.1.</span> <span class="nav-text">node</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#id-1"><span class="nav-number">16.1.1.</span> <span class="nav-text">id</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#bandwidth"><span class="nav-number">16.1.2.</span> <span class="nav-text">bandwidth</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">杨维宁</p>
+  <div class="site-description" itemprop="description">天行健，君子以自强不息。地势坤，君子以厚德载物。</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">22</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">42</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/bbbccvbvv" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;bbbccvbvv" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:nanjiecunxiaozu@163.com" title="E-Mail → mailto:nanjiecunxiaozu@163.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">杨维宁</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">71k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">1:58</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
