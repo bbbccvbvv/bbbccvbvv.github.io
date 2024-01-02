@@ -6,7 +6,7 @@
   <link href="http://example.com/atom.xml" rel="self"/>
   
   <link href="http://example.com/"/>
-  <updated>2023-12-29T02:38:41.469Z</updated>
+  <updated>2024-01-02T13:04:15.607Z</updated>
   <id>http://example.com/</id>
   
   <author>
@@ -15,6 +15,31 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>Windows系统tscon工具概述</title>
+    <link href="http://example.com/2023/12/22/windows_tool_tscon/"/>
+    <id>http://example.com/2023/12/22/windows_tool_tscon/</id>
+    <published>2023-12-22T12:15:41.000Z</published>
+    <updated>2024-01-02T13:04:15.607Z</updated>
+    
+    <content type="html"><![CDATA[<p>最近看到了一个使用tscon工具解决windows远程链接断开后部分应用随之中断的案例，因此对tscon产生了一些好奇，这里就总结一下tscon工具的功能及使用方法。<br>在微软的官方文档上（<a href="https://learn.microsoft.com/zh-cn/windows-server/administration/windows-commands/tscon">tscon</a>）可以看到该工具的一些描述，因此结合该文档对tscon工具进行描述。</p><span id="more"></span>​<h2 id="定义"><a href="#定义" class="headerlink" title="定义"></a>定义</h2><p>该工具用来连接到远程桌面会话主机服务器上的另一个会话。<br>备注：必须拥有“完全控制”访问权限或“连接”特殊访问权限才能连接到另一个会话（即使用该工具的账号需具有较高的权限）</p><h2 id="适用范围"><a href="#适用范围" class="headerlink" title="适用范围"></a>适用范围</h2><p>Windows server服务器，即Windows Server 2022、Windows Server 2019、Windows Server 2016、Windows Server 2012 R2、Windows Server 2012。</p><h2 id="语法"><a href="#语法" class="headerlink" title="语法"></a>语法</h2><pre><code>tscon &#123;&lt;sessionID&gt; | &lt;sessionname&gt;&#125; [/dest:&lt;sessionname&gt;] [/password:&lt;pw&gt; | /password:*] [/v]</code></pre><p>参数详解如下：</p><ul><li><sessionID>：指定要连接到的会话的 ID。 如果你使用可选的 &#x2F;dest:<sessionname> 参数，则还可以指定当前会话的名称。</li><li><sessionname>：指定要连接到的会话的名称</li><li>&#x2F;dest:<sessionname>：指定当前会话的名称。 连接到新会话时，此会话将断开连接。 还可以使用此参数将其他用户的会话连接到一个不同的会话。</li><li>&#x2F;password:<pw>：指定拥有你要连接到的会话的用户的密码。 当进行连接的用户不拥有会话时，需要提供此密码。</li><li>&#x2F;password:*：提示输入拥有你要连接到的会话的用户的密码。</li><li>&#x2F;v：显示有关正在执行的操作的信息。</li><li>&#x2F;?：在命令提示符下显示帮助。</li></ul><p>备注：<br>（1）如果未在 &#x2F;password 参数中指定密码，并且目标会话属于当前用户以外的用户，则此命令将失败。<br>（2）你无法连接到控制台会话。</p><h2 id="示例"><a href="#示例" class="headerlink" title="示例"></a>示例</h2><p>（1）若要连接到当前远程桌面服务会话主机服务器上的会话 12，并断开当前会话的连接，请键入：</p><pre><code>tscon 12</code></pre><p>(2)若要使用密码 mypass 连接到当前远程桌面服务会话主机服务器上的会话 23，并断开当前会话的连接，请键入：</p><pre><code>tscon 23 /password:mypass</code></pre><p>（3）若要将名为 TERM03 的会话连接到名为 TERM05 的会话，然后断开会话 TERM05 的连接，请键入：</p><pre><code>tscon TERM03 /v /dest:TERM05</code></pre><h2 id="复杂脚本分析"><a href="#复杂脚本分析" class="headerlink" title="复杂脚本分析"></a>复杂脚本分析</h2><p>当使用远程桌面连接到远程计算机时，关闭远程桌面将会锁定计算机并显示登录界面，在锁定模式下，计算机不会有GUI图形界面，因此所有正在运行和即将调度的GUI任务都会失败。<br>为避免GUI任务失败，可以使用tscon组件实现从远程桌面断开连接，tscon会把控制权返还给远程计算机上的原始本地会话，这样就绕过了登录界面。远程计算机上的全部程序（包含GUI图形任务在内）都会继续正常运行。</p><pre><code>for /f &quot;skip=1 tokens=3&quot; %%s in (&#39;query user %USERNAME%&#39;) do (%windir%\System32\tscon.exe %%s /dest:console)</code></pre><p>该脚本的运行逻辑如下：<br>1.查询以用户名%USERNAME%登录的全部会话；<br>2.使用”skip&#x3D;1 tokens&#x3D;3”语法过滤掉查询结果的首行（标题行），并选取第3列（session ID）作为输出值；<br>3.遍历筛选过的全部会话id，使用tscon将会话的控制钱返还给计算机上的原始本地会话（console），依此实现断开连接，但是绕过登录界面，保持会话内的全部任务可以后续继续执行；</p><h2 id="参考链接"><a href="#参考链接" class="headerlink" title="参考链接"></a>参考链接</h2><p>1.<a href="https://learn.microsoft.com/zh-cn/windows-server/administration/windows-commands/tscon%EF%BC%9B">https://learn.microsoft.com/zh-cn/windows-server/administration/windows-commands/tscon；</a><br>2.<a href="https://support.smartbear.com/testcomplete/docs/testing-with/running/via-rdp/keeping-computer-unlocked.html%EF%BC%9B">https://support.smartbear.com/testcomplete/docs/testing-with/running/via-rdp/keeping-computer-unlocked.html；</a><br>3.<a href="https://learn.microsoft.com/zh-cn/windows-server/administration/windows-commands/for%EF%BC%9B">https://learn.microsoft.com/zh-cn/windows-server/administration/windows-commands/for；</a><br>4.<a href="https://learn.microsoft.com/zh-cn/windows-server/administration/windows-commands/query-user%EF%BC%9B">https://learn.microsoft.com/zh-cn/windows-server/administration/windows-commands/query-user；</a><br>​</p>]]></content>
+    
+    
+    <summary type="html">&lt;p&gt;最近看到了一个使用tscon工具解决windows远程链接断开后部分应用随之中断的案例，因此对tscon产生了一些好奇，这里就总结一下tscon工具的功能及使用方法。&lt;br&gt;在微软的官方文档上（&lt;a href=&quot;https://learn.microsoft.com/zh-cn/windows-server/administration/windows-commands/tscon&quot;&gt;tscon&lt;/a&gt;）可以看到该工具的一些描述，因此结合该文档对tscon工具进行描述。&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="计算机科学" scheme="http://example.com/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A7%91%E5%AD%A6/"/>
+    
+    
+    <category term="tscon" scheme="http://example.com/tags/tscon/"/>
+    
+    <category term="windows会话" scheme="http://example.com/tags/windows%E4%BC%9A%E8%AF%9D/"/>
+    
+    <category term="微软官方工具" scheme="http://example.com/tags/%E5%BE%AE%E8%BD%AF%E5%AE%98%E6%96%B9%E5%B7%A5%E5%85%B7/"/>
+    
+  </entry>
   
   <entry>
     <title>windbg标准调试技巧-读写内存（5）：将虚拟地址转换为物理地址</title>
@@ -572,29 +597,6 @@
     <category term="windows" scheme="http://example.com/tags/windows/"/>
     
     <category term="coredump" scheme="http://example.com/tags/coredump/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>Ubuntu离线情况下安装gcc编译器</title>
-    <link href="http://example.com/2020/12/23/Ubuntu_offline_setup_gcc/"/>
-    <id>http://example.com/2020/12/23/Ubuntu_offline_setup_gcc/</id>
-    <published>2020-12-23T03:38:49.000Z</published>
-    <updated>2023-12-29T02:38:41.453Z</updated>
-    
-    <content type="html"><![CDATA[<h2 id="系统版本"><a href="#系统版本" class="headerlink" title="系统版本"></a>系统版本</h2><p>（1）Ubuntu系统版本：20.04.1LTS；<br>（2）gcc编译器版本：gcc-9.3.0；<br>当前可找到的gcc最新版本为gcc-10，但是笔者在安装gcc-10版本时发现一些依赖项无法安装，因此选取了gcc-9版本。如果是在联网情况下安装，直接使用apt相关的安装指令即可。</p><span id="more"></span><h2 id="安装说明"><a href="#安装说明" class="headerlink" title="安装说明"></a>安装说明</h2><p>安装建议在root模式下进行，因为各人的系统已安装软件不同，因此使用gcc9.3可能会造成一些依赖库降级，如果不了解的情况下，不建议降级。笔者所用的为linux虚拟机，为学习之用，近似于裸机，因此不考虑对其他软件的影响。<br>安装顺序不定，因为非裸机情况下，可能已安装部分支持库。笔者建议直接安装上述安装包内的gcc-9_9.3.0-10ubuntu2_amd64.deb，根据提示再去进行其他依赖库的安装。安装完成gcc之后，再安装g++-9_9.3.0-10ubuntu2_amd64.deb。<br>如果在安装过程中发现部分依赖库不存在，可到<a href="https://pkgs.org/">https://pkgs.org</a>网站进行下载。</p><h2 id="异常处理"><a href="#异常处理" class="headerlink" title="异常处理"></a>异常处理</h2><p>安装完成之后，可通过gcc -v与g++ -v指令获取当前的编译器版本信息。但是笔者在安装完成之后发现，无法通过这两条指令获取版本信息，提示命令不存在。但是可通过gcc-9 -v与g++-9 -v指令获取编译器版本信息。因此需进行处理，处理方法如下（转载自<a href="https://www.zhihu.com/question/348286167/answer/838993075">https://www.zhihu.com/question/348286167/answer/838993075</a>）：<br>（1）依次执行下面三个命令：</p><pre><code>cd //进入home目录touch .bash_profile //生成新文件vim .touch_profile //编辑&#39;.bash_profile&#39;文件</code></pre><p>（2）将以下alias命令复制进 .bash_profile 文件：</p><pre><code>alias gcc=&#39;gcc-9&#39;alias g++=&#39;g++-9&#39;</code></pre><p>&#x2F;&#x2F;切记&#x3D;两边不要加空格</p><p>（3）然后执行如下命令：</p><pre><code>source .bash_profile</code></pre><p>然后，就可以使用gcc -v和g++ -v相关指令了。</p>]]></content>
-    
-    
-    <summary type="html">&lt;h2 id=&quot;系统版本&quot;&gt;&lt;a href=&quot;#系统版本&quot; class=&quot;headerlink&quot; title=&quot;系统版本&quot;&gt;&lt;/a&gt;系统版本&lt;/h2&gt;&lt;p&gt;（1）Ubuntu系统版本：20.04.1LTS；&lt;br&gt;（2）gcc编译器版本：gcc-9.3.0；&lt;br&gt;当前可找到的gcc最新版本为gcc-10，但是笔者在安装gcc-10版本时发现一些依赖项无法安装，因此选取了gcc-9版本。如果是在联网情况下安装，直接使用apt相关的安装指令即可。&lt;/p&gt;</summary>
-    
-    
-    
-    <category term="计算机科学" scheme="http://example.com/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A7%91%E5%AD%A6/"/>
-    
-    
-    <category term="Ubuntu" scheme="http://example.com/tags/Ubuntu/"/>
-    
-    <category term="gcc" scheme="http://example.com/tags/gcc/"/>
     
   </entry>
   
