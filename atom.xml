@@ -6,7 +6,7 @@
   <link href="http://example.com/atom.xml" rel="self"/>
   
   <link href="http://example.com/"/>
-  <updated>2024-02-05T13:21:52.343Z</updated>
+  <updated>2024-02-05T13:23:21.938Z</updated>
   <id>http://example.com/</id>
   
   <author>
@@ -21,7 +21,7 @@
     <link href="http://example.com/2024/02/05/windbg_0xef_debug_1/"/>
     <id>http://example.com/2024/02/05/windbg_0xef_debug_1/</id>
     <published>2024-02-05T13:17:00.000Z</published>
-    <updated>2024-02-05T13:21:52.343Z</updated>
+    <updated>2024-02-05T13:23:21.938Z</updated>
     
     <content type="html"><![CDATA[<p>停止码0xEF出现的可能原因如下：</p><span id="more"></span>​<p>（1）硬件故障，尤其是内存和磁盘；</p><p>（2）安全软件例如杀毒软件；</p><p>（3）windows自身原因；</p><p>第一个原因是以上三个原因中最普遍的原因，尤其是加载到内存中的程序因为一些未处理的异常而中止自身运行是最典型的情况。之后造成操作系统突然panic并抛出0xEF停止码。另一方面，如果安全软件不信任二进制运行文件并中止其运行。如果对应的程序是critical关键进程（例如scvhost.exe），这会造成灾难性的后果。但是第二种情况较少出现。</p><p>然而，在这篇文章中，我将会将注意力集中到第三个原因上，当启动了影子栈shadow stack功能，并且监测到影子栈与调用栈间存在差异，windows系统会中止运行进程，并进而导致0xEF停止码被抛出。这也是我把windows自身作为0xEF异常产生原因的理由，尽管这种情况也有可能是因为异常的驱动程序或内存引起的。</p><p>如果启用了基于硬件的栈保护，处理器会保持两份调用栈的拷贝，第二份拷贝就是知名的影子栈。该栈旨在控制线程的运行流，如果任一栈的返回地址存在异常，则一个特殊的硬件异常被抛出进而造成进程被windows中止。</p><pre><code>CRITICAL_PROCESS_DIED (ef)        A critical system process diedArguments:Arg1: ffffaf08b56a90c0, Process object or thread objectArg2: 0000000000000000, If this is 0, a process died. If this is 1, a thread died.Arg3: 0000000000000000Arg4: 00000000000000003: kd&gt; knL# Child-SP          RetAddr               Call Site00 ffff8c0a`14b3ed38 fffff801`0ed0d122     nt!KeBugCheckEx01 ffff8c0a`14b3ed40 fffff801`0ec0c7a3     nt!PspCatchCriticalBreak+0x10e02 ffff8c0a`14b3ede0 fffff801`0ea99290     nt!PspTerminateAllThreads+0x17291703 ffff8c0a`14b3ee50 fffff801`0ea9908c     nt!PspTerminateProcess+0xe004 ffff8c0a`14b3ee90 fffff801`0e80f8f8     nt!NtTerminateProcess+0x9c &lt;&lt; Terminate our svchost.exe process which then bugchecks the system05 ffff8c0a`14b3ef00 fffff801`0e800ca0     nt!KiSystemServiceCopyEnd+0x2806 ffff8c0a`14b3f098 fffff801`0e860d9d     nt!KiServiceLinkage07 ffff8c0a`14b3f0a0 fffff801`0e8106a4     nt!KiDispatchException+0x17941d08 ffff8c0a`14b3f8e0 fffff801`0e80e03c     nt!KiFastFailDispatch+0xe409 ffff8c0a`14b3fac0 00007ffc`f18833c6     nt!KiControlProtectionFault+0x2fc &lt;&lt; Throws #CP (Control Protection) exception0a 0000002f`4637f820 000001b1`ae000340     ntdll!RtlpGetActivationContextData+0x520b 0000002f`4637f828 000001b1`ae002480     0x000001b1`ae0003400c 0000002f`4637f830 00000000`00000001     0x000001b1`ae0024800d 0000002f`4637f838 000001b1`000000f0     0x10e 0000002f`4637f840 00000000`00000002     0x000001b1`000000f00f 0000002f`4637f848 00000050`00000000     0x210 0000002f`4637f850 00000000`00000002     0x00000050`0000000011 0000002f`4637f858 00000000`000000f0     0x212 0000002f`4637f860 00000000`00000000     0xf0</code></pre><p>如果检查传递给nt!KiDispatchException函数的第一个参数，就可以看到抛出的异常类型信息。</p><pre><code>07 ffff8c0a14b3f0a0 fffff8010e8106a4 nt!KiDispatchException+17941d (perf)    Parameter[0] = ffff8c0a14b3fa18    Parameter[1] = 0000000000000000    Parameter[2] = ffffffffffffff80    Parameter[3] = 0000002f4637f8203: kd&gt; .exr ffff8c0a14b3fa18ExceptionAddress: 00007ffcf18833c6 (ntdll!RtlpGetActivationContextData+0x0000000000000052)ExceptionCode: c0000409 (Security check failure or stack buffer overrun)ExceptionFlags: 00000001NumberParameters: 1Parameter[0]: 0000000000000039Subcode: 0x39 FAST_FAIL_CONTROL_INVALID_RETURN_ADDRESS Shadow stack violation</code></pre><p>进一步检查异常，当启用了cet（Control-flow Enforcement Technology，控制流执行技术）时，运行调用指令，两个返回地址被压入栈：一个进入了调用栈，另一个进入影子栈。之后当返回指令运行时，会检查并比较两个返回地址，如果两个地址不匹配，则cp异常就会像之前提到的那样被抛出。但是cet仅在使用call调用指令时起作用，当使用压栈指令将地址压栈时，cet不起作用，因此影子栈中也不存在返回地址。考虑到这一点，推荐使用cfg保护的jmp跳转指令。cfg的行为与cet类似，如果发现了异常，则中止违规进程。如果进程是critical关键进程，抛出0xEF停止码。</p><p>参考链接：</p><p>1.<a href="https://techcommunity.microsoft.com/t5/windows-os-platform-blog/developer-guidance-for-hardware-enforced-stack-protection/ba-p/2163340%EF%BC%9B">https://techcommunity.microsoft.com/t5/windows-os-platform-blog/developer-guidance-for-hardware-enforced-stack-protection/ba-p/2163340；</a></p><p>2.<a href="https://learn.microsoft.com/en-us/windows/win32/secbp/control-flow-guard%EF%BC%9B">https://learn.microsoft.com/en-us/windows/win32/secbp/control-flow-guard；</a></p><p>原文链接：<a href="https://bsodtutorials.wordpress.com/2023/12/09/debugging-stop-0xef-critical_process_died/">https://bsodtutorials.wordpress.com/2023/12/09/debugging-stop-0xef-critical_process_died/</a></p>]]></content>
     
@@ -35,9 +35,9 @@
     
     <category term="windbg" scheme="http://example.com/tags/windbg/"/>
     
-    <category term="239" scheme="http://example.com/tags/239/"/>
-    
     <category term="bsod" scheme="http://example.com/tags/bsod/"/>
+    
+    <category term="停止码0xEF" scheme="http://example.com/tags/%E5%81%9C%E6%AD%A2%E7%A0%810xEF/"/>
     
   </entry>
   
