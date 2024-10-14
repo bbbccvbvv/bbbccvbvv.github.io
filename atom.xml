@@ -3,11 +3,11 @@
   <title>怀德维宁</title>
   
   <subtitle>大邦维屏，大宗维翰。怀德维宁，宗子维城。</subtitle>
-  <link href="http://example.com/atom.xml" rel="self"/>
+  <link href="https://bbbccvbvv.github.io/atom.xml" rel="self"/>
   
-  <link href="http://example.com/"/>
+  <link href="https://bbbccvbvv.github.io/"/>
   <updated>2024-07-26T09:23:52.970Z</updated>
-  <id>http://example.com/</id>
+  <id>https://bbbccvbvv.github.io/</id>
   
   <author>
     <name>杨维宁</name>
@@ -18,8 +18,8 @@
   
   <entry>
     <title>windbg手动添加非官方pdb文件进行调试</title>
-    <link href="http://example.com/2024/07/25/windbg_add_pdb_file_manually/"/>
-    <id>http://example.com/2024/07/25/windbg_add_pdb_file_manually/</id>
+    <link href="https://bbbccvbvv.github.io/2024/07/25/windbg_add_pdb_file_manually/"/>
+    <id>https://bbbccvbvv.github.io/2024/07/25/windbg_add_pdb_file_manually/</id>
     <published>2024-07-25T13:33:20.000Z</published>
     <updated>2024-07-26T09:23:52.970Z</updated>
     
@@ -30,23 +30,23 @@
     
     
     
-    <category term="计算机科学" scheme="http://example.com/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A7%91%E5%AD%A6/"/>
+    <category term="计算机科学" scheme="https://bbbccvbvv.github.io/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A7%91%E5%AD%A6/"/>
     
-    <category term="windbg" scheme="http://example.com/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A7%91%E5%AD%A6/windbg/"/>
+    <category term="windbg" scheme="https://bbbccvbvv.github.io/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A7%91%E5%AD%A6/windbg/"/>
     
     
-    <category term="windows" scheme="http://example.com/tags/windows/"/>
+    <category term="windows" scheme="https://bbbccvbvv.github.io/tags/windows/"/>
     
-    <category term="windbg" scheme="http://example.com/tags/windbg/"/>
+    <category term="windbg" scheme="https://bbbccvbvv.github.io/tags/windbg/"/>
     
-    <category term="非官方pdb" scheme="http://example.com/tags/%E9%9D%9E%E5%AE%98%E6%96%B9pdb/"/>
+    <category term="非官方pdb" scheme="https://bbbccvbvv.github.io/tags/%E9%9D%9E%E5%AE%98%E6%96%B9pdb/"/>
     
   </entry>
   
   <entry>
     <title>关于南宋权相现象的一些思考</title>
-    <link href="http://example.com/2024/02/27/south_song_leader-20240227/"/>
-    <id>http://example.com/2024/02/27/south_song_leader-20240227/</id>
+    <link href="https://bbbccvbvv.github.io/2024/02/27/south_song_leader-20240227/"/>
+    <id>https://bbbccvbvv.github.io/2024/02/27/south_song_leader-20240227/</id>
     <published>2024-02-27T11:56:10.000Z</published>
     <updated>2024-02-27T11:57:02.946Z</updated>
     
@@ -57,19 +57,19 @@
     
     
     
-    <category term="历史" scheme="http://example.com/categories/%E5%8E%86%E5%8F%B2/"/>
+    <category term="历史" scheme="https://bbbccvbvv.github.io/categories/%E5%8E%86%E5%8F%B2/"/>
     
     
-    <category term="南宋权相" scheme="http://example.com/tags/%E5%8D%97%E5%AE%8B%E6%9D%83%E7%9B%B8/"/>
+    <category term="南宋权相" scheme="https://bbbccvbvv.github.io/tags/%E5%8D%97%E5%AE%8B%E6%9D%83%E7%9B%B8/"/>
     
-    <category term="丞相制度" scheme="http://example.com/tags/%E4%B8%9E%E7%9B%B8%E5%88%B6%E5%BA%A6/"/>
+    <category term="丞相制度" scheme="https://bbbccvbvv.github.io/tags/%E4%B8%9E%E7%9B%B8%E5%88%B6%E5%BA%A6/"/>
     
   </entry>
   
   <entry>
     <title>【翻译】windbg调试0xef异常（1）</title>
-    <link href="http://example.com/2024/02/05/windbg_0xef_debug_1/"/>
-    <id>http://example.com/2024/02/05/windbg_0xef_debug_1/</id>
+    <link href="https://bbbccvbvv.github.io/2024/02/05/windbg_0xef_debug_1/"/>
+    <id>https://bbbccvbvv.github.io/2024/02/05/windbg_0xef_debug_1/</id>
     <published>2024-02-05T13:17:00.000Z</published>
     <updated>2024-02-05T13:23:21.938Z</updated>
     
@@ -80,21 +80,21 @@
     
     
     
-    <category term="计算机科学" scheme="http://example.com/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A7%91%E5%AD%A6/"/>
+    <category term="计算机科学" scheme="https://bbbccvbvv.github.io/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A7%91%E5%AD%A6/"/>
     
     
-    <category term="windbg" scheme="http://example.com/tags/windbg/"/>
+    <category term="windbg" scheme="https://bbbccvbvv.github.io/tags/windbg/"/>
     
-    <category term="停止码0xEF" scheme="http://example.com/tags/%E5%81%9C%E6%AD%A2%E7%A0%810xEF/"/>
+    <category term="停止码0xEF" scheme="https://bbbccvbvv.github.io/tags/%E5%81%9C%E6%AD%A2%E7%A0%810xEF/"/>
     
-    <category term="bsod" scheme="http://example.com/tags/bsod/"/>
+    <category term="bsod" scheme="https://bbbccvbvv.github.io/tags/bsod/"/>
     
   </entry>
   
   <entry>
     <title>《矛盾论》与《实践论》读后感</title>
-    <link href="http://example.com/2024/01/23/on_contraction_on_practice/"/>
-    <id>http://example.com/2024/01/23/on_contraction_on_practice/</id>
+    <link href="https://bbbccvbvv.github.io/2024/01/23/on_contraction_on_practice/"/>
+    <id>https://bbbccvbvv.github.io/2024/01/23/on_contraction_on_practice/</id>
     <published>2024-01-23T04:56:10.000Z</published>
     <updated>2024-01-23T08:09:06.282Z</updated>
     
@@ -105,19 +105,19 @@
     
     
     
-    <category term="哲学" scheme="http://example.com/categories/%E5%93%B2%E5%AD%A6/"/>
+    <category term="哲学" scheme="https://bbbccvbvv.github.io/categories/%E5%93%B2%E5%AD%A6/"/>
     
     
-    <category term="《矛盾论》" scheme="http://example.com/tags/%E3%80%8A%E7%9F%9B%E7%9B%BE%E8%AE%BA%E3%80%8B/"/>
+    <category term="《矛盾论》" scheme="https://bbbccvbvv.github.io/tags/%E3%80%8A%E7%9F%9B%E7%9B%BE%E8%AE%BA%E3%80%8B/"/>
     
-    <category term="《实践论》" scheme="http://example.com/tags/%E3%80%8A%E5%AE%9E%E8%B7%B5%E8%AE%BA%E3%80%8B/"/>
+    <category term="《实践论》" scheme="https://bbbccvbvv.github.io/tags/%E3%80%8A%E5%AE%9E%E8%B7%B5%E8%AE%BA%E3%80%8B/"/>
     
   </entry>
   
   <entry>
     <title>Windows系统tscon工具概述</title>
-    <link href="http://example.com/2023/12/22/windows_tool_tscon/"/>
-    <id>http://example.com/2023/12/22/windows_tool_tscon/</id>
+    <link href="https://bbbccvbvv.github.io/2023/12/22/windows_tool_tscon/"/>
+    <id>https://bbbccvbvv.github.io/2023/12/22/windows_tool_tscon/</id>
     <published>2023-12-22T12:15:41.000Z</published>
     <updated>2024-01-02T13:04:15.607Z</updated>
     
@@ -128,21 +128,21 @@
     
     
     
-    <category term="计算机科学" scheme="http://example.com/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A7%91%E5%AD%A6/"/>
+    <category term="计算机科学" scheme="https://bbbccvbvv.github.io/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A7%91%E5%AD%A6/"/>
     
     
-    <category term="tscon" scheme="http://example.com/tags/tscon/"/>
+    <category term="tscon" scheme="https://bbbccvbvv.github.io/tags/tscon/"/>
     
-    <category term="windows会话" scheme="http://example.com/tags/windows%E4%BC%9A%E8%AF%9D/"/>
+    <category term="windows会话" scheme="https://bbbccvbvv.github.io/tags/windows%E4%BC%9A%E8%AF%9D/"/>
     
-    <category term="微软官方工具" scheme="http://example.com/tags/%E5%BE%AE%E8%BD%AF%E5%AE%98%E6%96%B9%E5%B7%A5%E5%85%B7/"/>
+    <category term="微软官方工具" scheme="https://bbbccvbvv.github.io/tags/%E5%BE%AE%E8%BD%AF%E5%AE%98%E6%96%B9%E5%B7%A5%E5%85%B7/"/>
     
   </entry>
   
   <entry>
     <title>windbg标准调试技巧-读写内存（5）：将虚拟地址转换为物理地址</title>
-    <link href="http://example.com/2023/08/07/windbg_debug_technique_reading_and_writing_memory_5/"/>
-    <id>http://example.com/2023/08/07/windbg_debug_technique_reading_and_writing_memory_5/</id>
+    <link href="https://bbbccvbvv.github.io/2023/08/07/windbg_debug_technique_reading_and_writing_memory_5/"/>
+    <id>https://bbbccvbvv.github.io/2023/08/07/windbg_debug_technique_reading_and_writing_memory_5/</id>
     <published>2023-08-07T10:30:00.000Z</published>
     <updated>2023-12-29T02:38:41.469Z</updated>
     
@@ -153,21 +153,21 @@
     
     
     
-    <category term="计算机科学" scheme="http://example.com/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A7%91%E5%AD%A6/"/>
+    <category term="计算机科学" scheme="https://bbbccvbvv.github.io/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A7%91%E5%AD%A6/"/>
     
-    <category term="windbg官方文档翻译" scheme="http://example.com/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A7%91%E5%AD%A6/windbg%E5%AE%98%E6%96%B9%E6%96%87%E6%A1%A3%E7%BF%BB%E8%AF%91/"/>
+    <category term="windbg官方文档翻译" scheme="https://bbbccvbvv.github.io/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A7%91%E5%AD%A6/windbg%E5%AE%98%E6%96%B9%E6%96%87%E6%A1%A3%E7%BF%BB%E8%AF%91/"/>
     
     
-    <category term="windbg" scheme="http://example.com/tags/windbg/"/>
+    <category term="windbg" scheme="https://bbbccvbvv.github.io/tags/windbg/"/>
     
-    <category term="convert virtual address to physical address" scheme="http://example.com/tags/convert-virtual-address-to-physical-address/"/>
+    <category term="convert virtual address to physical address" scheme="https://bbbccvbvv.github.io/tags/convert-virtual-address-to-physical-address/"/>
     
   </entry>
   
   <entry>
     <title>windbg标准调试技巧-读写内存（4）：访问局部变量</title>
-    <link href="http://example.com/2023/08/07/windbg_debug_technique_reading_and_writing_memory_4/"/>
-    <id>http://example.com/2023/08/07/windbg_debug_technique_reading_and_writing_memory_4/</id>
+    <link href="https://bbbccvbvv.github.io/2023/08/07/windbg_debug_technique_reading_and_writing_memory_4/"/>
+    <id>https://bbbccvbvv.github.io/2023/08/07/windbg_debug_technique_reading_and_writing_memory_4/</id>
     <published>2023-08-07T10:20:00.000Z</published>
     <updated>2023-12-29T02:38:41.453Z</updated>
     
@@ -178,21 +178,21 @@
     
     
     
-    <category term="计算机科学" scheme="http://example.com/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A7%91%E5%AD%A6/"/>
+    <category term="计算机科学" scheme="https://bbbccvbvv.github.io/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A7%91%E5%AD%A6/"/>
     
-    <category term="windbg官方文档翻译" scheme="http://example.com/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A7%91%E5%AD%A6/windbg%E5%AE%98%E6%96%B9%E6%96%87%E6%A1%A3%E7%BF%BB%E8%AF%91/"/>
+    <category term="windbg官方文档翻译" scheme="https://bbbccvbvv.github.io/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A7%91%E5%AD%A6/windbg%E5%AE%98%E6%96%B9%E6%96%87%E6%A1%A3%E7%BF%BB%E8%AF%91/"/>
     
     
-    <category term="windbg" scheme="http://example.com/tags/windbg/"/>
+    <category term="windbg" scheme="https://bbbccvbvv.github.io/tags/windbg/"/>
     
-    <category term="access local variables" scheme="http://example.com/tags/access-local-variables/"/>
+    <category term="access local variables" scheme="https://bbbccvbvv.github.io/tags/access-local-variables/"/>
     
   </entry>
   
   <entry>
     <title>windbg标准调试技巧-读写内存（3）：访问全局变量</title>
-    <link href="http://example.com/2023/08/04/windbg_debug_technique_reading_and_writing_memory_3/"/>
-    <id>http://example.com/2023/08/04/windbg_debug_technique_reading_and_writing_memory_3/</id>
+    <link href="https://bbbccvbvv.github.io/2023/08/04/windbg_debug_technique_reading_and_writing_memory_3/"/>
+    <id>https://bbbccvbvv.github.io/2023/08/04/windbg_debug_technique_reading_and_writing_memory_3/</id>
     <published>2023-08-04T11:30:00.000Z</published>
     <updated>2023-12-29T02:38:41.453Z</updated>
     
@@ -203,21 +203,21 @@
     
     
     
-    <category term="计算机科学" scheme="http://example.com/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A7%91%E5%AD%A6/"/>
+    <category term="计算机科学" scheme="https://bbbccvbvv.github.io/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A7%91%E5%AD%A6/"/>
     
-    <category term="windbg官方文档翻译" scheme="http://example.com/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A7%91%E5%AD%A6/windbg%E5%AE%98%E6%96%B9%E6%96%87%E6%A1%A3%E7%BF%BB%E8%AF%91/"/>
+    <category term="windbg官方文档翻译" scheme="https://bbbccvbvv.github.io/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A7%91%E5%AD%A6/windbg%E5%AE%98%E6%96%B9%E6%96%87%E6%A1%A3%E7%BF%BB%E8%AF%91/"/>
     
     
-    <category term="windbg" scheme="http://example.com/tags/windbg/"/>
+    <category term="windbg" scheme="https://bbbccvbvv.github.io/tags/windbg/"/>
     
-    <category term="access global variables" scheme="http://example.com/tags/access-global-variables/"/>
+    <category term="access global variables" scheme="https://bbbccvbvv.github.io/tags/access-global-variables/"/>
     
   </entry>
   
   <entry>
     <title>windbg标准调试技巧-读写内存（2）：通过物理地址访问内存</title>
-    <link href="http://example.com/2023/08/03/windbg_debug_technique_reading_and_writing_memory_2/"/>
-    <id>http://example.com/2023/08/03/windbg_debug_technique_reading_and_writing_memory_2/</id>
+    <link href="https://bbbccvbvv.github.io/2023/08/03/windbg_debug_technique_reading_and_writing_memory_2/"/>
+    <id>https://bbbccvbvv.github.io/2023/08/03/windbg_debug_technique_reading_and_writing_memory_2/</id>
     <published>2023-08-03T12:30:00.000Z</published>
     <updated>2023-12-29T02:38:41.453Z</updated>
     
@@ -233,27 +233,27 @@
     
     
     
-    <category term="计算机科学" scheme="http://example.com/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A7%91%E5%AD%A6/"/>
+    <category term="计算机科学" scheme="https://bbbccvbvv.github.io/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A7%91%E5%AD%A6/"/>
     
-    <category term="windbg官方文档翻译" scheme="http://example.com/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A7%91%E5%AD%A6/windbg%E5%AE%98%E6%96%B9%E6%96%87%E6%A1%A3%E7%BF%BB%E8%AF%91/"/>
+    <category term="windbg官方文档翻译" scheme="https://bbbccvbvv.github.io/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A7%91%E5%AD%A6/windbg%E5%AE%98%E6%96%B9%E6%96%87%E6%A1%A3%E7%BF%BB%E8%AF%91/"/>
     
     
-    <category term="windows" scheme="http://example.com/tags/windows/"/>
+    <category term="windows" scheme="https://bbbccvbvv.github.io/tags/windows/"/>
     
-    <category term="windbg" scheme="http://example.com/tags/windbg/"/>
+    <category term="windbg" scheme="https://bbbccvbvv.github.io/tags/windbg/"/>
     
-    <category term="standard debugging techniques" scheme="http://example.com/tags/standard-debugging-techniques/"/>
+    <category term="standard debugging techniques" scheme="https://bbbccvbvv.github.io/tags/standard-debugging-techniques/"/>
     
-    <category term="reading and writng memory" scheme="http://example.com/tags/reading-and-writng-memory/"/>
+    <category term="reading and writng memory" scheme="https://bbbccvbvv.github.io/tags/reading-and-writng-memory/"/>
     
-    <category term="physical address" scheme="http://example.com/tags/physical-address/"/>
+    <category term="physical address" scheme="https://bbbccvbvv.github.io/tags/physical-address/"/>
     
   </entry>
   
   <entry>
     <title>【翻译】OpenSSL环境变量OPENSSL_ia32cap详解</title>
-    <link href="http://example.com/2023/07/24/openssl_env_variable_openssl_ia32cap/"/>
-    <id>http://example.com/2023/07/24/openssl_env_variable_openssl_ia32cap/</id>
+    <link href="https://bbbccvbvv.github.io/2023/07/24/openssl_env_variable_openssl_ia32cap/"/>
+    <id>https://bbbccvbvv.github.io/2023/07/24/openssl_env_variable_openssl_ia32cap/</id>
     <published>2023-07-24T03:30:10.000Z</published>
     <updated>2023-12-29T02:38:41.453Z</updated>
     
@@ -264,19 +264,19 @@
     
     
     
-    <category term="计算机科学" scheme="http://example.com/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A7%91%E5%AD%A6/"/>
+    <category term="计算机科学" scheme="https://bbbccvbvv.github.io/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A7%91%E5%AD%A6/"/>
     
     
-    <category term="OpenSSL" scheme="http://example.com/tags/OpenSSL/"/>
+    <category term="OpenSSL" scheme="https://bbbccvbvv.github.io/tags/OpenSSL/"/>
     
-    <category term="OPENSSL_ia32cap" scheme="http://example.com/tags/OPENSSL-ia32cap/"/>
+    <category term="OPENSSL_ia32cap" scheme="https://bbbccvbvv.github.io/tags/OPENSSL-ia32cap/"/>
     
   </entry>
   
   <entry>
     <title>windbg标准调试技巧-读写内存（1）：通过虚拟地址访问内存</title>
-    <link href="http://example.com/2023/07/19/windbg_debug_technique_reading_and_writing_memory_1/"/>
-    <id>http://example.com/2023/07/19/windbg_debug_technique_reading_and_writing_memory_1/</id>
+    <link href="https://bbbccvbvv.github.io/2023/07/19/windbg_debug_technique_reading_and_writing_memory_1/"/>
+    <id>https://bbbccvbvv.github.io/2023/07/19/windbg_debug_technique_reading_and_writing_memory_1/</id>
     <published>2023-07-19T11:30:00.000Z</published>
     <updated>2023-12-29T02:38:41.453Z</updated>
     
@@ -287,27 +287,27 @@
     
     
     
-    <category term="计算机科学" scheme="http://example.com/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A7%91%E5%AD%A6/"/>
+    <category term="计算机科学" scheme="https://bbbccvbvv.github.io/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A7%91%E5%AD%A6/"/>
     
-    <category term="windbg官方文档翻译" scheme="http://example.com/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A7%91%E5%AD%A6/windbg%E5%AE%98%E6%96%B9%E6%96%87%E6%A1%A3%E7%BF%BB%E8%AF%91/"/>
+    <category term="windbg官方文档翻译" scheme="https://bbbccvbvv.github.io/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A7%91%E5%AD%A6/windbg%E5%AE%98%E6%96%B9%E6%96%87%E6%A1%A3%E7%BF%BB%E8%AF%91/"/>
     
     
-    <category term="windows" scheme="http://example.com/tags/windows/"/>
+    <category term="windows" scheme="https://bbbccvbvv.github.io/tags/windows/"/>
     
-    <category term="windbg" scheme="http://example.com/tags/windbg/"/>
+    <category term="windbg" scheme="https://bbbccvbvv.github.io/tags/windbg/"/>
     
-    <category term="standard debugging techniques" scheme="http://example.com/tags/standard-debugging-techniques/"/>
+    <category term="standard debugging techniques" scheme="https://bbbccvbvv.github.io/tags/standard-debugging-techniques/"/>
     
-    <category term="reading and writng memory" scheme="http://example.com/tags/reading-and-writng-memory/"/>
+    <category term="reading and writng memory" scheme="https://bbbccvbvv.github.io/tags/reading-and-writng-memory/"/>
     
-    <category term="virtual address" scheme="http://example.com/tags/virtual-address/"/>
+    <category term="virtual address" scheme="https://bbbccvbvv.github.io/tags/virtual-address/"/>
     
   </entry>
   
   <entry>
     <title>【翻译】libvirt虚拟机xml配置文件格式（9）CPU model and topology</title>
-    <link href="http://example.com/2022/11/15/domain_xml_format9_cpu_model_topology/"/>
-    <id>http://example.com/2022/11/15/domain_xml_format9_cpu_model_topology/</id>
+    <link href="https://bbbccvbvv.github.io/2022/11/15/domain_xml_format9_cpu_model_topology/"/>
+    <id>https://bbbccvbvv.github.io/2022/11/15/domain_xml_format9_cpu_model_topology/</id>
     <published>2022-11-15T10:10:10.000Z</published>
     <updated>2023-12-29T02:38:41.453Z</updated>
     
@@ -318,27 +318,27 @@
     
     
     
-    <category term="计算机科学" scheme="http://example.com/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A7%91%E5%AD%A6/"/>
+    <category term="计算机科学" scheme="https://bbbccvbvv.github.io/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A7%91%E5%AD%A6/"/>
     
     
-    <category term="虚拟化" scheme="http://example.com/tags/%E8%99%9A%E6%8B%9F%E5%8C%96/"/>
+    <category term="虚拟化" scheme="https://bbbccvbvv.github.io/tags/%E8%99%9A%E6%8B%9F%E5%8C%96/"/>
     
-    <category term="kvm" scheme="http://example.com/tags/kvm/"/>
+    <category term="kvm" scheme="https://bbbccvbvv.github.io/tags/kvm/"/>
     
-    <category term="libvirt" scheme="http://example.com/tags/libvirt/"/>
+    <category term="libvirt" scheme="https://bbbccvbvv.github.io/tags/libvirt/"/>
     
-    <category term="虚拟机xml配置文件" scheme="http://example.com/tags/%E8%99%9A%E6%8B%9F%E6%9C%BAxml%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6/"/>
+    <category term="虚拟机xml配置文件" scheme="https://bbbccvbvv.github.io/tags/%E8%99%9A%E6%8B%9F%E6%9C%BAxml%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6/"/>
     
-    <category term="翻译" scheme="http://example.com/tags/%E7%BF%BB%E8%AF%91/"/>
+    <category term="翻译" scheme="https://bbbccvbvv.github.io/tags/%E7%BF%BB%E8%AF%91/"/>
     
-    <category term="CPU model and topology" scheme="http://example.com/tags/CPU-model-and-topology/"/>
+    <category term="CPU model and topology" scheme="https://bbbccvbvv.github.io/tags/CPU-model-and-topology/"/>
     
   </entry>
   
   <entry>
     <title>【翻译】libvirt虚拟机xml配置文件格式（8）NUMA Node Tuning、Block I/O Tuning、Resource partitioning、Fibre Channel VMID</title>
-    <link href="http://example.com/2022/11/14/domain_xml_format8_block_io_tuning_resource_partitioning_fibre_channel_vmid/"/>
-    <id>http://example.com/2022/11/14/domain_xml_format8_block_io_tuning_resource_partitioning_fibre_channel_vmid/</id>
+    <link href="https://bbbccvbvv.github.io/2022/11/14/domain_xml_format8_block_io_tuning_resource_partitioning_fibre_channel_vmid/"/>
+    <id>https://bbbccvbvv.github.io/2022/11/14/domain_xml_format8_block_io_tuning_resource_partitioning_fibre_channel_vmid/</id>
     <published>2022-11-14T08:10:10.000Z</published>
     <updated>2023-12-29T02:38:41.453Z</updated>
     
@@ -349,33 +349,33 @@
     
     
     
-    <category term="计算机科学" scheme="http://example.com/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A7%91%E5%AD%A6/"/>
+    <category term="计算机科学" scheme="https://bbbccvbvv.github.io/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A7%91%E5%AD%A6/"/>
     
     
-    <category term="虚拟化" scheme="http://example.com/tags/%E8%99%9A%E6%8B%9F%E5%8C%96/"/>
+    <category term="虚拟化" scheme="https://bbbccvbvv.github.io/tags/%E8%99%9A%E6%8B%9F%E5%8C%96/"/>
     
-    <category term="kvm" scheme="http://example.com/tags/kvm/"/>
+    <category term="kvm" scheme="https://bbbccvbvv.github.io/tags/kvm/"/>
     
-    <category term="libvirt" scheme="http://example.com/tags/libvirt/"/>
+    <category term="libvirt" scheme="https://bbbccvbvv.github.io/tags/libvirt/"/>
     
-    <category term="虚拟机xml配置文件" scheme="http://example.com/tags/%E8%99%9A%E6%8B%9F%E6%9C%BAxml%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6/"/>
+    <category term="虚拟机xml配置文件" scheme="https://bbbccvbvv.github.io/tags/%E8%99%9A%E6%8B%9F%E6%9C%BAxml%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6/"/>
     
-    <category term="翻译" scheme="http://example.com/tags/%E7%BF%BB%E8%AF%91/"/>
+    <category term="翻译" scheme="https://bbbccvbvv.github.io/tags/%E7%BF%BB%E8%AF%91/"/>
     
-    <category term="NUMA Node Tuning" scheme="http://example.com/tags/NUMA-Node-Tuning/"/>
+    <category term="NUMA Node Tuning" scheme="https://bbbccvbvv.github.io/tags/NUMA-Node-Tuning/"/>
     
-    <category term="Block I/O Tuning" scheme="http://example.com/tags/Block-I-O-Tuning/"/>
+    <category term="Block I/O Tuning" scheme="https://bbbccvbvv.github.io/tags/Block-I-O-Tuning/"/>
     
-    <category term="Resource partitioning" scheme="http://example.com/tags/Resource-partitioning/"/>
+    <category term="Resource partitioning" scheme="https://bbbccvbvv.github.io/tags/Resource-partitioning/"/>
     
-    <category term="Fibre Channel VMID" scheme="http://example.com/tags/Fibre-Channel-VMID/"/>
+    <category term="Fibre Channel VMID" scheme="https://bbbccvbvv.github.io/tags/Fibre-Channel-VMID/"/>
     
   </entry>
   
   <entry>
     <title>【翻译】libvirt虚拟机xml配置文件格式（7）Memory Allocation、Memory Backing和Memory Tuning</title>
-    <link href="http://example.com/2022/11/10/domain_xml_format7_memory_allocation/"/>
-    <id>http://example.com/2022/11/10/domain_xml_format7_memory_allocation/</id>
+    <link href="https://bbbccvbvv.github.io/2022/11/10/domain_xml_format7_memory_allocation/"/>
+    <id>https://bbbccvbvv.github.io/2022/11/10/domain_xml_format7_memory_allocation/</id>
     <published>2022-11-10T03:56:10.000Z</published>
     <updated>2023-12-29T02:38:41.453Z</updated>
     
@@ -386,31 +386,31 @@
     
     
     
-    <category term="计算机科学" scheme="http://example.com/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A7%91%E5%AD%A6/"/>
+    <category term="计算机科学" scheme="https://bbbccvbvv.github.io/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A7%91%E5%AD%A6/"/>
     
     
-    <category term="虚拟化" scheme="http://example.com/tags/%E8%99%9A%E6%8B%9F%E5%8C%96/"/>
+    <category term="虚拟化" scheme="https://bbbccvbvv.github.io/tags/%E8%99%9A%E6%8B%9F%E5%8C%96/"/>
     
-    <category term="kvm" scheme="http://example.com/tags/kvm/"/>
+    <category term="kvm" scheme="https://bbbccvbvv.github.io/tags/kvm/"/>
     
-    <category term="libvirt" scheme="http://example.com/tags/libvirt/"/>
+    <category term="libvirt" scheme="https://bbbccvbvv.github.io/tags/libvirt/"/>
     
-    <category term="虚拟机xml配置文件" scheme="http://example.com/tags/%E8%99%9A%E6%8B%9F%E6%9C%BAxml%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6/"/>
+    <category term="虚拟机xml配置文件" scheme="https://bbbccvbvv.github.io/tags/%E8%99%9A%E6%8B%9F%E6%9C%BAxml%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6/"/>
     
-    <category term="翻译" scheme="http://example.com/tags/%E7%BF%BB%E8%AF%91/"/>
+    <category term="翻译" scheme="https://bbbccvbvv.github.io/tags/%E7%BF%BB%E8%AF%91/"/>
     
-    <category term="Memory Allocation" scheme="http://example.com/tags/Memory-Allocation/"/>
+    <category term="Memory Allocation" scheme="https://bbbccvbvv.github.io/tags/Memory-Allocation/"/>
     
-    <category term="Memory Backing" scheme="http://example.com/tags/Memory-Backing/"/>
+    <category term="Memory Backing" scheme="https://bbbccvbvv.github.io/tags/Memory-Backing/"/>
     
-    <category term="Memory Tuning" scheme="http://example.com/tags/Memory-Tuning/"/>
+    <category term="Memory Tuning" scheme="https://bbbccvbvv.github.io/tags/Memory-Tuning/"/>
     
   </entry>
   
   <entry>
     <title>【翻译】libvirt虚拟机xml配置文件格式（6）CPU Tuning</title>
-    <link href="http://example.com/2022/11/04/domain_xml_format_CPU-tuning/"/>
-    <id>http://example.com/2022/11/04/domain_xml_format_CPU-tuning/</id>
+    <link href="https://bbbccvbvv.github.io/2022/11/04/domain_xml_format_CPU-tuning/"/>
+    <id>https://bbbccvbvv.github.io/2022/11/04/domain_xml_format_CPU-tuning/</id>
     <published>2022-11-04T06:35:10.000Z</published>
     <updated>2023-12-29T02:38:41.453Z</updated>
     
@@ -421,27 +421,27 @@
     
     
     
-    <category term="计算机科学" scheme="http://example.com/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A7%91%E5%AD%A6/"/>
+    <category term="计算机科学" scheme="https://bbbccvbvv.github.io/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A7%91%E5%AD%A6/"/>
     
     
-    <category term="虚拟化" scheme="http://example.com/tags/%E8%99%9A%E6%8B%9F%E5%8C%96/"/>
+    <category term="虚拟化" scheme="https://bbbccvbvv.github.io/tags/%E8%99%9A%E6%8B%9F%E5%8C%96/"/>
     
-    <category term="kvm" scheme="http://example.com/tags/kvm/"/>
+    <category term="kvm" scheme="https://bbbccvbvv.github.io/tags/kvm/"/>
     
-    <category term="libvirt" scheme="http://example.com/tags/libvirt/"/>
+    <category term="libvirt" scheme="https://bbbccvbvv.github.io/tags/libvirt/"/>
     
-    <category term="虚拟机xml配置文件" scheme="http://example.com/tags/%E8%99%9A%E6%8B%9F%E6%9C%BAxml%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6/"/>
+    <category term="虚拟机xml配置文件" scheme="https://bbbccvbvv.github.io/tags/%E8%99%9A%E6%8B%9F%E6%9C%BAxml%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6/"/>
     
-    <category term="翻译" scheme="http://example.com/tags/%E7%BF%BB%E8%AF%91/"/>
+    <category term="翻译" scheme="https://bbbccvbvv.github.io/tags/%E7%BF%BB%E8%AF%91/"/>
     
-    <category term="CPU Tuning" scheme="http://example.com/tags/CPU-Tuning/"/>
+    <category term="CPU Tuning" scheme="https://bbbccvbvv.github.io/tags/CPU-Tuning/"/>
     
   </entry>
   
   <entry>
     <title>_access函数32bit和64bit编译差异</title>
-    <link href="http://example.com/2022/10/20/access_usage/"/>
-    <id>http://example.com/2022/10/20/access_usage/</id>
+    <link href="https://bbbccvbvv.github.io/2022/10/20/access_usage/"/>
+    <id>https://bbbccvbvv.github.io/2022/10/20/access_usage/</id>
     <published>2022-10-20T07:00:10.000Z</published>
     <updated>2023-12-29T02:38:41.453Z</updated>
     
@@ -453,23 +453,23 @@
     
     
     
-    <category term="计算机科学" scheme="http://example.com/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A7%91%E5%AD%A6/"/>
+    <category term="计算机科学" scheme="https://bbbccvbvv.github.io/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A7%91%E5%AD%A6/"/>
     
     
-    <category term="C语言" scheme="http://example.com/tags/C%E8%AF%AD%E8%A8%80/"/>
+    <category term="C语言" scheme="https://bbbccvbvv.github.io/tags/C%E8%AF%AD%E8%A8%80/"/>
     
-    <category term="_access函数" scheme="http://example.com/tags/access%E5%87%BD%E6%95%B0/"/>
+    <category term="_access函数" scheme="https://bbbccvbvv.github.io/tags/access%E5%87%BD%E6%95%B0/"/>
     
-    <category term="编译环境" scheme="http://example.com/tags/%E7%BC%96%E8%AF%91%E7%8E%AF%E5%A2%83/"/>
+    <category term="编译环境" scheme="https://bbbccvbvv.github.io/tags/%E7%BC%96%E8%AF%91%E7%8E%AF%E5%A2%83/"/>
     
-    <category term="文件检查" scheme="http://example.com/tags/%E6%96%87%E4%BB%B6%E6%A3%80%E6%9F%A5/"/>
+    <category term="文件检查" scheme="https://bbbccvbvv.github.io/tags/%E6%96%87%E4%BB%B6%E6%A3%80%E6%9F%A5/"/>
     
   </entry>
   
   <entry>
     <title>【翻译】libvirt虚拟机xml配置文件格式（5）IOThreads Allocation</title>
-    <link href="http://example.com/2022/10/19/domain_xml_format_IOThreads-Allocation/"/>
-    <id>http://example.com/2022/10/19/domain_xml_format_IOThreads-Allocation/</id>
+    <link href="https://bbbccvbvv.github.io/2022/10/19/domain_xml_format_IOThreads-Allocation/"/>
+    <id>https://bbbccvbvv.github.io/2022/10/19/domain_xml_format_IOThreads-Allocation/</id>
     <published>2022-10-19T09:36:10.000Z</published>
     <updated>2023-12-29T02:38:41.453Z</updated>
     
@@ -481,27 +481,27 @@
     
     
     
-    <category term="计算机科学" scheme="http://example.com/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A7%91%E5%AD%A6/"/>
+    <category term="计算机科学" scheme="https://bbbccvbvv.github.io/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A7%91%E5%AD%A6/"/>
     
     
-    <category term="虚拟化" scheme="http://example.com/tags/%E8%99%9A%E6%8B%9F%E5%8C%96/"/>
+    <category term="虚拟化" scheme="https://bbbccvbvv.github.io/tags/%E8%99%9A%E6%8B%9F%E5%8C%96/"/>
     
-    <category term="kvm" scheme="http://example.com/tags/kvm/"/>
+    <category term="kvm" scheme="https://bbbccvbvv.github.io/tags/kvm/"/>
     
-    <category term="libvirt" scheme="http://example.com/tags/libvirt/"/>
+    <category term="libvirt" scheme="https://bbbccvbvv.github.io/tags/libvirt/"/>
     
-    <category term="虚拟机xml配置文件" scheme="http://example.com/tags/%E8%99%9A%E6%8B%9F%E6%9C%BAxml%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6/"/>
+    <category term="虚拟机xml配置文件" scheme="https://bbbccvbvv.github.io/tags/%E8%99%9A%E6%8B%9F%E6%9C%BAxml%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6/"/>
     
-    <category term="翻译" scheme="http://example.com/tags/%E7%BF%BB%E8%AF%91/"/>
+    <category term="翻译" scheme="https://bbbccvbvv.github.io/tags/%E7%BF%BB%E8%AF%91/"/>
     
-    <category term="IOThreads Allocation" scheme="http://example.com/tags/IOThreads-Allocation/"/>
+    <category term="IOThreads Allocation" scheme="https://bbbccvbvv.github.io/tags/IOThreads-Allocation/"/>
     
   </entry>
   
   <entry>
     <title>【翻译】libvirt虚拟机xml配置文件格式（4）CPU Allocation</title>
-    <link href="http://example.com/2022/09/05/domain_xml_format_CPU-Allocation/"/>
-    <id>http://example.com/2022/09/05/domain_xml_format_CPU-Allocation/</id>
+    <link href="https://bbbccvbvv.github.io/2022/09/05/domain_xml_format_CPU-Allocation/"/>
+    <id>https://bbbccvbvv.github.io/2022/09/05/domain_xml_format_CPU-Allocation/</id>
     <published>2022-09-05T11:01:10.000Z</published>
     <updated>2023-12-29T02:38:41.453Z</updated>
     
@@ -512,27 +512,27 @@
     
     
     
-    <category term="计算机科学" scheme="http://example.com/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A7%91%E5%AD%A6/"/>
+    <category term="计算机科学" scheme="https://bbbccvbvv.github.io/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A7%91%E5%AD%A6/"/>
     
     
-    <category term="虚拟化" scheme="http://example.com/tags/%E8%99%9A%E6%8B%9F%E5%8C%96/"/>
+    <category term="虚拟化" scheme="https://bbbccvbvv.github.io/tags/%E8%99%9A%E6%8B%9F%E5%8C%96/"/>
     
-    <category term="kvm" scheme="http://example.com/tags/kvm/"/>
+    <category term="kvm" scheme="https://bbbccvbvv.github.io/tags/kvm/"/>
     
-    <category term="libvirt" scheme="http://example.com/tags/libvirt/"/>
+    <category term="libvirt" scheme="https://bbbccvbvv.github.io/tags/libvirt/"/>
     
-    <category term="虚拟机xml配置文件" scheme="http://example.com/tags/%E8%99%9A%E6%8B%9F%E6%9C%BAxml%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6/"/>
+    <category term="虚拟机xml配置文件" scheme="https://bbbccvbvv.github.io/tags/%E8%99%9A%E6%8B%9F%E6%9C%BAxml%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6/"/>
     
-    <category term="翻译" scheme="http://example.com/tags/%E7%BF%BB%E8%AF%91/"/>
+    <category term="翻译" scheme="https://bbbccvbvv.github.io/tags/%E7%BF%BB%E8%AF%91/"/>
     
-    <category term="CPU Allocation" scheme="http://example.com/tags/CPU-Allocation/"/>
+    <category term="CPU Allocation" scheme="https://bbbccvbvv.github.io/tags/CPU-Allocation/"/>
     
   </entry>
   
   <entry>
     <title>【翻译】libvirt虚拟机xml配置文件格式（3）SMBIOS System Information</title>
-    <link href="http://example.com/2022/09/02/domain_xml_format_SMBIOS-System-Information/"/>
-    <id>http://example.com/2022/09/02/domain_xml_format_SMBIOS-System-Information/</id>
+    <link href="https://bbbccvbvv.github.io/2022/09/02/domain_xml_format_SMBIOS-System-Information/"/>
+    <id>https://bbbccvbvv.github.io/2022/09/02/domain_xml_format_SMBIOS-System-Information/</id>
     <published>2022-09-02T09:00:10.000Z</published>
     <updated>2023-12-29T02:38:41.453Z</updated>
     
@@ -544,27 +544,27 @@
     
     
     
-    <category term="计算机科学" scheme="http://example.com/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A7%91%E5%AD%A6/"/>
+    <category term="计算机科学" scheme="https://bbbccvbvv.github.io/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A7%91%E5%AD%A6/"/>
     
     
-    <category term="虚拟化" scheme="http://example.com/tags/%E8%99%9A%E6%8B%9F%E5%8C%96/"/>
+    <category term="虚拟化" scheme="https://bbbccvbvv.github.io/tags/%E8%99%9A%E6%8B%9F%E5%8C%96/"/>
     
-    <category term="kvm" scheme="http://example.com/tags/kvm/"/>
+    <category term="kvm" scheme="https://bbbccvbvv.github.io/tags/kvm/"/>
     
-    <category term="libvirt" scheme="http://example.com/tags/libvirt/"/>
+    <category term="libvirt" scheme="https://bbbccvbvv.github.io/tags/libvirt/"/>
     
-    <category term="虚拟机xml配置文件" scheme="http://example.com/tags/%E8%99%9A%E6%8B%9F%E6%9C%BAxml%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6/"/>
+    <category term="虚拟机xml配置文件" scheme="https://bbbccvbvv.github.io/tags/%E8%99%9A%E6%8B%9F%E6%9C%BAxml%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6/"/>
     
-    <category term="翻译" scheme="http://example.com/tags/%E7%BF%BB%E8%AF%91/"/>
+    <category term="翻译" scheme="https://bbbccvbvv.github.io/tags/%E7%BF%BB%E8%AF%91/"/>
     
-    <category term="SMBIOS System Information" scheme="http://example.com/tags/SMBIOS-System-Information/"/>
+    <category term="SMBIOS System Information" scheme="https://bbbccvbvv.github.io/tags/SMBIOS-System-Information/"/>
     
   </entry>
   
   <entry>
     <title>【翻译】libvirt虚拟机xml配置文件格式（2）Operating system booting</title>
-    <link href="http://example.com/2022/08/31/domain_xml_format_Operating-system-booting/"/>
-    <id>http://example.com/2022/08/31/domain_xml_format_Operating-system-booting/</id>
+    <link href="https://bbbccvbvv.github.io/2022/08/31/domain_xml_format_Operating-system-booting/"/>
+    <id>https://bbbccvbvv.github.io/2022/08/31/domain_xml_format_Operating-system-booting/</id>
     <published>2022-08-31T11:00:10.000Z</published>
     <updated>2023-12-29T02:38:41.453Z</updated>
     
@@ -576,20 +576,20 @@
     
     
     
-    <category term="计算机科学" scheme="http://example.com/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A7%91%E5%AD%A6/"/>
+    <category term="计算机科学" scheme="https://bbbccvbvv.github.io/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A7%91%E5%AD%A6/"/>
     
     
-    <category term="虚拟化" scheme="http://example.com/tags/%E8%99%9A%E6%8B%9F%E5%8C%96/"/>
+    <category term="虚拟化" scheme="https://bbbccvbvv.github.io/tags/%E8%99%9A%E6%8B%9F%E5%8C%96/"/>
     
-    <category term="kvm" scheme="http://example.com/tags/kvm/"/>
+    <category term="kvm" scheme="https://bbbccvbvv.github.io/tags/kvm/"/>
     
-    <category term="libvirt" scheme="http://example.com/tags/libvirt/"/>
+    <category term="libvirt" scheme="https://bbbccvbvv.github.io/tags/libvirt/"/>
     
-    <category term="虚拟机xml配置文件" scheme="http://example.com/tags/%E8%99%9A%E6%8B%9F%E6%9C%BAxml%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6/"/>
+    <category term="虚拟机xml配置文件" scheme="https://bbbccvbvv.github.io/tags/%E8%99%9A%E6%8B%9F%E6%9C%BAxml%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6/"/>
     
-    <category term="翻译" scheme="http://example.com/tags/%E7%BF%BB%E8%AF%91/"/>
+    <category term="翻译" scheme="https://bbbccvbvv.github.io/tags/%E7%BF%BB%E8%AF%91/"/>
     
-    <category term="Operating system booting" scheme="http://example.com/tags/Operating-system-booting/"/>
+    <category term="Operating system booting" scheme="https://bbbccvbvv.github.io/tags/Operating-system-booting/"/>
     
   </entry>
   

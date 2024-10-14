@@ -17,13 +17,13 @@
 
 <script id="hexo-configurations">
     var NexT = window.NexT || {};
-    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+    var CONFIG = {"hostname":"bbbccvbvv.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
   </script>
 
   <meta name="description" content="在使用windbg分析windows产生的dmp异常转储文件时，常常需要使用到相关应用的pdb文件，否则就只能看到粗略的模块，却不能看到具体的函数执行内容。而微软的官方pdb服务器可以下载到windows相关的pdb文件，对于非官方的程序或驱动，就需要调试者自己去查找并进行设置。本文就如何在使用windbg调试dmp时，如何手动添加非官方的pdb文件进行描述，希望能够帮助遇到该问题的开发者。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="windbg手动添加非官方pdb文件进行调试">
-<meta property="og:url" content="http://example.com/2024/07/25/windbg_add_pdb_file_manually/index.html">
+<meta property="og:url" content="https://bbbccvbvv.github.io/2024/07/25/windbg_add_pdb_file_manually/index.html">
 <meta property="og:site_name" content="怀德维宁">
 <meta property="og:description" content="在使用windbg分析windows产生的dmp异常转储文件时，常常需要使用到相关应用的pdb文件，否则就只能看到粗略的模块，却不能看到具体的函数执行内容。而微软的官方pdb服务器可以下载到windows相关的pdb文件，对于非官方的程序或驱动，就需要调试者自己去查找并进行设置。本文就如何在使用windbg调试dmp时，如何手动添加非官方的pdb文件进行描述，希望能够帮助遇到该问题的开发者。">
 <meta property="og:locale" content="zh_CN">
@@ -35,7 +35,7 @@
 <meta property="article:tag" content="非官方pdb">
 <meta name="twitter:card" content="summary">
 
-<link rel="canonical" href="http://example.com/2024/07/25/windbg_add_pdb_file_manually/">
+<link rel="canonical" href="https://bbbccvbvv.github.io/2024/07/25/windbg_add_pdb_file_manually/">
 
 
 <script id="page-configurations">
@@ -170,7 +170,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2024/07/25/windbg_add_pdb_file_manually/">
+    <link itemprop="mainEntityOfPage" href="https://bbbccvbvv.github.io/2024/07/25/windbg_add_pdb_file_manually/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
