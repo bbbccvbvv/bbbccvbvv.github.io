@@ -27,13 +27,18 @@
 <meta property="og:site_name" content="怀德维宁">
 <meta property="og:description" content="在使用windbg分析windows产生的dmp异常转储文件时，常常需要使用到相关应用的pdb文件，否则就只能看到粗略的模块，却不能看到具体的函数执行内容。而微软的官方pdb服务器可以下载到windows相关的pdb文件，对于非官方的程序或驱动，就需要调试者自己去查找并进行设置。本文就如何在使用windbg调试dmp时，如何手动添加非官方的pdb文件进行描述，希望能够帮助遇到该问题的开发者。">
 <meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://bbbccvbvv.github.io/images/windbg_add_pdb_file_manually/1.png">
+<meta property="og:image" content="https://bbbccvbvv.github.io/images/windbg_add_pdb_file_manually/2.png">
+<meta property="og:image" content="https://bbbccvbvv.github.io/images/windbg_add_pdb_file_manually/3.png">
+<meta property="og:image" content="https://bbbccvbvv.github.io/images/windbg_add_pdb_file_manually/4.png">
 <meta property="article:published_time" content="2024-07-25T13:33:20.000Z">
-<meta property="article:modified_time" content="2024-10-14T11:25:17.120Z">
+<meta property="article:modified_time" content="2024-10-14T12:10:18.588Z">
 <meta property="article:author" content="杨维宁">
 <meta property="article:tag" content="windows">
 <meta property="article:tag" content="windbg">
 <meta property="article:tag" content="非官方pdb">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://bbbccvbvv.github.io/images/windbg_add_pdb_file_manually/1.png">
 
 <link rel="canonical" href="https://bbbccvbvv.github.io/2024/07/25/windbg_add_pdb_file_manually/">
 
@@ -200,7 +205,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2024-10-14 19:25:17" itemprop="dateModified" datetime="2024-10-14T19:25:17+08:00">2024-10-14</time>
+                <time title="修改时间：2024-10-14 20:10:18" itemprop="dateModified" datetime="2024-10-14T20:10:18+08:00">2024-10-14</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -222,14 +227,14 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>13k</span>
+              <span>776</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
                 <i class="far fa-clock"></i>
               </span>
                 <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>22 分钟</span>
+              <span>1 分钟</span>
             </span>
 
         </div>
@@ -245,130 +250,14 @@
 <span id="more"></span>
 
 <p>笔者最近在分析一个dmp文件，从其stack中可以看到，异常发生时涉及到了一个第三方程序netkvm，查询资料发现这是一个开源的第三方网络驱动，主要用于虚拟机。由于初始时只有微软的相关pdb文件，因此在stack中只能看到netkvm的模块名称，却无法准确判断具体的异常函数。</p>
-<pre><code>STACK_TEXT:  
-fffff802`8f11dc08 fffff802`8d247a4e     : 00000000`00000080 00000000`004f4454 00000000`00000000 00000000`00000000 : nt!KeBugCheckEx
-fffff802`8f11dc10 fffff802`8d4bc1c0     : ffffc006`7b554968 fffff802`8d25fe30 fffff802`8d25fe30 00000000`00000001 : hal!HalBugCheckSystem+0x7e
-fffff802`8f11dc50 fffff802`8d248a1e     : fffff802`000006c0 fffff802`8d64a600 fffff802`8f11dd30 fffff802`8d3349d8 : nt!WheaReportHwError+0x258
-fffff802`8f11dcb0 fffff802`8d334302     : 00000000`000c00e1 00000000`00000000 00000000`00000000 fffff802`8d3347a8 : hal!HalHandleNMI+0xfe
-fffff802`8f11dce0 fffff802`8d3f6142     : 00000000`000c00e1 fffff802`8f11def0 00000000`00000000 00000000`00000000 : nt!KiProcessNMI+0x106
-fffff802`8f11dd30 fffff802`8d3f5f43     : 00000000`00000000 00000000`00000000 00000000`00000000 00000000`00000000 : nt!KxNmiInterrupt+0x82
-fffff802`8f11de70 fffff802`8d3fd6a1     : fffff802`8d22b2f5 00000000`00000002 fffff802`8d22b2f5 00000000`00000002 : nt!KiNmiInterrupt+0x1c3
-ffff8300`63eada68 fffff802`8d22b2f5     : 00000000`00000002 fffff802`8d22b2f5 00000000`00000002 fffff802`8d22b2f5 : nt!HvlWriteApicCommandRegister+0x1d
-ffff8300`63eada70 fffff802`8d213b62     : ffffffff`ffd10738 00000000`00000001 ffff8300`63eadbb0 00001f80`00260cb0 : hal!HalpApicRequestInterrupt+0x176b5
-ffff8300`63eadae0 fffff802`8d2c92a3     : 00000000`00000001 fffff802`8d21392f ffffffff`ffd10738 00000000`00000001 : hal!HalRequestIpi+0x452
-ffff8300`63eadd60 fffff802`8d2c8b49     : 00000000`00000001 00000000`00010008 00000000`00000001 00000000`00000002 : nt!KiIpiSendRequest+0x453
-ffff8300`63eadf70 fffff802`8d2d7e2f     : 00000000`00000002 00000000`00000000 00000000`00000002 00000000`074d8416 : nt!MiFlushTbList+0x349
-ffff8300`63eae0c0 fffff802`8d2cb9b8     : ffffee81`5e88c420 00000000`c0000001 ffffee80`0000c420 00000000`00000004 : nt!MiGetPteFromCopyList+0x9f
-ffff8300`63eae1e0 fffff802`8d296966     : 00000000`00000416 00000000`074d8416 80000074`d8416963 00000000`00000004 : nt!MiCopyPage+0x3e8
-ffff8300`63eae2a0 fffff802`8d293e27     : ffffee81`5e88c420 00000000`074d8416 ffffee81`5e88c420 00000000`08100000 : nt!MiStealPage+0x1562
-ffff8300`63eae620 fffff802`8d291e48     : fffff802`8d5af400 ffffee81`5e88c420 00000000`00000001 ffff8300`63eae760 : nt!MiClaimPhysicalRun+0x4cb
-ffff8300`63eae6b0 fffff802`8d28f31d     : 00000000`00000000 00000000`00000000 00000000`00000004 fffff802`00000003 : nt!MiFindContiguousPages+0x424
-ffff8300`63eae830 fffff802`8d28f141     : ffff8300`00000000 00000000`00001000 0000000f`ffffffff fffff180`0001e8a8 : nt!MiAllocateContiguousMemory+0x1bd
-ffff8300`63eae8d0 fffff802`8d2331d2     : 00000000`00011000 00000000`00000000 00000000`00001000 00000000`00000000 : nt!MmAllocateContiguousNodeMemory+0x81
-ffff8300`63eae920 fffff80a`6d202a2e     : 00000000`00000001 ffffc006`7b54f1a0 ffffc006`862e1648 00000000`00001000 : hal!HalAllocateCommonBufferV2+0x5e
-ffff8300`63eae960 fffff80a`6da67455     : ffffc006`862e1930 00000000`00000001 fffff80a`6da73601 00000000`00001000 : NDIS!NdisMAllocateSharedMemory+0xfe
-ffff8300`63eae9c0 fffff80a`6da5d853     : ffffc006`862e1930 ffffc006`7d9c4340 ffffc006`356d7551 ffff8300`6ff7c010 : netkvm+0x17455
-ffff8300`63eaea00 fffff80a`6da5dd12     : ffffc006`7d9c4340 fffff80a`6da77000 00000000`0000009b ffffc006`7d9c43a8 : netkvm+0xd853
-ffff8300`63eaea40 fffff80a`6da5d733     : ffffc006`7d9c4340 00000000`00000000 00000000`00000030 00000000`00000000 : netkvm+0xdd12
-ffff8300`63eaea80 fffff80a`6da54a9f     : ffffc006`7b541000 00000000`0000002e fffff80a`356d7551 00000000`356d0047 : netkvm+0xd733
-ffff8300`63eaeab0 fffff80a`6da5309b     : 00000000`00000000 fffff80a`6da77000 00000000`00000000 ffffc006`7b541000 : netkvm+0x4a9f
-ffff8300`63eaeb10 fffff80a`6da65dc9     : ffffc006`7b541498 ffff8300`63eaec50 ffffc006`7b541000 fffff80a`6d1c76b8 : netkvm+0x309b
-ffff8300`63eaeb50 fffff80a`6d1fd532     : ffffc006`7b54f1a0 ffffc006`7b54f1a0 ffff8300`63eaee70 ffffc006`7b550028 : netkvm+0x15dc9
-ffff8300`63eaed10 fffff80a`6d23b848     : ffffc006`7b54fed8 00000000`00000000 00000000`00000000 ffffc006`7b54f1a0 : NDIS!ndisMInvokeInitialize+0x5e
-ffff8300`63eaed70 fffff80a`6d1fd9d3     : 00000000`00000000 00000000`000005b4 ffffc006`7b744490 01da68a5`e1ad1af4 : NDIS!ndisMInitializeAdapter+0x4d4
-ffff8300`63eaf430 fffff80a`6d1fdae0     : 00000000`000005b4 ffffc006`7b7fc490 ffffaa0d`0d578010 ffffc006`7b54f1a0 : NDIS!ndisInitializeAdapter+0x5f
-ffff8300`63eaf480 fffff80a`6d1efb3b     : ffffc006`7b54f1a0 fffff80a`6d1ef9f0 ffffc006`78092250 fffff802`8d74969c : NDIS!ndisPnPStartDevice+0x80
-ffff8300`63eaf4c0 fffff80a`6d1efa21     : 00000000`00000100 ffffc006`7b54f1a0 ffffc006`7b7f80c0 fffff80a`6d06f4a0 : NDIS!ndisStartDeviceSynchronous+0x4f
-ffff8300`63eaf510 fffff802`8d2cfb59     : ffffc006`756dd040 ffffc006`7b7f80c0 ffffaa0d`00000000 ffffc006`756dd040 : NDIS!ndisStartDeviceWorkItem+0x31
-ffff8300`63eaf540 fffff802`8d321a39     : ffffc006`756dd040 00000000`00000080 ffffc006`7569e6c0 ffffc006`756dd040 : nt!ExpWorkerThread+0xe9
-ffff8300`63eaf5d0 fffff802`8d3f2976     : ffff8300`5df40180 ffffc006`756dd040 fffff802`8d3219f8 00000000`00000000 : nt!PspSystemThreadStartup+0x41
-ffff8300`63eaf620 00000000`00000000     : ffff8300`63eb0000 ffff8300`63ea9000 00000000`00000000 00000000`00000000 : nt!KiStartSystemThread+0x16
-</code></pre>
+<p><img src="/images/windbg_add_pdb_file_manually/1.png"></p>
 <p>因为netkvm是开源的驱动文件，因此很容易在社区中找到了所需的sys和pdb文件，但是直接将对应的文件放入到笔者设置的本地symbol路径下，并重新reload并没有效果，那么问题应该是文件路径不对，windbg没有识别相关的文件，因此需要获取windbg加载pdb的详细路径。</p>
 <p>使用“.reload &#x2F;f netkvm.sys”指令尝试加载相关的模块，可以看到windbg异常输出如下：</p>
-<pre><code>0: kd&gt; .reload /f netkvm.sys
-SYMSRV:  BYINDEX: 0x1F
-        d:\symbols*https://msdl.microsoft.com/download/symbols
-        netkvm.sys
-        61A8F2E22e000
-SYMSRV:  UNC: d:\symbols\netkvm.sys\61A8F2E22e000\netkvm.sys - path not found
-SYMSRV:  UNC: d:\symbols\netkvm.sys\61A8F2E22e000\netkvm.sy_ - path not found
-SYMSRV:  UNC: d:\symbols\netkvm.sys\61A8F2E22e000\file.ptr - path not found
-SYMSRV:  HTTPGET: /download/symbols/netkvm.sys/61A8F2E22e000/netkvm.sys
-SYMSRV:  HttpQueryInfo: 80190194 - HTTP_STATUS_NOT_FOUND
-SYMSRV:  HTTPGET: /download/symbols/netkvm.sys/61A8F2E22e000/netkvm.sy_
-SYMSRV:  HttpQueryInfo: 80190194 - HTTP_STATUS_NOT_FOUND
-SYMSRV:  HTTPGET: /download/symbols/netkvm.sys/61A8F2E22e000/file.ptr
-SYMSRV:  HttpQueryInfo: 80190194 - HTTP_STATUS_NOT_FOUND
-SYMSRV:  RESULT: 0x80190194
-DBGHELP: C:\Windows\system32\netkvm.sys - file not found
-DBGHELP: C:\Windows\system32\netkvm.sys - file not found
-DBGENG:  \SystemRoot\System32\drivers\netkvm.sys - Image mapping disallowed by non-local path.
-Unable to load image \SystemRoot\System32\drivers\netkvm.sys, Win32 error 0n2
-SYMSRV:  BYINDEX: 0x20
-        d:\symbols*https://msdl.microsoft.com/download/symbols
-        netkvm.pdb
-        E2CD669467F24AFB9856B5AF63BB298B2
-SYMSRV:  UNC: d:\symbols\netkvm.pdb\E2CD669467F24AFB9856B5AF63BB298B2\netkvm.pdb - path not found
-SYMSRV:  UNC: d:\symbols\netkvm.pdb\E2CD669467F24AFB9856B5AF63BB298B2\netkvm.pd_ - path not found
-SYMSRV:  UNC: d:\symbols\netkvm.pdb\E2CD669467F24AFB9856B5AF63BB298B2\file.ptr - path not found
-SYMSRV:  HTTPGET: /download/symbols/netkvm.pdb/E2CD669467F24AFB9856B5AF63BB298B2/netkvm.pdb
-SYMSRV:  HttpQueryInfo: 80190194 - HTTP_STATUS_NOT_FOUND
-SYMSRV:  HTTPGET: /download/symbols/netkvm.pdb/E2CD669467F24AFB9856B5AF63BB298B2/netkvm.pd_
-SYMSRV:  HttpQueryInfo: 80190194 - HTTP_STATUS_NOT_FOUND
-SYMSRV:  HTTPGET: /download/symbols/netkvm.pdb/E2CD669467F24AFB9856B5AF63BB298B2/file.ptr
-SYMSRV:  HttpQueryInfo: 80190194 - HTTP_STATUS_NOT_FOUND
-SYMSRV:  RESULT: 0x80190194
-DBGHELP: C:\cygwin64\tmp\build\source\internal-kvm-guest-drivers-windows\NetKVM\x64\Win10Release\netkvm.pdb - file not found
-DBGHELP: netkvm - no symbols loaded
-
-************* Symbol Loading Error Summary **************
-Module name            Error
-netkvm                 The system cannot find the file specified
-                The SYMSRV client failed to find a file in the UNC store, or there
-                is an invalid UNC store (an invalid path or the pingme.txt file is
-                not present in the root directory), or the file is present in the
-                symbol server exclusion list.
-</code></pre>
-<p>从上述报错信息可以看到，windbg尝试从“d:\symbols\netkvm.sys\61A8F2E22e000”路径加载netkvm.sys文件，从“d:\symbols\netkvm.pdb\E2CD669467F24AFB9856B5AF63BB298B2”路径加载netkvm.pdb文件。因此解决方法也很简单，创建指定的文件目录，并把所需的文件放入到指定的路径下，并使用“.reload”指令重新加载pdb文件后查看stack，可以看到netkvm显示了具体的调用函数信息。</p>
-<pre><code>fffff802`8f11dc08 fffff802`8d247a4e     : 00000000`00000080 00000000`004f4454 00000000`00000000 00000000`00000000 : nt!KeBugCheckEx
-fffff802`8f11dc10 fffff802`8d4bc1c0     : ffffc006`7b554968 fffff802`8d25fe30 fffff802`8d25fe30 00000000`00000001 : hal!HalBugCheckSystem+0x7e
-fffff802`8f11dc50 fffff802`8d248a1e     : fffff802`000006c0 fffff802`8d64a600 fffff802`8f11dd30 fffff802`8d3349d8 : nt!WheaReportHwError+0x258
-fffff802`8f11dcb0 fffff802`8d334302     : 00000000`000c00e1 00000000`00000000 00000000`00000000 fffff802`8d3347a8 : hal!HalHandleNMI+0xfe
-fffff802`8f11dce0 fffff802`8d3f6142     : 00000000`000c00e1 fffff802`8f11def0 00000000`00000000 00000000`00000000 : nt!KiProcessNMI+0x106
-fffff802`8f11dd30 fffff802`8d3f5f43     : 00000000`00000000 00000000`00000000 00000000`00000000 00000000`00000000 : nt!KxNmiInterrupt+0x82
-fffff802`8f11de70 fffff802`8d3fd6a1     : fffff802`8d22b2f5 00000000`00000002 fffff802`8d22b2f5 00000000`00000002 : nt!KiNmiInterrupt+0x1c3 (TrapFrame @ fffff802`8f11de70)
-ffff8300`63eada68 fffff802`8d22b2f5     : 00000000`00000002 fffff802`8d22b2f5 00000000`00000002 fffff802`8d22b2f5 : nt!HvlWriteApicCommandRegister+0x1d
-ffff8300`63eada70 fffff802`8d213b62     : ffffffff`ffd10738 00000000`00000001 ffff8300`63eadbb0 00001f80`00260cb0 : hal!HalpApicRequestInterrupt+0x176b5
-ffff8300`63eadae0 fffff802`8d2c92a3     : 00000000`00000001 fffff802`8d21392f ffffffff`ffd10738 00000000`00000001 : hal!HalRequestIpi+0x452
-ffff8300`63eadd60 fffff802`8d2c8b49     : 00000000`00000001 00000000`00010008 00000000`00000001 00000000`00000002 : nt!KiIpiSendRequest+0x453
-ffff8300`63eadf70 fffff802`8d2d7e2f     : 00000000`00000002 00000000`00000000 00000000`00000002 00000000`074d8416 : nt!MiFlushTbList+0x349
-ffff8300`63eae0c0 fffff802`8d2cb9b8     : ffffee81`5e88c420 00000000`c0000001 ffffee80`0000c420 00000000`00000004 : nt!MiGetPteFromCopyList+0x9f
-ffff8300`63eae1e0 fffff802`8d296966     : 00000000`00000416 00000000`074d8416 80000074`d8416963 00000000`00000004 : nt!MiCopyPage+0x3e8
-ffff8300`63eae2a0 fffff802`8d293e27     : ffffee81`5e88c420 00000000`074d8416 ffffee81`5e88c420 00000000`08100000 : nt!MiStealPage+0x1562
-ffff8300`63eae620 fffff802`8d291e48     : fffff802`8d5af400 ffffee81`5e88c420 00000000`00000001 ffff8300`63eae760 : nt!MiClaimPhysicalRun+0x4cb
-ffff8300`63eae6b0 fffff802`8d28f31d     : 00000000`00000000 00000000`00000000 00000000`00000004 fffff802`00000003 : nt!MiFindContiguousPages+0x424
-ffff8300`63eae830 fffff802`8d28f141     : ffff8300`00000000 00000000`00001000 0000000f`ffffffff fffff180`0001e8a8 : nt!MiAllocateContiguousMemory+0x1bd
-ffff8300`63eae8d0 fffff802`8d2331d2     : 00000000`00011000 00000000`00000000 00000000`00001000 00000000`00000000 : nt!MmAllocateContiguousNodeMemory+0x81
-ffff8300`63eae920 fffff80a`6d202a2e     : 00000000`00000001 ffffc006`7b54f1a0 ffffc006`862e1648 00000000`00001000 : hal!HalAllocateCommonBufferV2+0x5e
-ffff8300`63eae960 fffff80a`6da67455     : ffffc006`862e1930 00000000`00000001 fffff80a`6da73601 00000000`00001000 : NDIS!NdisMAllocateSharedMemory+0xfe
-ffff8300`63eae9c0 fffff80a`6da5d853     : ffffc006`862e1930 ffffc006`7d9c4340 ffffc006`356d7551 ffff8300`6ff7c010 : netkvm!ParaNdis_InitialAllocatePhysicalMemory+0x29 [C:\cygwin64\tmp\build\source\internal-kvm-guest-drivers-windows\NetKVM\wlh\ParaNdis6_Impl.cpp @ 119] 
-ffff8300`63eaea00 fffff80a`6da5dd12     : ffffc006`7d9c4340 fffff80a`6da77000 00000000`0000009b ffffc006`7d9c43a8 : netkvm!CParaNdisRX::CreateRxDescriptorOnInit+0xc3 [C:\cygwin64\tmp\build\source\internal-kvm-guest-drivers-windows\NetKVM\Common\ParaNdis_RX.cpp @ 164] 
-ffff8300`63eaea40 fffff80a`6da5d733     : ffffc006`7d9c4340 00000000`00000000 00000000`00000030 00000000`00000000 : netkvm!CParaNdisRX::PrepareReceiveBuffers+0x5e [C:\cygwin64\tmp\build\source\internal-kvm-guest-drivers-windows\NetKVM\Common\ParaNdis_RX.cpp @ 114] 
-ffff8300`63eaea80 fffff80a`6da54a9f     : ffffc006`7b541000 00000000`0000002e fffff80a`356d7551 00000000`356d0047 : netkvm!CParaNdisRX::Create+0x6b [C:\cygwin64\tmp\build\source\internal-kvm-guest-drivers-windows\NetKVM\Common\ParaNdis_RX.cpp @ 99] 
-ffff8300`63eaeab0 fffff80a`6da5309b     : 00000000`00000000 fffff80a`6da77000 00000000`00000000 ffffc006`7b541000 : netkvm!ParaNdis_VirtIONetInit+0x233 [C:\cygwin64\tmp\build\source\internal-kvm-guest-drivers-windows\NetKVM\Common\ParaNdis_Common.cpp @ 1143] 
-ffff8300`63eaeb10 fffff80a`6da65dc9     : ffffc006`7b541498 ffff8300`63eaec50 ffffc006`7b541000 fffff80a`6d1c76b8 : netkvm!ParaNdis_FinishInitialization+0x97 [C:\cygwin64\tmp\build\source\internal-kvm-guest-drivers-windows\NetKVM\Common\ParaNdis_Common.cpp @ 1301] 
-ffff8300`63eaeb50 fffff80a`6d1fd532     : ffffc006`7b54f1a0 ffffc006`7b54f1a0 ffff8300`63eaee70 ffffc006`7b550028 : netkvm!ParaNdis6_Initialize+0x4b9 [C:\cygwin64\tmp\build\source\internal-kvm-guest-drivers-windows\NetKVM\wlh\ParaNdis6_Driver.cpp @ 332] 
-ffff8300`63eaed10 fffff80a`6d23b848     : ffffc006`7b54fed8 00000000`00000000 00000000`00000000 ffffc006`7b54f1a0 : NDIS!ndisMInvokeInitialize+0x5e
-ffff8300`63eaed70 fffff80a`6d1fd9d3     : 00000000`00000000 00000000`000005b4 ffffc006`7b744490 01da68a5`e1ad1af4 : NDIS!ndisMInitializeAdapter+0x4d4
-ffff8300`63eaf430 fffff80a`6d1fdae0     : 00000000`000005b4 ffffc006`7b7fc490 ffffaa0d`0d578010 ffffc006`7b54f1a0 : NDIS!ndisInitializeAdapter+0x5f
-ffff8300`63eaf480 fffff80a`6d1efb3b     : ffffc006`7b54f1a0 fffff80a`6d1ef9f0 ffffc006`78092250 fffff802`8d74969c : NDIS!ndisPnPStartDevice+0x80
-ffff8300`63eaf4c0 fffff80a`6d1efa21     : 00000000`00000100 ffffc006`7b54f1a0 ffffc006`7b7f80c0 fffff80a`6d06f4a0 : NDIS!ndisStartDeviceSynchronous+0x4f
-ffff8300`63eaf510 fffff802`8d2cfb59     : ffffc006`756dd040 ffffc006`7b7f80c0 ffffaa0d`00000000 ffffc006`756dd040 : NDIS!ndisStartDeviceWorkItem+0x31
-ffff8300`63eaf540 fffff802`8d321a39     : ffffc006`756dd040 00000000`00000080 ffffc006`7569e6c0 ffffc006`756dd040 : nt!ExpWorkerThread+0xe9
-ffff8300`63eaf5d0 fffff802`8d3f2976     : ffff8300`5df40180 ffffc006`756dd040 fffff802`8d3219f8 00000000`00000000 : nt!PspSystemThreadStartup+0x41
-ffff8300`63eaf620 00000000`00000000     : ffff8300`63eb0000 ffff8300`63ea9000 00000000`00000000 00000000`00000000 : nt!KiStartSystemThread+0x16
-</code></pre>
+<p><img src="/images/windbg_add_pdb_file_manually/2.png"></p>
+<p>从上述报错信息可以看到，windbg尝试从“d:\symbols\netkvm.sys\61A8F2E22e000”路径加载netkvm.sys文件，从“d:\symbols\netkvm.pdb\E2CD669467F24AFB9856B5AF63BB298B2”路径加载netkvm.pdb文件。因此解决方法也很简单，创建指定的文件目录，并把所需的文件放入到指定的路径下，并使用“.reload”指令重新加载pdb文件.</p>
+<p><img src="/images/windbg_add_pdb_file_manually/3.png"></p>
+<p>后查看stack，可以看到netkvm显示了具体的调用函数信息。</p>
+<p><img src="/images/windbg_add_pdb_file_manually/4.png"></p>
 <script src="https://utteranc.es/client.js" repo="bbbccvbvv/blog_comments" issue-term="pathname" theme="github-light" crossorigin="anonymous" async></script>
     </div>
 
@@ -521,12 +410,12 @@ ffff8300`63eaf620 00000000`00000000     : ffff8300`63eb0000 ffff8300`63ea9000 00
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-area"></i>
     </span>
-    <span title="站点总字数">93k</span>
+    <span title="站点总字数">80k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">2:35</span>
+    <span title="站点阅读时长">2:14</span>
 </div>
   <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
   </div>
