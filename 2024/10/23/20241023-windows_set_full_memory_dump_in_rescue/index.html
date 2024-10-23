@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"bbbccvbvv.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="在windows系统遇到异常时，往往会触发自带的异常转储机制，将问题现场进行保存，方便事后使用对应的dmp文件进行分析。但是系统默认的设置为核心内存转储，即只转储问题时刻的部分关键内存信息，但是系统的判断并不总是正确的，因此很可能便会造成dmp因为部分关键内存信息没有被保存而无法精确定位问题。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="windows救援模式下设置完全内存转储">
+<meta property="og:url" content="https://bbbccvbvv.github.io/2024/10/23/20241023-windows_set_full_memory_dump_in_rescue/index.html">
+<meta property="og:site_name" content="怀德维宁">
+<meta property="og:description" content="在windows系统遇到异常时，往往会触发自带的异常转储机制，将问题现场进行保存，方便事后使用对应的dmp文件进行分析。但是系统默认的设置为核心内存转储，即只转储问题时刻的部分关键内存信息，但是系统的判断并不总是正确的，因此很可能便会造成dmp因为部分关键内存信息没有被保存而无法精确定位问题。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://bbbccvbvv.github.io/images/windows_set_full_memory_dump_in_rescue/1.png">
+<meta property="og:image" content="https://bbbccvbvv.github.io/images/windows_set_full_memory_dump_in_rescue/2.png">
+<meta property="og:image" content="https://bbbccvbvv.github.io/images/windows_set_full_memory_dump_in_rescue/3.png">
+<meta property="og:image" content="https://bbbccvbvv.github.io/images/windows_set_full_memory_dump_in_rescue/4.png">
+<meta property="og:image" content="https://bbbccvbvv.github.io/images/windows_set_full_memory_dump_in_rescue/5.png">
+<meta property="og:image" content="https://bbbccvbvv.github.io/images/windows_set_full_memory_dump_in_rescue/6.png">
+<meta property="og:image" content="https://bbbccvbvv.github.io/images/windows_set_full_memory_dump_in_rescue/7.png">
+<meta property="og:image" content="https://bbbccvbvv.github.io/images/windows_set_full_memory_dump_in_rescue/8.png">
+<meta property="og:image" content="https://bbbccvbvv.github.io/images/windows_set_full_memory_dump_in_rescue/9.png">
+<meta property="article:published_time" content="2024-10-23T10:56:10.000Z">
+<meta property="article:modified_time" content="2024-10-23T11:42:27.012Z">
+<meta property="article:author" content="杨维宁">
+<meta property="article:tag" content="windows">
+<meta property="article:tag" content="转储设置">
+<meta property="article:tag" content="救援模式">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://bbbccvbvv.github.io/images/windows_set_full_memory_dump_in_rescue/1.png">
+
+<link rel="canonical" href="https://bbbccvbvv.github.io/2024/10/23/20241023-windows_set_full_memory_dump_in_rescue/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>windows救援模式下设置完全内存转储 | 怀德维宁</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="怀德维宁" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">怀德维宁</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">大邦维屏，大宗维翰。怀德维宁，宗子维城。</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://bbbccvbvv.github.io/2024/10/23/20241023-windows_set_full_memory_dump_in_rescue/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="杨维宁">
+      <meta itemprop="description" content="天行健，君子以自强不息。地势坤，君子以厚德载物。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="怀德维宁">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          windows救援模式下设置完全内存转储
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2024-10-23 18:56:10 / 修改时间：19:42:27" itemprop="dateCreated datePublished" datetime="2024-10-23T18:56:10+08:00">2024-10-23</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A7%91%E5%AD%A6/" itemprop="url" rel="index"><span itemprop="name">计算机科学</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>1.2k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>2 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>在windows系统遇到异常时，往往会触发自带的异常转储机制，将问题现场进行保存，方便事后使用对应的dmp文件进行分析。但是系统默认的设置为核心内存转储，即只转储问题时刻的部分关键内存信息，但是系统的判断并不总是正确的，因此很可能便会造成dmp因为部分关键内存信息没有被保存而无法精确定位问题。</p>
+<span id="more"></span>
+<p>尤其是在遇到开机相关的异常问题时，由于无法正常进入系统，因此只能依靠dmp进行分析。但是如果系统没有进行转储设置或者设置的不是完全内存转储，就会造成没有合适的dmp用来分析定位问题。这时如果能够修改为完全内存转储，再通过外部注入中断（例如kvm环境下的inject-nmi）主动触发转储机制，就可以获得比较完整的异常现场信息，以便进行问题定位分析。下面就介绍如何在救援模式下进行windows转储设置的相关修改：</p>
+<p>（0）进入救援模式中，将问题windows的磁盘挂载到救援机上，异常机的系统盘会被分配一个盘符（根据救援机和异常机的磁盘挂载情况不同发生变化，在本次演示中，异常机的系统盘盘符为E）；</p>
+<p>（1）打开windows注册表（regedit），选择HKEY_LOCAL_MACHINE条目（dump相关信息保存在该条目下，因此选择将异常机的注册表也挂载在该条目下）：</p>
+<p><img src="/images/windows_set_full_memory_dump_in_rescue/1.png"></p>
+<p>（2）点击文件（file），选择加载配置单元（load hive）；</p>
+<p><img src="/images/windows_set_full_memory_dump_in_rescue/2.png"></p>
+<p>（3）选择异常机的system注册表配置单元（异常机系统盘的windows\System32\config\SYSTEM文件，在本文中具体路径是E:\windows\System32\config\SYSTEM）；</p>
+<p><img src="/images/windows_set_full_memory_dump_in_rescue/3.png"></p>
+<p>（4）为加载的注册表配置单元起一个名称与其他注册表项进行区分（在本文中命名为aaa）；</p>
+<p><img src="/images/windows_set_full_memory_dump_in_rescue/4.png"></p>
+<p><img src="/images/windows_set_full_memory_dump_in_rescue/5.png"></p>
+<p>（5）在虚拟机内可能存在多个controlset，因此需要在注册表中查找虚拟机启动时真实加载的controlset，查看aaa下的select注册表项（在本文中可以看到default默认值为1，代表系统启动时加载的是controlset001，因此修改controlset001，也可以对全部的controlset进行相同的改动）；</p>
+<p><img src="/images/windows_set_full_memory_dump_in_rescue/6.png"></p>
+<p><img src="/images/windows_set_full_memory_dump_in_rescue/7.png"></p>
+<p>（6）修改aaa\ControlSet001\Control\CrashControl路径下的CrashControl，将其值改为1；</p>
+<p><img src="/images/windows_set_full_memory_dump_in_rescue/8.png"></p>
+<p>（7）修改aaa\ControlSet001\Control\SESSION MANAGER\MEMORY路径下的PagingFiles，将其值改为”C:\pagefile.sys 8600 8600”（配置的分页文件大小需要比内存大小要大，否则会转储失败，因为异常机的内存为8g，因此配置了8600，一般4g配置4300即可）（另外需保证异常机的系统盘可用空间不小于配置的分页文件大小，不然内存转储也会失败）；</p>
+<p><img src="/images/windows_set_full_memory_dump_in_rescue/9.png"></p>
+<p>这样配置修改就完成了，后续就可以通过主动触发中断的方式获取完全内存转储的dmp文件了。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/windows/" rel="tag"># windows</a>
+              <a href="/tags/%E8%BD%AC%E5%82%A8%E8%AE%BE%E7%BD%AE/" rel="tag"># 转储设置</a>
+              <a href="/tags/%E6%95%91%E6%8F%B4%E6%A8%A1%E5%BC%8F/" rel="tag"># 救援模式</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2024/07/25/windbg_add_pdb_file_manually/" rel="prev" title="windbg手动添加非官方pdb文件进行调试">
+      <i class="fa fa-chevron-left"></i> windbg手动添加非官方pdb文件进行调试
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">杨维宁</p>
+  <div class="site-description" itemprop="description">天行健，君子以自强不息。地势坤，君子以厚德载物。</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">28</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">54</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/bbbccvbvv" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;bbbccvbvv" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:nanjiecunxiaozu@163.com" title="E-Mail → mailto:nanjiecunxiaozu@163.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">杨维宁</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">81k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">2:16</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
