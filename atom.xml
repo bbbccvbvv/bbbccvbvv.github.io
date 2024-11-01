@@ -6,7 +6,7 @@
   <link href="https://bbbccvbvv.github.io/atom.xml" rel="self"/>
   
   <link href="https://bbbccvbvv.github.io/"/>
-  <updated>2024-10-23T11:42:27.012Z</updated>
+  <updated>2024-11-01T06:46:52.708Z</updated>
   <id>https://bbbccvbvv.github.io/</id>
   
   <author>
@@ -15,6 +15,29 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>windows系统内存参数分析</title>
+    <link href="https://bbbccvbvv.github.io/2024/11/01/20241101-windows_memory_para_analyze/"/>
+    <id>https://bbbccvbvv.github.io/2024/11/01/20241101-windows_memory_para_analyze/</id>
+    <published>2024-11-01T10:56:10.000Z</published>
+    <updated>2024-11-01T06:46:52.708Z</updated>
+    
+    <content type="html"><![CDATA[<p>现代操作系统普遍采用了虚拟机内存机制以扩展用户或程序可使用的最大内存值，但是不同的系统有不同的内存管理机制，因此适用于某一系统的术语在另一系统上可能并不是同一概念。本文旨在对于windows系统中内存相关的参数进行解析，使得使用者可以对于windows的内存相关参数有一个清晰的理解。</p><span id="more"></span><p>在windows系统中，内存的相关数据可以通过以下四种方法查看：</p><p>（1）任务管理器；</p><p>（2）资源监视器；</p><p>（3）systeminfo；</p><p>（4）procexp；</p><p>下面分别介绍在这四种方法中看到的内存各项参数的具体含义：</p><h1 id="任务管理器内存参数"><a href="#任务管理器内存参数" class="headerlink" title="任务管理器内存参数"></a>任务管理器内存参数</h1><p>一般对windows系统当前运行情况进行查看时，任务管理器都是第一选择。在任务管理器的性能界面上，可以选择内存进行系统内存信息的查看。</p><p><img src="/images/windows_memory_para_analyze/1.png"></p><p>自上而下对相关参数进行介绍：</p><p>（1）内存：16GB</p><p>实际的物理内存，在真实物理机中，就是主板上内存插槽中全部内存条的总容量，在虚拟机中，就是创建虚拟机时配置的内存大小。在系统运行过程中，该参数一般不会发生改变。但是虚拟机具有动态调整内存的功能，因此实际上虚拟机中的该参数是会发生变化的。</p><p>（2）使用中（已压缩）：7.5GB（470MB）</p><p>当前正在被操作系统和正在运行的程序使用的物理内存。包括已分配但是未必正在活跃使用的内存。<br>出现的”已压缩”字样，它指的是操作系统对内存页进行了压缩。这是一种操作系统级别的优化技术，旨在减少内存使用量并提高系统性能。<br>内存压缩通常在系统资源紧张时才会被启用，并且操作系统会根据系统负载和内存需求来自动调整内存压缩的程度。在正常情况下，内存压缩对大多数用户和应用程序不会产生明显的性能下降。然而，在某些情况下，例如对于特定的高性能应用程序或需要大量内存带宽的工作负载，可能会出现轻微的性能影响。</p><pre><code>#关闭内存压缩，重启生效Disable-MMAgent -mc#开启内存压缩，重启生效Enable-MMAgent -mc#查看当前内存压缩状态Get-mmagent </code></pre><p>（3）可用：8.4GB</p><p>表示当前操作系统可用于分配给新进程或应用程序的物理内存，可用内存是系统当前未被使用的内存。<br>初次看到这个参数，可能有的用户会产生一种错觉：只要可用内存不为0，则计算机当前运行情况良好。这种观点是不正确的，windows系统内存的占用关键是看已提交内存的使用率，而可用内存仅代表内存当前未被使用，不代表内存未被分配出去。而这部分内存可被其他进程使用的前提是可以被置换到磁盘上的分页文件中，如果分页文件已满，则这些内存也无法被其他进程使用。</p><p>（4）为硬件保留的内存：0.5MB</p><p>表示由硬件设备保留的物理内存，通常由系统BIOS或UEFI分配。<br>物理内存&#x3D;使用中内存 + 可用内存 + 为硬件保留的内存；</p><p>（5）已提交：9.8&#x2F;33.0GB</p><p>表示已分配的物理内存和虚拟内存的总和，已提交的内存包括当前正在使用的内存和保留的内存空间。<br>左边（9.8G）：当前运行的所有程序总共已经向操作系统申请的内存空间<br>右边（33G）：当前运行的所有程序总共可以向操作系统申请的内存空间</p><p>（6）已缓存：8.4GB</p><p>显示文件系统缓存占用的物理内存。文件系统缓存有助于提高文件访问速度，缓存最近访问过的文件。</p><p>（7）分页缓冲池：770MB</p><p>内核使用的内存池，存储可以交换到磁盘的数据。</p><p>（8）非分页缓冲池：810MB</p><p>内核使用的内存池，存储不可以交换到磁盘的数据。</p><h1 id="资源监视器内存参数"><a href="#资源监视器内存参数" class="headerlink" title="资源监视器内存参数"></a>资源监视器内存参数</h1><p><img src="/images/windows_memory_para_analyze/2.png"></p><h2 id="进程内存参数"><a href="#进程内存参数" class="headerlink" title="进程内存参数"></a>进程内存参数</h2><p>（1）提交：表示已经被分配给进程和系统使用的虚拟内存大小。已提交内存包括物理内存（RAM）和交换文件（Pagefile）中的空间，用于存储进程的代码、数据以及操作系统的内核数据。</p><p>（2）工作集：进程所占用的总物理内存。但是这个值是由两部分组成, 即 专用工作集 （即专用内存）+ 共享工作集（即可共享内存）；</p><p>（3）可共享：该进程和别的进程共享的内存量；</p><p>（4）专用：进程独占的物理内存；</p><pre><code>（1）工作集，即在物理内存中的数据的集合；（2）工作集 = 专用内存 + 共享内存；（3）将所有的 &quot;工作集&quot; 相加后的值会大于任务管理器中内存占用的百分比，因为百分比对共享内存进行排重了，即共享内存会在不同进程中被重复计算；（4）&quot;提交大小&quot; 和 &quot;工作集&quot; 是两个层面的概念，大部分活跃进程的 &quot;工作集&quot; 会大于 &quot;提交大小&quot;，而大部分非活跃的进程 &quot;工作集&quot; 会小于 &quot;提交大小&quot;，但是两者没有绝对关系；</code></pre><h2 id="物理内存参数"><a href="#物理内存参数" class="headerlink" title="物理内存参数"></a>物理内存参数</h2><p>物理内存大小为16G，内部分为了以下几个部分：</p><p>（1）为硬件保留的内存（1MB）：专门为硬件（如显卡、BIOS等）保留的内存，通常在系统启动时由硬件设备直接占用，用户无法访问。</p><p>（2）正在使用（7732MB）：当前正在被操作系统和正在运行的程序使用的物理内存；</p><p>（3）已修改（20MB）：被修改的内存页，但是修改并未写回到磁盘，写回操作完成后这部分内存才能用于其他用途；</p><p>（4）备用（8614MB）：包含未使用的缓存数据和代码的内存；</p><p>（5）可用（17MB）：不包含任何有价值数据，以及当进程、驱动程序、操作系统需要更多的内存时优先使用的内存；</p><p>实际上的可用内存（8631MB）&#x3D; 备用内存（8614MB）+ 可用内存（17MB），而当系统内存负载过高时，也可以看到可用内存急剧减少。</p><p>缓存：当文件被打开时，系统会把文件保存在缓存中，方便下次迅速读写。Windows 2008 R2及以后版本，对这个缓存的使用也做了限制，有一部分物理内存不会被缓存使用，保证系统即使在缓存过大的时候，也有可用物理内存，满足程序使用需求。</p><h1 id="systeminfo内存参数"><a href="#systeminfo内存参数" class="headerlink" title="systeminfo内存参数"></a>systeminfo内存参数</h1><p><img src="/images/windows_memory_para_analyze/3.png"></p><p>（1）Total Physical Memory：16383MB</p><p>对应任务管理器中的总物理内存，即实际的物理内存。在真实物理机中，就是主板上内存插槽中全部内存条的总容量。</p><p>（2）Available Physical Memory：8634MB</p><p>对应任务管理器中的可用内存，表示当前操作系统可用于分配给新进程或应用程序的物理内存，可用内存是系统当前未被使用的内存。</p><p>（3）Virtual Memory：Max Size：33791MB</p><p>对应任务管理器中的可提交内存，表示已分配的物理内存和虚拟内存的总和。</p><p>（4）Virtual Memory：Available：23778MB</p><p>可提交内存与已提交内存之差，表示当前运行的所有程序还可以向操作系统申请的内存空间。</p><p>（5）Virtual Memory：In Use：10013MB</p><p>对应任务管理器中的已提交内存，表示当前运行的所有程序总共已经向操作系统申请的内存空间。</p><p>（6）Page File Location</p><p>分页文件的位置，windows通过分页文件机制提供了远超物理内存大小的虚拟机内存。<br>如下图所示，在windows系统的高级设置-性能选项中可以修改分页文件的设置（文件位置及文件大小）。名称虚拟内存是一个不太准确的标题，忽略即可。</p><p><img src="/images/windows_memory_para_analyze/4.png"></p><h1 id="procexp内存参数"><a href="#procexp内存参数" class="headerlink" title="procexp内存参数"></a>procexp内存参数</h1><p><img src="/images/windows_memory_para_analyze/5.png"></p><p>procexp显示相比较上述的途径更加全面，主要包含提交内存、物理内存、内核内存（分页缓冲池和非分页缓冲池），相关参数都已经在前面有过介绍，这里不再赘述。</p><h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>（1）决定windows系统当前真实内存负载的参数是任务管理器界面的已提交内存，该数值越大，代表系统内部当前各项进程申请的内存资源越多，如果已提交内存远大于真实物理内存，代表一大部分文件被置换到了分页文件中，进行进程切换时可能会有卡断发生；</p><p>（2）资源监视器的物理内存参数真实反应了系统当前物理内存的分配使用情况，该界面的可用内存（备用+可用）越小，代表此时系统的内存压力越大；</p><p>（3）反应进程真实物理内存使用的是其工作集，尤其是工作集中的专用内存，这部分内存表示该进程独占的物理内存，在系统内存压力过大时，可以手动关闭专用内存占用较多的进程；</p><p>（4）驱动有时也会发生内存泄漏，但是相关信息无法通过上述的工具看到，这时可以使用微软提供的poolmon工具进行分析，使用方法可在网络进行搜索；</p><h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><p><a href="https://learn.microsoft.com/zh-cn/troubleshoot/windows-client/performance/introduction-to-the-page-file">https://learn.microsoft.com/zh-cn/troubleshoot/windows-client/performance/introduction-to-the-page-file</a><br><a href="https://answers.microsoft.com/zh-hans/windows/forum/all/windows/e1a6c144-26e1-4c1a-af27-c5c90fd60308?page=2">https://answers.microsoft.com/zh-hans/windows/forum/all/windows/e1a6c144-26e1-4c1a-af27-c5c90fd60308?page=2</a><br><a href="https://blog.51cto.com/markwin/91907">https://blog.51cto.com/markwin/91907</a><br><a href="https://cloud.tencent.com/developer/article/1924864">https://cloud.tencent.com/developer/article/1924864</a><br><a href="https://www.pcoic.com/system/windows/4785.html">https://www.pcoic.com/system/windows/4785.html</a><br><a href="https://docs.freebsd.org/en/articles/vm-design/#allen-briggs-qa">https://docs.freebsd.org/en/articles/vm-design/#allen-briggs-qa</a><br><a href="https://www.itprotoday.com/cloud-computing/the-memory-optimization-hoax">https://www.itprotoday.com/cloud-computing/the-memory-optimization-hoax</a><br><a href="https://www.zhihu.com/question/43714216/answer/1164044678">https://www.zhihu.com/question/43714216/answer/1164044678</a><br><a href="https://github.com/cw1997/memory-allocation-test">https://github.com/cw1997/memory-allocation-test</a><br><a href="https://www.cnblogs.com/oboth-zl/p/17168468.html">https://www.cnblogs.com/oboth-zl/p/17168468.html</a></p>]]></content>
+    
+    
+    <summary type="html">&lt;p&gt;现代操作系统普遍采用了虚拟机内存机制以扩展用户或程序可使用的最大内存值，但是不同的系统有不同的内存管理机制，因此适用于某一系统的术语在另一系统上可能并不是同一概念。本文旨在对于windows系统中内存相关的参数进行解析，使得使用者可以对于windows的内存相关参数有一个清晰的理解。&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="计算机科学" scheme="https://bbbccvbvv.github.io/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A7%91%E5%AD%A6/"/>
+    
+    
+    <category term="windows" scheme="https://bbbccvbvv.github.io/tags/windows/"/>
+    
+    <category term="内存" scheme="https://bbbccvbvv.github.io/tags/%E5%86%85%E5%AD%98/"/>
+    
+  </entry>
   
   <entry>
     <title>windows救援模式下设置完全内存转储</title>
@@ -551,38 +574,6 @@
     <category term="翻译" scheme="https://bbbccvbvv.github.io/tags/%E7%BF%BB%E8%AF%91/"/>
     
     <category term="CPU Allocation" scheme="https://bbbccvbvv.github.io/tags/CPU-Allocation/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>【翻译】libvirt虚拟机xml配置文件格式（3）SMBIOS System Information</title>
-    <link href="https://bbbccvbvv.github.io/2022/09/02/domain_xml_format_SMBIOS-System-Information/"/>
-    <id>https://bbbccvbvv.github.io/2022/09/02/domain_xml_format_SMBIOS-System-Information/</id>
-    <published>2022-09-02T09:00:10.000Z</published>
-    <updated>2023-12-29T02:38:41.453Z</updated>
-    
-    <content type="html"><![CDATA[<p>原文网址：<a href="https://libvirt.org/formatdomain.html#id8" title="Domain XML format">https://libvirt.org/formatdomain.html#id8</a></p><p>一些虚拟机管理器运行控制呈现给客户机的系统信息（例如虚拟机管理器可以填充SMBIOS并通过客户机的dmidecode指令进行检查）。可选元素项sysinfo包含了所有此类信息。自0.8.7版本起。</p><span id="more"></span><pre><code>...&lt;os&gt;  &lt;smbios mode=&#39;sysinfo&#39;/&gt;  ...&lt;/os&gt;&lt;sysinfo type=&#39;smbios&#39;&gt;  &lt;bios&gt;    &lt;entry name=&#39;vendor&#39;&gt;LENOVO&lt;/entry&gt;  &lt;/bios&gt;  &lt;system&gt;    &lt;entry name=&#39;manufacturer&#39;&gt;Fedora&lt;/entry&gt;    &lt;entry name=&#39;product&#39;&gt;Virt-Manager&lt;/entry&gt;    &lt;entry name=&#39;version&#39;&gt;0.9.4&lt;/entry&gt;  &lt;/system&gt;  &lt;baseBoard&gt;    &lt;entry name=&#39;manufacturer&#39;&gt;LENOVO&lt;/entry&gt;    &lt;entry name=&#39;product&#39;&gt;20BE0061MC&lt;/entry&gt;    &lt;entry name=&#39;version&#39;&gt;0B98401 Pro&lt;/entry&gt;    &lt;entry name=&#39;serial&#39;&gt;W1KS427111E&lt;/entry&gt;  &lt;/baseBoard&gt;  &lt;chassis&gt;    &lt;entry name=&#39;manufacturer&#39;&gt;Dell Inc.&lt;/entry&gt;    &lt;entry name=&#39;version&#39;&gt;2.12&lt;/entry&gt;    &lt;entry name=&#39;serial&#39;&gt;65X0XF2&lt;/entry&gt;    &lt;entry name=&#39;asset&#39;&gt;40000101&lt;/entry&gt;    &lt;entry name=&#39;sku&#39;&gt;Type3Sku1&lt;/entry&gt;  &lt;/chassis&gt;  &lt;oemStrings&gt;    &lt;entry&gt;myappname:some arbitrary data&lt;/entry&gt;    &lt;entry&gt;otherappname:more arbitrary data&lt;/entry&gt;  &lt;/oemStrings&gt;&lt;/sysinfo&gt;&lt;sysinfo type=&#39;fwcfg&#39;&gt;  &lt;entry name=&#39;opt/com.example/name&#39;&gt;example value&lt;/entry&gt;  &lt;entry name=&#39;opt/com.coreos/config&#39; file=&#39;/tmp/provision.ign&#39;/&gt;&lt;/sysinfo&gt;...</code></pre><p>sysinfo元素包含一个强制属性项type决定了子元素的布局，支持值如下：</p><h1 id="smbios"><a href="#smbios" class="headerlink" title="smbios"></a>smbios</h1><p>子元素调用特定的SMBIOS值，如果被用在os元素（参照Operating system booting）的smbios子元素间的连接上，将会影响客户机。sysinfo 的每个子元素命名一个SMBIOS块，并且在这些元素中可以是描述块内字段的条目元素列表。识别以下块和条目：</p><h2 id="bios"><a href="#bios" class="headerlink" title="bios"></a>bios</h2><p>这是SMBIOS的块0，条目名称来自：</p><ul><li>vender：BIOS供应商名称</li><li>version：BIOS版本</li><li>date：BIOS发行日期。如果提供了该元素项，则会改为mm&#x2F;dd&#x2F;yy或mm&#x2F;dd&#x2F;yyyy的格式。如果字符串的年部分只有两个数字，则将会假定为19yy年。</li></ul><h2 id="system"><a href="#system" class="headerlink" title="system"></a>system</h2><p>这是SMBIOS的块1，条目名称来自：</p><ul><li>manufacturer：BIOS制造商</li><li>product：产品名称</li><li>version：产品版本</li><li>serial：序列号</li><li>uuid：统一唯一标识符。如果该条目与顶层的uuid的一起设定，则两个元素值必须相同</li><li>sku：识别特定配置的sku编号</li><li>family：识别特定计算机所属的家族系列</li></ul><h2 id="baseBoard"><a href="#baseBoard" class="headerlink" title="baseBoard"></a>baseBoard</h2><p>这是SMBIOS的块2.该元素项可以重复多次用以描述所有的基板（base board）；然而，并不是所有的虚拟机管理器都支持该元素项重复。该元素项有下列的子元素项：</p><ul><li>manufacturer：BIOS的制造商</li><li>product：产品名称</li><li>version：产品版本号</li><li>serial：序列号</li><li>asset：资产标签</li><li>location：机箱内的位置</li></ul><p><strong>注意：bios、system和baseBoard块的错误条目会被忽略，而不会报错。除了uuid验证和日期格式检查之外，所有值都作为字符串传递给虚拟机管理器驱动程序。</strong></p><h2 id="chassis"><a href="#chassis" class="headerlink" title="chassis"></a>chassis</h2><p>自4.1.0起支持。SMBIOS的块3，条目名称来自：</p><ul><li>manufacturer：机箱的制造商</li><li>version：机箱的版本号</li><li>serial：序列号</li><li>asset：资产标签</li><li>sku：sku编号</li></ul><h2 id="oemStrings"><a href="#oemStrings" class="headerlink" title="oemStrings"></a>oemStrings</h2><p>SMBIOS的块11.该元素项只出现一次，却有多个entry子元素项，每一个都提供随机字符串数据。对于entry提供的数据并没有任何限制，如果数据打算由客户机中的应用程序使用，建议使用应用程序名称作为字符串中的前缀。（自4.1.0起支持）</p><h1 id="fwcfg"><a href="#fwcfg" class="headerlink" title="fwcfg"></a>fwcfg</h1><p>一些虚拟机管理器提供统一的方法来调整固件如何配置自身，或者可能包含要为客户机操作系统安装的表，例如引导顺序、ACPI、SMBIOS等。</p><p>如果允许用户自定义自己的配置blob（config blob）。在QEMU的例子中，然后这些出现在domain的sysfs下（如果客户机内核启用FW_CFG_SYSFS配置项），即&#x2F;sys&#x2F;firmware&#x2F;qemu_fw_cfg路径下。注意，这些值适用于<os/>下的<smbios/>模式。自6.5.0起支持。</p><p><strong>注意：由于数据槽数量有限，强烈建议不要使用fwcfg，而应使用 <oemStrings/>。</strong></p><pre><code>&lt;sysinfo type=&#39;fwcfg&#39;&gt;  &lt;entry name=&#39;opt/com.example/name&#39;&gt;example value&lt;/entry&gt;  &lt;entry name=&#39;opt/com.example/config&#39; file=&#39;/tmp/provision.ign&#39;/&gt;&lt;/sysinfo&gt;</code></pre><p>sysinfo元素项拥有多个entry子元素。每一个元素都有强制的name属性，它定义了blob的名称，并且必须以opt&#x2F;开头，并且为了避免与其他名称冲突，建议采用opt&#x2F;$RFQDN&#x2F;$name形式，其中$RFQDN是控制的反向完全限定域名。之后，元素项也可以包含相应数值（直接设置blob值），或者file属性项（从file中设置blob值）。</p><p>本章节描述了用来代表作用域的xml文件格式，根据运行的作用于种类的格式变化，有一些可选配置项用来加载文件。对于特定虚拟机的细节可以查看<br><a href="https://libvirt.org/drivers.html">相关文件</a>。</p>]]></content>
-    
-    
-    <summary type="html">&lt;p&gt;原文网址：&lt;a href=&quot;https://libvirt.org/formatdomain.html#id8&quot; title=&quot;Domain XML format&quot;&gt;https://libvirt.org/formatdomain.html#id8&lt;/a&gt;&lt;/p&gt;
-&lt;p&gt;一些虚拟机管理器运行控制呈现给客户机的系统信息（例如虚拟机管理器可以填充SMBIOS并通过客户机的dmidecode指令进行检查）。可选元素项sysinfo包含了所有此类信息。自0.8.7版本起。&lt;/p&gt;</summary>
-    
-    
-    
-    <category term="计算机科学" scheme="https://bbbccvbvv.github.io/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A7%91%E5%AD%A6/"/>
-    
-    
-    <category term="虚拟化" scheme="https://bbbccvbvv.github.io/tags/%E8%99%9A%E6%8B%9F%E5%8C%96/"/>
-    
-    <category term="kvm" scheme="https://bbbccvbvv.github.io/tags/kvm/"/>
-    
-    <category term="libvirt" scheme="https://bbbccvbvv.github.io/tags/libvirt/"/>
-    
-    <category term="虚拟机xml配置文件" scheme="https://bbbccvbvv.github.io/tags/%E8%99%9A%E6%8B%9F%E6%9C%BAxml%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6/"/>
-    
-    <category term="翻译" scheme="https://bbbccvbvv.github.io/tags/%E7%BF%BB%E8%AF%91/"/>
-    
-    <category term="SMBIOS System Information" scheme="https://bbbccvbvv.github.io/tags/SMBIOS-System-Information/"/>
     
   </entry>
   
