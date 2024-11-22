@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"bbbccvbvv.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="在windows系统下进行开发工作时，往往会遇到文件的检验操作，需要检查文件是否合法。这时通过检查文件的签名是一个有效的方法，但是也会遇到文件包含多个签名信息，这时使用通常的powershell就会遇到难题，因为powershell上相关指令只能显示出一个签名信息，多余的签名无法显示，本文针对这一问题进行阐述。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="获取windows多签名文件的签名信息">
+<meta property="og:url" content="https://bbbccvbvv.github.io/2024/11/22/20241122-windows_get_file_multi_sign/index.html">
+<meta property="og:site_name" content="怀德维宁">
+<meta property="og:description" content="在windows系统下进行开发工作时，往往会遇到文件的检验操作，需要检查文件是否合法。这时通过检查文件的签名是一个有效的方法，但是也会遇到文件包含多个签名信息，这时使用通常的powershell就会遇到难题，因为powershell上相关指令只能显示出一个签名信息，多余的签名无法显示，本文针对这一问题进行阐述。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://bbbccvbvv.github.io/images/windows_get_file_multi_sign/1.png">
+<meta property="og:image" content="https://bbbccvbvv.github.io/images/windows_get_file_multi_sign/2.png">
+<meta property="og:image" content="https://bbbccvbvv.github.io/images/windows_get_file_multi_sign/3.png">
+<meta property="og:image" content="https://bbbccvbvv.github.io/images/windows_get_file_multi_sign/4.png">
+<meta property="article:published_time" content="2024-11-22T10:46:10.000Z">
+<meta property="article:modified_time" content="2024-11-22T06:05:33.538Z">
+<meta property="article:author" content="杨维宁">
+<meta property="article:tag" content="Windows">
+<meta property="article:tag" content="multi-signed">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://bbbccvbvv.github.io/images/windows_get_file_multi_sign/1.png">
+
+<link rel="canonical" href="https://bbbccvbvv.github.io/2024/11/22/20241122-windows_get_file_multi_sign/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>获取windows多签名文件的签名信息 | 怀德维宁</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="怀德维宁" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">怀德维宁</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">大邦维屏，大宗维翰。怀德维宁，宗子维城。</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://bbbccvbvv.github.io/2024/11/22/20241122-windows_get_file_multi_sign/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="杨维宁">
+      <meta itemprop="description" content="天行健，君子以自强不息。地势坤，君子以厚德载物。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="怀德维宁">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          获取windows多签名文件的签名信息
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2024-11-22 18:46:10 / 修改时间：14:05:33" itemprop="dateCreated datePublished" datetime="2024-11-22T18:46:10+08:00">2024-11-22</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A7%91%E5%AD%A6/" itemprop="url" rel="index"><span itemprop="name">计算机科学</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>1.1k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>2 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>在windows系统下进行开发工作时，往往会遇到文件的检验操作，需要检查文件是否合法。这时通过检查文件的签名是一个有效的方法，但是也会遇到文件包含多个签名信息，这时使用通常的powershell就会遇到难题，因为powershell上相关指令只能显示出一个签名信息，多余的签名无法显示，本文针对这一问题进行阐述。</p>
+<span id="more"></span>
+
+<p>以阿里的云服务器的网络驱动netkvm为例，从驱动的属性信息来看，可以得知该驱动包含3个签名信息，分别为：</p>
+<p>表1</p>
+<table>
+<thead>
+<tr>
+<th align="center">index</th>
+<th align="center">subject</th>
+<th align="center">serial</th>
+<th align="center">thumbprint</th>
+<th align="center">digestAlgorithm</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">1</td>
+<td align="center">Alibaba Cloud Computing Co., Ltd.</td>
+<td align="center">09c730c35c9f41a1018acf4c8906d490</td>
+<td align="center">4484ba511350dfa6adb00cc720496e54877f6042</td>
+<td align="center">sha1</td>
+</tr>
+<tr>
+<td align="center">2</td>
+<td align="center">Microsoft Windows Hardware Compatibility Publisher</td>
+<td align="center">3300000062f45cf99e58a96a89000000000062</td>
+<td align="center">fac666005546d6be881a31c1267717879401a950</td>
+<td align="center">sha256</td>
+</tr>
+<tr>
+<td align="center">3</td>
+<td align="center">Alibaba Cloud Computing Co., Ltd.</td>
+<td align="center">09c730c35c9f41a1018acf4c8906d490</td>
+<td align="center">4484ba511350dfa6adb00cc720496e54877f6042</td>
+<td align="center">sha256</td>
+</tr>
+</tbody></table>
+<p><img src="/images/windows_get_file_multi_sign/1.png"></p>
+<p>查看windows文件签名最简单的办法就是直接使用powershell的Get-AuthenticodeSignature指令，但是使用该指令查看基于上述多签名的netkvm文件签名信息，只得到了一个序列号为“3300000062F45CF99E58A96A89000000000062”的签名信息，即表1中的第2条信息，并没有找到其他两条签名的信息，与预期不符。</p>
+<p><img src="/images/windows_get_file_multi_sign/2.png"></p>
+<p>后续继续查找资料，发现了一个开源项目（<a target="_blank" rel="noopener" href="https://github.com/leeqwind/PESignAnalyzer%EF%BC%89%E6%94%AF%E6%8C%81%E8%AF%A5%E5%8A%9F%E8%83%BD%EF%BC%8C%E5%88%A9%E7%94%A8%E9%A1%B9%E7%9B%AE%E4%B8%AD%E8%87%AA%E5%B8%A6%E7%9A%84%E6%96%87%E4%BB%B6%E8%BF%9B%E8%A1%8C%E7%AD%BE%E5%90%8D%E6%9F%A5%E6%89%BE%EF%BC%8C%E5%BE%97%E5%88%B0%E4%BA%86%E4%B8%A4%E6%9D%A1%E7%AD%BE%E5%90%8D%E4%BF%A1%E6%81%AF%EF%BC%8C%E5%88%86%E5%88%AB%E5%AF%B9%E5%BA%94%E8%A1%A81%E4%B8%AD%E7%9A%84%E7%AC%AC1%E6%9D%A1%E5%92%8C%E7%AC%AC2%E6%9D%A1%E7%AD%BE%E5%90%8D%E4%BF%A1%E6%81%AF%E3%80%82">https://github.com/leeqwind/PESignAnalyzer）支持该功能，利用项目中自带的文件进行签名查找，得到了两条签名信息，分别对应表1中的第1条和第2条签名信息。</a></p>
+<p><img src="/images/windows_get_file_multi_sign/3.png"></p>
+<p><img src="/images/windows_get_file_multi_sign/4.png"></p>
+<p>该项目使用CryptQueryObject函数对文件的签名信息进行查询，关于该函数的详情可以参考微软官方链接：<a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/windows/win32/api/wincrypt/nf-wincrypt-cryptqueryobject%E3%80%82">https://learn.microsoft.com/zh-cn/windows/win32/api/wincrypt/nf-wincrypt-cryptqueryobject。</a></p>
+<p>而3个签名信息只显示了两个的原因在于，签名1和3的thumbprint完全一致，因此二者发生了冲突，但是为什么只保留了签名1的信息而非签名3把签名1覆盖掉，则还是不清楚（函数内部签名检索逻辑存在问题？）。</p>
+<script src="https://utteranc.es/client.js" repo="bbbccvbvv/blog_comments" issue-term="pathname" theme="github-light" crossorigin="anonymous" async></script>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Windows/" rel="tag"># Windows</a>
+              <a href="/tags/multi-signed/" rel="tag"># multi-signed</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2024/11/04/20241104-windows_virtual_memory_experiment/" rel="prev" title="因磁盘空间变化引发的windows虚拟内存机制分析验证">
+      <i class="fa fa-chevron-left"></i> 因磁盘空间变化引发的windows虚拟内存机制分析验证
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">杨维宁</p>
+  <div class="site-description" itemprop="description">天行健，君子以自强不息。地势坤，君子以厚德载物。</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">31</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">59</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/bbbccvbvv" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;bbbccvbvv" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:nanjiecunxiaozu@163.com" title="E-Mail → mailto:nanjiecunxiaozu@163.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">杨维宁</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">88k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">2:27</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

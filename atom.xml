@@ -6,7 +6,7 @@
   <link href="https://bbbccvbvv.github.io/atom.xml" rel="self"/>
   
   <link href="https://bbbccvbvv.github.io/"/>
-  <updated>2024-11-07T07:57:49.732Z</updated>
+  <updated>2024-11-22T06:05:33.538Z</updated>
   <id>https://bbbccvbvv.github.io/</id>
   
   <author>
@@ -15,6 +15,29 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>获取windows多签名文件的签名信息</title>
+    <link href="https://bbbccvbvv.github.io/2024/11/22/20241122-windows_get_file_multi_sign/"/>
+    <id>https://bbbccvbvv.github.io/2024/11/22/20241122-windows_get_file_multi_sign/</id>
+    <published>2024-11-22T10:46:10.000Z</published>
+    <updated>2024-11-22T06:05:33.538Z</updated>
+    
+    <content type="html"><![CDATA[<p>在windows系统下进行开发工作时，往往会遇到文件的检验操作，需要检查文件是否合法。这时通过检查文件的签名是一个有效的方法，但是也会遇到文件包含多个签名信息，这时使用通常的powershell就会遇到难题，因为powershell上相关指令只能显示出一个签名信息，多余的签名无法显示，本文针对这一问题进行阐述。</p><span id="more"></span><p>以阿里的云服务器的网络驱动netkvm为例，从驱动的属性信息来看，可以得知该驱动包含3个签名信息，分别为：</p><p>表1</p><table><thead><tr><th align="center">index</th><th align="center">subject</th><th align="center">serial</th><th align="center">thumbprint</th><th align="center">digestAlgorithm</th></tr></thead><tbody><tr><td align="center">1</td><td align="center">Alibaba Cloud Computing Co., Ltd.</td><td align="center">09c730c35c9f41a1018acf4c8906d490</td><td align="center">4484ba511350dfa6adb00cc720496e54877f6042</td><td align="center">sha1</td></tr><tr><td align="center">2</td><td align="center">Microsoft Windows Hardware Compatibility Publisher</td><td align="center">3300000062f45cf99e58a96a89000000000062</td><td align="center">fac666005546d6be881a31c1267717879401a950</td><td align="center">sha256</td></tr><tr><td align="center">3</td><td align="center">Alibaba Cloud Computing Co., Ltd.</td><td align="center">09c730c35c9f41a1018acf4c8906d490</td><td align="center">4484ba511350dfa6adb00cc720496e54877f6042</td><td align="center">sha256</td></tr></tbody></table><p><img src="/images/windows_get_file_multi_sign/1.png"></p><p>查看windows文件签名最简单的办法就是直接使用powershell的Get-AuthenticodeSignature指令，但是使用该指令查看基于上述多签名的netkvm文件签名信息，只得到了一个序列号为“3300000062F45CF99E58A96A89000000000062”的签名信息，即表1中的第2条信息，并没有找到其他两条签名的信息，与预期不符。</p><p><img src="/images/windows_get_file_multi_sign/2.png"></p><p>后续继续查找资料，发现了一个开源项目（<a href="https://github.com/leeqwind/PESignAnalyzer%EF%BC%89%E6%94%AF%E6%8C%81%E8%AF%A5%E5%8A%9F%E8%83%BD%EF%BC%8C%E5%88%A9%E7%94%A8%E9%A1%B9%E7%9B%AE%E4%B8%AD%E8%87%AA%E5%B8%A6%E7%9A%84%E6%96%87%E4%BB%B6%E8%BF%9B%E8%A1%8C%E7%AD%BE%E5%90%8D%E6%9F%A5%E6%89%BE%EF%BC%8C%E5%BE%97%E5%88%B0%E4%BA%86%E4%B8%A4%E6%9D%A1%E7%AD%BE%E5%90%8D%E4%BF%A1%E6%81%AF%EF%BC%8C%E5%88%86%E5%88%AB%E5%AF%B9%E5%BA%94%E8%A1%A81%E4%B8%AD%E7%9A%84%E7%AC%AC1%E6%9D%A1%E5%92%8C%E7%AC%AC2%E6%9D%A1%E7%AD%BE%E5%90%8D%E4%BF%A1%E6%81%AF%E3%80%82">https://github.com/leeqwind/PESignAnalyzer）支持该功能，利用项目中自带的文件进行签名查找，得到了两条签名信息，分别对应表1中的第1条和第2条签名信息。</a></p><p><img src="/images/windows_get_file_multi_sign/3.png"></p><p><img src="/images/windows_get_file_multi_sign/4.png"></p><p>该项目使用CryptQueryObject函数对文件的签名信息进行查询，关于该函数的详情可以参考微软官方链接：<a href="https://learn.microsoft.com/zh-cn/windows/win32/api/wincrypt/nf-wincrypt-cryptqueryobject%E3%80%82">https://learn.microsoft.com/zh-cn/windows/win32/api/wincrypt/nf-wincrypt-cryptqueryobject。</a></p><p>而3个签名信息只显示了两个的原因在于，签名1和3的thumbprint完全一致，因此二者发生了冲突，但是为什么只保留了签名1的信息而非签名3把签名1覆盖掉，则还是不清楚（函数内部签名检索逻辑存在问题？）。</p><script src="https://utteranc.es/client.js" repo="bbbccvbvv/blog_comments" issue-term="pathname" theme="github-light" crossorigin="anonymous" async></script>]]></content>
+    
+    
+    <summary type="html">&lt;p&gt;在windows系统下进行开发工作时，往往会遇到文件的检验操作，需要检查文件是否合法。这时通过检查文件的签名是一个有效的方法，但是也会遇到文件包含多个签名信息，这时使用通常的powershell就会遇到难题，因为powershell上相关指令只能显示出一个签名信息，多余的签名无法显示，本文针对这一问题进行阐述。&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="计算机科学" scheme="https://bbbccvbvv.github.io/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A7%91%E5%AD%A6/"/>
+    
+    
+    <category term="Windows" scheme="https://bbbccvbvv.github.io/tags/Windows/"/>
+    
+    <category term="multi-signed" scheme="https://bbbccvbvv.github.io/tags/multi-signed/"/>
+    
+  </entry>
   
   <entry>
     <title>因磁盘空间变化引发的windows虚拟内存机制分析验证</title>
@@ -536,38 +559,6 @@
     <category term="编译环境" scheme="https://bbbccvbvv.github.io/tags/%E7%BC%96%E8%AF%91%E7%8E%AF%E5%A2%83/"/>
     
     <category term="文件检查" scheme="https://bbbccvbvv.github.io/tags/%E6%96%87%E4%BB%B6%E6%A3%80%E6%9F%A5/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>【翻译】libvirt虚拟机xml配置文件格式（5）IOThreads Allocation</title>
-    <link href="https://bbbccvbvv.github.io/2022/10/19/domain_xml_format_IOThreads-Allocation/"/>
-    <id>https://bbbccvbvv.github.io/2022/10/19/domain_xml_format_IOThreads-Allocation/</id>
-    <published>2022-10-19T09:36:10.000Z</published>
-    <updated>2023-12-29T02:38:41.453Z</updated>
-    
-    <content type="html"><![CDATA[<p>原文网址：<a href="https://libvirt.org/formatdomain.html#id8" title="Domain XML format">https://libvirt.org/formatdomain.html#id8</a></p><p>IOThreads是支持磁盘设备的专用事件循环线程，用于执行块I&#x2F;O请求，以提高可伸缩性，尤其是在具有许多LUN的SMP主机&#x2F;客户机上。自1.2.8起（仅限于QEMU）。</p><span id="more"></span><pre><code>&lt;domain&gt;  ...  &lt;iothreads&gt;4&lt;/iothreads&gt;  ...&lt;/domain&gt;&lt;domain&gt;  ...  &lt;iothreadids&gt;    &lt;iothread id=&quot;2&quot;/&gt;    &lt;iothread id=&quot;4&quot;/&gt;    &lt;iothread id=&quot;6&quot;/&gt;    &lt;iothread id=&quot;8&quot; thread_pool_min=&quot;2&quot; thread_pool_max=&quot;32&quot;/&gt;  &lt;/iothreadids&gt;  &lt;defaultiothread thread_pool_min=&quot;8&quot; thread_pool_max=&quot;16&quot;/&gt;  ...&lt;/domain&gt;</code></pre><h1 id="iothreads"><a href="#iothreads" class="headerlink" title="iothreads"></a>iothreads</h1><p>此可选元素的内容定义要分配给虚拟机以供支持的目标存储设备使用的 IOThread数量。每一个主机CPU只有1个或2个IOThread。可能有多个受支持的设备分配给每个IOThread。自1.2.8起。</p><h1 id="iothreadids"><a href="#iothreadids" class="headerlink" title="iothreadids"></a>iothreadids</h1><p>可选的iothreadids元素提供了为虚拟机专门定义IOThread ID的能力。默认情况下，IOThread ID 是从1到为虚拟机定义的iothreads的数量顺序编号的。id属性项用于定义IOThread ID。id属性项必须是一个大于0的正整数。如果定义的iothreadids少于为虚拟机定义的iothreads，则libvirt将从1开始按顺序填充iothreadids，避免任何预定义的id。如果iothreadids大于为虚拟机定义的iothreads，iothreads的值将会相应调整。自1.2.15起。该元素有两个可选属性项thread_pool_min和thread_pool_max用于定义给定IOThread工作线程的上下限。前者可能是0，后者绝不会为0.自8.5.0起。</p><h1 id="defaultiothread"><a href="#defaultiothread" class="headerlink" title="defaultiothread"></a>defaultiothread</h1><p>该元素代表了虚拟机管理程序内部的默认事件循环，为指定特定IOThread的I&#x2F;O请求会被该循环处理。该元素可设置thread_pool_min和thread_pool_max属性项，指定了默认事件循环工作线程的上下限数量。模拟器可能是多线程的并按需生成所谓的工作线程。通常两个属性项都不会去设置（使得模拟器使用其自身的默认值），除非模拟器在实时工作负载中运行，因此无法承受生成新工作线程所需时间的不可预测性。自8.5.0起。</p><p>本章节描述了用来代表作用域的xml文件格式，根据运行的作用于种类的格式变化，有一些可选配置项用来加载文件。对于特定虚拟机的细节可以查看<br><a href="https://libvirt.org/drivers.html">相关文件</a>。</p>]]></content>
-    
-    
-    <summary type="html">&lt;p&gt;原文网址：&lt;a href=&quot;https://libvirt.org/formatdomain.html#id8&quot; title=&quot;Domain XML format&quot;&gt;https://libvirt.org/formatdomain.html#id8&lt;/a&gt;&lt;/p&gt;
-&lt;p&gt;IOThreads是支持磁盘设备的专用事件循环线程，用于执行块I&amp;#x2F;O请求，以提高可伸缩性，尤其是在具有许多LUN的SMP主机&amp;#x2F;客户机上。自1.2.8起（仅限于QEMU）。&lt;/p&gt;</summary>
-    
-    
-    
-    <category term="计算机科学" scheme="https://bbbccvbvv.github.io/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A7%91%E5%AD%A6/"/>
-    
-    
-    <category term="虚拟化" scheme="https://bbbccvbvv.github.io/tags/%E8%99%9A%E6%8B%9F%E5%8C%96/"/>
-    
-    <category term="kvm" scheme="https://bbbccvbvv.github.io/tags/kvm/"/>
-    
-    <category term="libvirt" scheme="https://bbbccvbvv.github.io/tags/libvirt/"/>
-    
-    <category term="虚拟机xml配置文件" scheme="https://bbbccvbvv.github.io/tags/%E8%99%9A%E6%8B%9F%E6%9C%BAxml%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6/"/>
-    
-    <category term="翻译" scheme="https://bbbccvbvv.github.io/tags/%E7%BF%BB%E8%AF%91/"/>
-    
-    <category term="IOThreads Allocation" scheme="https://bbbccvbvv.github.io/tags/IOThreads-Allocation/"/>
     
   </entry>
   
