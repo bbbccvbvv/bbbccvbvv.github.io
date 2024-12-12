@@ -6,7 +6,7 @@
   <link href="https://bbbccvbvv.github.io/atom.xml" rel="self"/>
   
   <link href="https://bbbccvbvv.github.io/"/>
-  <updated>2024-11-22T08:24:13.733Z</updated>
+  <updated>2024-12-12T07:16:59.706Z</updated>
   <id>https://bbbccvbvv.github.io/</id>
   
   <author>
@@ -15,6 +15,31 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>windows服务配置ErrorControl致使系统不断重启</title>
+    <link href="https://bbbccvbvv.github.io/2024/12/12/20241212-windows_restart_by_service_errorcontrol/"/>
+    <id>https://bbbccvbvv.github.io/2024/12/12/20241212-windows_restart_by_service_errorcontrol/</id>
+    <published>2024-12-12T05:30:10.000Z</published>
+    <updated>2024-12-12T07:16:59.706Z</updated>
+    
+    <content type="html"><![CDATA[<p>最近遇到了一个windows系统不断重启的问题，感到有些不知所措。后来其他同事发现了类似的问题，成功解决了异常的windows重启。现在就使用自己编写的程序尝试复现问题。</p><span id="more"></span><p>异常现象比较简单，启动windows系统后，系统处于设备准备或显示出登录界面后会不断重启。起初以为是文件系统损坏或注册表异常，但是挂载救援模式进行文件系统修复和使用备份注册表覆盖当前使用的注册表后仍然无法修复。后来参考网络资料，才知道是windows服务的ErrorControl配置异常产生的问题。详情可参考：<a href="https://cloud.tencent.com/developer/article/1853792%E3%80%82">https://cloud.tencent.com/developer/article/1853792。</a></p><p>从相关文档中可知，服务的ErrorControl设置为3后，在服务启动过程中如果出现异常造成服务启动失败，那么系统就会重启，然后使用上次的成功配置继续尝试启动。</p><p>这里首先生成一个异常的exe，该exe会触发除0异常，模拟服务启动过程中启动失败的场景。</p><pre><code>#include &lt;stdio.h&gt;int selfDivide(int val) &#123;    return 100 / val;&#125;int main() &#123;    for (int i = 10; i &gt; -1; --i) &#123;        printf(&quot;Result is %d.\n&quot;, selfDivide(i));    &#125;    return 0;&#125;</code></pre><p>然后在系统中将该exe注册为服务，并设置为开机自动启动。</p><pre><code>sc create testservice binpath= C:\divide_zero_error.exe type= own start= auto displayname= testservice</code></pre><p>可以看到在上述的创建服务代码中，并没有显式指定ErrorControl的配置值，该值在未显式指定的条件下被系统默认设置为了1。</p><p><img src="/images/windows_restart_by_service_errorcontrol/1.png"></p><p>此时如果不对其进行更改，直接重启系统，并不会发生不断重启的异常，只是可以在系统日志中看到，与testservice服务相关的异常记录项。</p><p><img src="/images/windows_restart_by_service_errorcontrol/2.png"></p><p>更改testservice服务的ErrorControl的配置值，将其改为3，再次重启系统。</p><p><img src="/images/windows_restart_by_service_errorcontrol/3.png"></p><p>这时就会触发不断重启的异常，挂载救援模式，查看系统日志，其内容如下：</p><p><img src="/images/windows_restart_by_service_errorcontrol/4.png"></p><p>在该日志中无法看到不断重启时的相关事件记录，但能看到异常发生前的系统异常事件记录。</p><p><img src="/images/windows_restart_by_service_errorcontrol/5.png"></p><p>此时加载注册表进行查看，看到注册表中存在controlset1和controlset2两个控制集，当前默认选择的控制集是1.</p><p><img src="/images/windows_restart_by_service_errorcontrol/6.png"></p><p>将当前的控制集改为2，解除救援模式，系统可以正常启动。</p><p><img src="/images/windows_restart_by_service_errorcontrol/7.png"></p><p>此时正常进入系统，查看currentcontrolset中testservice服务的ErrorControl的配置值，如果是3（不是则改为3），重启系统会再次发生不断重启事件。</p><p><img src="/images/windows_restart_by_service_errorcontrol/8.png"></p><p>再次挂载救援模式，查看注册表相关配置。可以看到增加了currentcontrolset3，currentcontrolset1消失，这个也可以作为该问题的一个佐证。</p><p><img src="/images/windows_restart_by_service_errorcontrol/9.png"></p><p>因此在遇到相同问题时，可以从正常启动时服务启动失败的相关系统日志中查看对应的服务项，并修改ErrorControl配置项进行修复。</p><p>备注：服务启动类型改为禁用存在被其他程序拉起的可能性，因此直接修改ErrorControl配置项较好。</p><script src="https://utteranc.es/client.js" repo="bbbccvbvv/blog_comments" issue-term="pathname" theme="github-light" crossorigin="anonymous" async></script>]]></content>
+    
+    
+    <summary type="html">&lt;p&gt;最近遇到了一个windows系统不断重启的问题，感到有些不知所措。后来其他同事发现了类似的问题，成功解决了异常的windows重启。现在就使用自己编写的程序尝试复现问题。&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="计算机科学" scheme="https://bbbccvbvv.github.io/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A7%91%E5%AD%A6/"/>
+    
+    
+    <category term="Windows" scheme="https://bbbccvbvv.github.io/tags/Windows/"/>
+    
+    <category term="service" scheme="https://bbbccvbvv.github.io/tags/service/"/>
+    
+    <category term="ErrorControl" scheme="https://bbbccvbvv.github.io/tags/ErrorControl/"/>
+    
+  </entry>
   
   <entry>
     <title>获取windows多签名文件的签名信息</title>
@@ -397,31 +422,6 @@
     <category term="reading and writng memory" scheme="https://bbbccvbvv.github.io/tags/reading-and-writng-memory/"/>
     
     <category term="virtual address" scheme="https://bbbccvbvv.github.io/tags/virtual-address/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>windows服务配置ErrorControl致使系统不断重启</title>
-    <link href="https://bbbccvbvv.github.io/2022/12/12/20241212-windows_restart_by_service_errorcontrol/"/>
-    <id>https://bbbccvbvv.github.io/2022/12/12/20241212-windows_restart_by_service_errorcontrol/</id>
-    <published>2022-12-12T05:30:10.000Z</published>
-    <updated>2024-12-12T07:08:22.481Z</updated>
-    
-    <content type="html"><![CDATA[<p>最近遇到了一个windows系统不断重启的问题，感到有些不知所措。后来其他同事发现了类似的问题，成功解决了异常的windows重启。现在就使用自己编写的程序尝试复现问题。</p><span id="more"></span><p>异常现象比较简单，启动windows系统后，系统处于设备准备或显示出登录界面后会不断重启。起初以为是文件系统损坏或注册表异常，但是挂载救援模式进行文件系统修复和使用备份注册表覆盖当前使用的注册表后仍然无法修复。后来参考网络资料，才知道是windows服务的ErrorControl配置异常产生的问题。详情可参考：<a href="https://cloud.tencent.com/developer/article/1853792%E3%80%82">https://cloud.tencent.com/developer/article/1853792。</a></p><p>从相关文档中可知，服务的ErrorControl设置为3后，在服务启动过程中如果出现异常造成服务启动失败，那么系统就会重启，然后使用上次的成功配置继续尝试启动。</p><p>这里首先生成一个异常的exe，该exe会触发除0异常，模拟服务启动过程中启动失败的场景。</p><pre><code>#include &lt;stdio.h&gt;int selfDivide(int val) &#123;    return 100 / val;&#125;int main() &#123;    for (int i = 10; i &gt; -1; --i) &#123;        printf(&quot;Result is %d.\n&quot;, selfDivide(i));    &#125;    return 0;&#125;</code></pre><p>然后在系统中将该exe注册为服务，并设置为开机自动启动。</p><pre><code>sc create testservice binpath= C:\divide_zero_error.exe type= own start= auto displayname= testservice</code></pre><p>可以看到在上述的创建服务代码中，并没有显式指定ErrorControl的配置值，该值在未显式指定的条件下被系统默认设置为了1。</p><p><img src="/images/windows_restart_by_service_errorcontrol/1.png"></p><p>此时如果不对其进行更改，直接重启系统，并不会发生不断重启的异常，只是可以在系统日志中看到，与testservice服务相关的异常记录项。</p><p><img src="/images/windows_restart_by_service_errorcontrol/2.png"></p><p>更改testservice服务的ErrorControl的配置值，将其改为3，再次重启系统。</p><p><img src="/images/windows_restart_by_service_errorcontrol/3.png"></p><p>这时就会触发不断重启的异常，挂载救援模式，查看系统日志，其内容如下：</p><p><img src="/images/windows_restart_by_service_errorcontrol/4.png"></p><p>在该日志中无法看到不断重启时的相关事件记录，但能看到异常发生前的系统异常事件记录。</p><p><img src="/images/windows_restart_by_service_errorcontrol/5.png"></p><p>此时加载注册表进行查看，看到注册表中存在controlset1和controlset2两个控制集，当前默认选择的控制集是1.</p><p><img src="/images/windows_restart_by_service_errorcontrol/6.png"></p><p>将当前的控制集改为2，解除救援模式，系统可以正常启动。</p><p><img src="/images/windows_restart_by_service_errorcontrol/7.png"></p><p>此时正常进入系统，查看currentcontrolset中testservice服务的ErrorControl的配置值，如果是3（不是则改为3），重启系统会再次发生不断重启事件。</p><p><img src="/images/windows_restart_by_service_errorcontrol/8.png"></p><p>再次挂载救援模式，查看注册表相关配置。可以看到增加了currentcontrolset3，currentcontrolset1消失，这个也可以作为该问题的一个佐证。</p><p><img src="/images/windows_restart_by_service_errorcontrol/9.png"></p><p>因此在遇到相同问题时，可以从正常启动时服务启动失败的相关系统日志中查看对应的服务项，并修改ErrorControl配置项进行修复。</p><p>备注：服务启动类型改为禁用存在被其他程序拉起的可能性，因此直接修改ErrorControl配置项较好。</p><script src="https://utteranc.es/client.js" repo="bbbccvbvv/blog_comments" issue-term="pathname" theme="github-light" crossorigin="anonymous" async></script>]]></content>
-    
-    
-    <summary type="html">&lt;p&gt;最近遇到了一个windows系统不断重启的问题，感到有些不知所措。后来其他同事发现了类似的问题，成功解决了异常的windows重启。现在就使用自己编写的程序尝试复现问题。&lt;/p&gt;</summary>
-    
-    
-    
-    <category term="计算机科学" scheme="https://bbbccvbvv.github.io/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A7%91%E5%AD%A6/"/>
-    
-    
-    <category term="Windows" scheme="https://bbbccvbvv.github.io/tags/Windows/"/>
-    
-    <category term="service" scheme="https://bbbccvbvv.github.io/tags/service/"/>
-    
-    <category term="ErrorControl" scheme="https://bbbccvbvv.github.io/tags/ErrorControl/"/>
     
   </entry>
   
