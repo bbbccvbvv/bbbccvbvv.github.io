@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"bbbccvbvv.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="windows常见的启动问题包含以下类型：">
+<meta property="og:type" content="article">
+<meta property="og:title" content="windows常见启动问题">
+<meta property="og:url" content="https://bbbccvbvv.github.io/2024/12/24/20241224-windows_common_boot_problems/index.html">
+<meta property="og:site_name" content="怀德维宁">
+<meta property="og:description" content="windows常见的启动问题包含以下类型：">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://bbbccvbvv.github.io/images/windows_common_boot_problems/1.png">
+<meta property="og:image" content="https://bbbccvbvv.github.io/images/windows_common_boot_problems/2.png">
+<meta property="og:image" content="https://bbbccvbvv.github.io/images/windows_common_boot_problems/3.png">
+<meta property="og:image" content="https://bbbccvbvv.github.io/images/windows_common_boot_problems/4.png">
+<meta property="og:image" content="https://bbbccvbvv.github.io/images/windows_common_boot_problems/5.png">
+<meta property="article:published_time" content="2024-12-24T05:26:10.000Z">
+<meta property="article:modified_time" content="2024-12-24T08:24:45.105Z">
+<meta property="article:author" content="杨维宁">
+<meta property="article:tag" content="Windows">
+<meta property="article:tag" content="boot">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://bbbccvbvv.github.io/images/windows_common_boot_problems/1.png">
+
+<link rel="canonical" href="https://bbbccvbvv.github.io/2024/12/24/20241224-windows_common_boot_problems/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>windows常见启动问题 | 怀德维宁</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="怀德维宁" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">怀德维宁</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">大邦维屏，大宗维翰。怀德维宁，宗子维城。</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://bbbccvbvv.github.io/2024/12/24/20241224-windows_common_boot_problems/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="杨维宁">
+      <meta itemprop="description" content="天行健，君子以自强不息。地势坤，君子以厚德载物。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="怀德维宁">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          windows常见启动问题
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2024-12-24 13:26:10 / 修改时间：16:24:45" itemprop="dateCreated datePublished" datetime="2024-12-24T13:26:10+08:00">2024-12-24</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A7%91%E5%AD%A6/" itemprop="url" rel="index"><span itemprop="name">计算机科学</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>5.6k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>9 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>windows常见的启动问题包含以下类型：</p>
+<span id="more"></span>
+
+<h1 id="主引导记录损坏（mbr-corruption）"><a href="#主引导记录损坏（mbr-corruption）" class="headerlink" title="主引导记录损坏（mbr corruption）"></a>主引导记录损坏（mbr corruption）</h1><p>现象：主引导记录损坏的系统会在bios上电自检（post）阶段显示黑屏，并展示bios版本信息和oem品牌标识，之后系统卡住（hang）。根据mbr损坏的类型的不同，用户可能会看到系列的信息：“无效的分区表（Invalid partition table）”、“加载操作系统异常（Error loading operating system）”或者“操作系统缺失（Missing operating system）”。</p>
+<p><img src="/images/windows_common_boot_problems/1.png"></p>
+<p>成因：硬盘异常、windows运行时由于驱动bug造成的磁盘损坏或者病毒的蓄意破坏都会造成主引导记录损坏。</p>
+<p>修复：开机进入windows恢复环境（windows recovery environment），选择“命令提示符（Command Prompt）”选项，之后运行“bootrec &#x2F;fixmbr”命令。该命令会替换主引导记录中的运行代码。</p>
+<h1 id="引导扇区损坏（Boot-Sector-Corruption）"><a href="#引导扇区损坏（Boot-Sector-Corruption）" class="headerlink" title="引导扇区损坏（Boot Sector Corruption）"></a>引导扇区损坏（Boot Sector Corruption）</h1><p>现象：引导扇区损坏的现象与主引导记录损坏相似，在bios上电自检后，系统卡在黑屏状态，此时可能在屏幕上显示“磁盘读取异常（A disk read error occurred）”、“bootmgr文件缺失（BOOTMGR is missing）”或“bootmgr文件被压缩（BOOTMGR is compressed）”等异常信息。</p>
+<p><img src="/images/windows_common_boot_problems/2.png"></p>
+<p>成因：硬盘异常、windows运行时由于驱动bug造成的磁盘损坏或者病毒的蓄意破坏都会造成引导扇区损坏。</p>
+<p>修复：开机进入windows恢复环境（windows recovery environment），选择“命令提示符（Command Prompt）”选项，之后运行“bootrec &#x2F;fixboot”命令。该命令会重写用户指定的卷的引导扇区。如果系统卷和引导卷不一致，那就需要在两个卷上都运行这个命令。</p>
+<h1 id="bcd配置错误（BCD-Misconfiguration）"><a href="#bcd配置错误（BCD-Misconfiguration）" class="headerlink" title="bcd配置错误（BCD Misconfiguration）"></a>bcd配置错误（BCD Misconfiguration）</h1><p>现象：在bios上电自检后，用户可能会看到如下的错误信息“windows因为计算机磁盘硬件配置问题无法启动（Windows could not start because of a computer disk hardware configuration problem）”、“无法从选定的引导磁盘上读取文件（Could not read from selected boot disk）”或“检查引导路径和磁盘硬件（Check boot path and disk hardware）”</p>
+<p><img src="/images/windows_common_boot_problems/3.png"></p>
+<p>成因：bcd被删除、bcd损坏或着由于分区的卷名称的改变造成不再指向引导卷都会造成该问题。</p>
+<p>修复：开机进入windows恢复环境（windows recovery environment），选择“命令提示符（Command Prompt）”选项，之后运行“bootrec &#x2F;scanos”和“bootrec &#x2F;rebuildbcd”命令。这些命令会扫描每一个卷查找windows安装文件。如果发现了安装文件，就会询问用户是否将其作为引导配置项加入到bcd中，是否在引导菜单中展示对应的安装程序名称。对于其他的bcd相关的损坏情况，用户也可以使用Bcdedit.exe工具进行构建新的bcd或者复制现有的良好bcd文件的操作。</p>
+<h1 id="系统文件损坏（System-File-Corruption）"><a href="#系统文件损坏（System-File-Corruption）" class="headerlink" title="系统文件损坏（System File Corruption）"></a>系统文件损坏（System File Corruption）</h1><p>现象：系统文件损坏包含多种方式，例如可执行文件损坏、驱动损坏或dll损坏等。一种方式是在bios上电自检后，黑屏上会显示如下的信息“windows无法启动因为下列文件缺失或损坏（Windows could not start because the following file is missing or corrupt）”，后续会跟着对应文件的名称，并请求重新安装对应文件。另一种方式是引导阶段产生一个蓝屏崩溃，并伴随着如下的文本信息“停止码：0xC0000135（无法定位组件）”（STOP: 0xC0000135 {Unable to Locate Component}）。</p>
+<p><img src="/images/windows_common_boot_problems/4.png"></p>
+<p>成因：系统文件所在的卷损坏、系统文件被删除或损坏都会造成该问题。</p>
+<p>修复：开机进入windows恢复环境（windows recovery environment），选择“命令提示符（Command Prompt）”选项，之后运行“chkdsk”命令。chkdsk程序会尝试修复卷损坏。如果chkdsk程序没有报告任何问题，请获取有问题的系统文件的备份。可以检查%SystemRoot%\winsxs\Backup目录。windows会把windows资源保护访问的许多系统文件的备份纺织在这里。如果无法在该路径下找到对应的系统文件备份，可以尝试从互联网上获取对应的文件。注意备份文件必须与正在替换的文件来自同一系统版本或补丁程序。<br>在某些情况下，多个系统文件被删除或损坏，因此修复进程在用户逐个修复系统文件时需要进行多次重启和启动失败。如果用户认为系统文件损坏范围较大，建议从系统的备份中进行系统恢复，例如从windows备份程序产生或来自于一个系统恢复点的系统备份文件。<br>当用户运行备份与恢复（backup and restore）程序（位于开始菜单的维护文件夹中）时，会产生一个系统镜像恢复镜像，该镜像包含系统卷和引导卷中的全部文件，并伴随着一个存储了系统磁盘和卷信息的软盘。为了从这样一个镜像中恢复系统，从windows安装媒介中引导启动并在出现提示时选择对应的选项（或者使用更早之前展示的winre）。<br>如果没有可以用来进行恢复的备份镜像，最后的手段就是运行windows修复安装：从windows安装媒介中引导启动，按照向导如同进行新系统安装一样操作。向导会向使用者询问时进行系统修复还是重新安装系统。选择进行系统修复，安装程序将会重安装全部的系统文件，保留用户的应用程序数据和注册表设置。</p>
+<h1 id="系统注册表文件损坏（System-Hive-Corruption）"><a href="#系统注册表文件损坏（System-Hive-Corruption）" class="headerlink" title="系统注册表文件损坏（System Hive Corruption）"></a>系统注册表文件损坏（System Hive Corruption）</h1><p>现象：如果系统注册表文件缺失或损坏，系统会在bios上电自检后显示黑屏，winload会在屏幕上显示如下信息“windows因为下列文件缺失或损坏而无法启动：\WINDOWS\SYSTEM32\CONFIG\­SYSTEM”（Windows could not start because the following file is missing or corrupt: \WINDOWS\SYSTEM32\CONFIG\­SYSTEM）。</p>
+<p><img src="/images/windows_common_boot_problems/5.png"></p>
+<p>成因：包含系统引导启动所需的配置文件的注册表文件损坏或被删除。</p>
+<p>修复：开机进入windows恢复环境（windows recovery environment），选择“命令提示符（Command Prompt）”选项，之后运行“chkdsk”命令。如果问题未被修复，就去获取系统注册表文件的备份。windows每隔12小时会把系统注册表文件备份到%SystemRoot%\System32\Config\RegBack路径下（先前的备份文件会被重命名，带有一个.old的扩展后缀名称），因此就可以复制该路径下的文件到%SystemRoot%\System32\Config文件夹中覆盖异常的注册表文件。<br>如果启用了系统恢复功能，用户可以从恢复点获取一个时间上更加接近当前时间的注册表备份文件，该文件包含system注册表文件。</p>
+<h1 id="启动后崩溃或卡顿（Post–Splash-Screen-Crash-or-Hang）"><a href="#启动后崩溃或卡顿（Post–Splash-Screen-Crash-or-Hang）" class="headerlink" title="启动后崩溃或卡顿（Post–Splash Screen Crash or Hang）"></a>启动后崩溃或卡顿（Post–Splash Screen Crash or Hang）</h1><p>现象：windows启动界面展示，桌面出现或者用户成功登录后发生了异常，出现了蓝屏崩溃或卡顿，整个系统被冻结或者鼠标光标可以移动但是系统没有任何反应。</p>
+<p>成因：这个问题通常是由设备驱动程序的异常引发，但是有时也可能是系统注册表文件（不是system注册表文件）的损坏引起。</p>
+<p>修复：用户可以使用多种方法尝试修复该问题。首先可以尝试使用最后已知正确的配置文件。最后已知正确（LKG：Last known good）就是指最后一次成功引导启动系统的注册表控制集。因为控制集包含了核心系统配置、设备驱动程序和服务注册表数据库，因此使用该版本将不会受到新增系统更改或新安装的驱动或服务的影响，避免因这些问题产生的异常。用户也可以在引导启动过程中按下f8按键访问之前进入安全引导模式的相同菜单中，在这里选择使用最后已知正确的配置文件进行系统启动。</p>
+<p>如果使用LKG配置文件启动系统，系统会保存用户拒绝的控制集，并为其添加失败（failed）控制集的标签。在使用后LKG配置文件成功启动系统后，用户也可以将成功启动的控制集与失败的控制集配置导出到.reg文件中，并进行比较以确定系统启动失败的原因。用户可以通过使用regedit的导出功能实现这一操作，可以参考如下的文件菜单操作：</p>
+<p>（1）运行regedit打开注册表，选择HKLM\SYSTEM\CurrentControlSet路径；</p>
+<p>（2）在file菜单中选择export，将控制集保存在一个自命名的good.reg后缀的文件中；</p>
+<p>（3）打开HKLM\SYSTEM\Select路径，读取failed的值xxx，选择名称为HKLM\SYSTEM\Controlxxx的子健；</p>
+<p>（4）将控制集配置导出到名为bad.reg的文件中；</p>
+<p>（5）使用WordPad程序把good.reg中的全部CurrentControlSet实例全局替换为ControlSet；</p>
+<p>（6）使用WordPad程序把bad.reg中的全部Controlxxx实例全局替换为ControlSet；</p>
+<p>（7）运行支持工具Windiff比较两个文件；</p>
+<p>failed控制集和正常控制集可能会存在多处不同，因此用户需要把检查集中在control子键、驱动的parameters子键和services子键中注册的服务上。忽略控制集的services分支中的驱动注册表的enum子键的更改。</p>
+<p>如果问题是上次成功启动前就已存在的驱动程序或服务造成的，那么lkg也无法成功启动系统。与之类似，如果控制集外存在异常配置设置或者在上次成功启动前问题就已存在，那么lkg也不会起作用。在这种情况下，下一步就是尝试安全模式启动。如果系统成功在安全模式下启动，就可以确认是特定的驱动程序造成了系统启动失败，用户可以通过使用设备管理器禁用设备驱动程序。可以通过选择异常驱动并从action菜单选择disable操作实现。如果用户最近更新了驱动程序，可以认为是更新引入了异常，用户可以在设备管理器中将对应的驱动程序回滚到先前版本。双击对应设备打开起属性对话框，点击驱动标签页中的“Roll Back Driver”即可实现驱动回滚。</p>
+<p>在启用了系统还原（System Restore）功能的系统中，如果lkg无法启动系统，可以将系统回滚到先前的时间点。安全模式会检查恢复点是否存在，如果存在就会询问用户是否登录到安装文件中进行人工检查或修复，或者直接加载系统还原（System Restore）向导程序。如果用户知道问题成因并想要自动修复，或者用户不知道问题成因但不想浪费过多时间调查原因，那使用系统还原（System Restore）使得系统恢复正常是十分有吸引力的。</p>
+<p>如果系统还原不可用或者用户以安全模式成功启动系统后想要明确系统崩溃的成因，可以在不成功的开机启动时通过f8进入特殊的引导菜单并选择引导记录（boot logging）选项获取引导日志记录。会话管理器（%SystemRoot%\System32\Smss.exe）会把记录引导启动过程中系统加载与不加载的设备驱动程序的相关记录信息保存到%SystemRoot%\ntbtlog.txt文件中，因此会话管理器初始化完成后，如果发生了系统崩溃或卡顿，用户就可以获得对应的引导日志。当用户重启进入安全模式后，系统就会把新条目添加到现有的引导日志中。摘录指向异常开机与安全模式开机的相关信息，并保存在不同的文件中。删除那些包含“未加载驱动”（Did not load driver）的文本行，之后使用例如windiff之类的文本比较工具进行比较。逐一禁用那些正常启动中加载但是安全模式启动中未加载的驱动程序，直到系统可以成功开机启动。（之后重启启用那些与问题无关的驱动程序。）</p>
+<p>如果用户无法获得正常开机时的引导日志（例如系统在会话管理器初始化前就崩溃）、如果系统在安全模式也发生崩溃或者正常模式和安全模式的启动日志对比未显示任何明显不同（例如造成启动异常的驱动程序在会话管理器初始化完成后才被加载启动），下一个工具就是驱动验证器与崩溃转储文件分析同时进行。</p>
+<h1 id="备注"><a href="#备注" class="headerlink" title="备注"></a>备注</h1><p>（1）上述描述主要来自于对于《Windows Internals》第六版第13章《stratup and Shutdown》中《Solving Common Boot Problems》章节的翻译，读者可以查询对应的原文获取原版的相关描述；</p>
+<p>（2）上述方法在当前虚拟化背景下有些不可用，最主要的就是云厂商在云环境下使用了特定驱动（例如virtio）的存储器，而winre中不包含对应的驱动文件，因此在引导开机异常进入winre后，winre因为驱动问题无法识别系统磁盘，自然也无法进行相关的修复动作；</p>
+<p>（3）可以通过向winre中打入对应的驱动文件解决该问题（详细方法可以在网上搜索），但是云厂商驱动不一，且更新频率无法保证，而且会有修改系统原始文件的风险，基于这一点，可能很多用户不会选择修改winre原始文件的方法；</p>
+<p>（4）其次就可以选择常见的winpe修复方法，制作专用的winpe，在其中可以添加所需的驱动程序，再使用winpe进行系统修复，winpe的制作方法网络上有很多资源，这里也不再赘述；</p>
+<script src="https://utteranc.es/client.js" repo="bbbccvbvv/blog_comments" issue-term="pathname" theme="github-light" crossorigin="anonymous" async></script>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Windows/" rel="tag"># Windows</a>
+              <a href="/tags/boot/" rel="tag"># boot</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2024/12/12/20241212-windows_restart_by_service_errorcontrol/" rel="prev" title="windows服务配置ErrorControl致使系统不断重启">
+      <i class="fa fa-chevron-left"></i> windows服务配置ErrorControl致使系统不断重启
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%BB%E5%BC%95%E5%AF%BC%E8%AE%B0%E5%BD%95%E6%8D%9F%E5%9D%8F%EF%BC%88mbr-corruption%EF%BC%89"><span class="nav-number">1.</span> <span class="nav-text">主引导记录损坏（mbr corruption）</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%BC%95%E5%AF%BC%E6%89%87%E5%8C%BA%E6%8D%9F%E5%9D%8F%EF%BC%88Boot-Sector-Corruption%EF%BC%89"><span class="nav-number">2.</span> <span class="nav-text">引导扇区损坏（Boot Sector Corruption）</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#bcd%E9%85%8D%E7%BD%AE%E9%94%99%E8%AF%AF%EF%BC%88BCD-Misconfiguration%EF%BC%89"><span class="nav-number">3.</span> <span class="nav-text">bcd配置错误（BCD Misconfiguration）</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%B3%BB%E7%BB%9F%E6%96%87%E4%BB%B6%E6%8D%9F%E5%9D%8F%EF%BC%88System-File-Corruption%EF%BC%89"><span class="nav-number">4.</span> <span class="nav-text">系统文件损坏（System File Corruption）</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%B3%BB%E7%BB%9F%E6%B3%A8%E5%86%8C%E8%A1%A8%E6%96%87%E4%BB%B6%E6%8D%9F%E5%9D%8F%EF%BC%88System-Hive-Corruption%EF%BC%89"><span class="nav-number">5.</span> <span class="nav-text">系统注册表文件损坏（System Hive Corruption）</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%90%AF%E5%8A%A8%E5%90%8E%E5%B4%A9%E6%BA%83%E6%88%96%E5%8D%A1%E9%A1%BF%EF%BC%88Post%E2%80%93Splash-Screen-Crash-or-Hang%EF%BC%89"><span class="nav-number">6.</span> <span class="nav-text">启动后崩溃或卡顿（Post–Splash Screen Crash or Hang）</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%A4%87%E6%B3%A8"><span class="nav-number">7.</span> <span class="nav-text">备注</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">杨维宁</p>
+  <div class="site-description" itemprop="description">天行健，君子以自强不息。地势坤，君子以厚德载物。</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">33</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">62</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/bbbccvbvv" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;bbbccvbvv" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:nanjiecunxiaozu@163.com" title="E-Mail → mailto:nanjiecunxiaozu@163.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">杨维宁</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">95k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">2:38</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
