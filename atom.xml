@@ -6,7 +6,7 @@
   <link href="https://bbbccvbvv.github.io/atom.xml" rel="self"/>
   
   <link href="https://bbbccvbvv.github.io/"/>
-  <updated>2024-12-24T08:24:45.105Z</updated>
+  <updated>2024-12-24T13:24:37.486Z</updated>
   <id>https://bbbccvbvv.github.io/</id>
   
   <author>
@@ -15,6 +15,29 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>windows内存限制研究</title>
+    <link href="https://bbbccvbvv.github.io/2024/12/24/20241224-windows_physical_memory_limit/"/>
+    <id>https://bbbccvbvv.github.io/2024/12/24/20241224-windows_physical_memory_limit/</id>
+    <published>2024-12-24T13:26:10.000Z</published>
+    <updated>2024-12-24T13:24:37.486Z</updated>
+    
+    <content type="html"><![CDATA[<p>最近遇到了一个windows可识别内存只显示2g，其他内存显示为硬件预留的问题，查找相关资料，发现多数认为原因为系统未激活，甚至微软官方的文档也有这个说法。但是当笔者在测试环境进行测试时，发现这个问题不是必现的，笔者的未激活windows系统识别到了完整的内存，远大于2g。因此收集相关资料，尝试研究影响windows可识别内存的相关因素。</p><span id="more"></span><h1 id="windows物理内存限制"><a href="#windows物理内存限制" class="headerlink" title="windows物理内存限制"></a>windows物理内存限制</h1><p>该部分内容主要参考《Windows Internals》第六版第10章《Memory Management》中《Physical Memory Limits》章节。</p><p>Windows对物理内存的支持受硬件限制、激活证书、操作系统数据结构和驱动程序兼容性的影响。下表列出了不同版本的Windows目前支持的物理内存容量及其限制因素。</p><table><thead><tr><th align="center">版本</th><th align="center">32位系统限制</th><th align="center">64位系统限制</th><th align="center">限制因素</th></tr></thead><tbody><tr><td align="center">旗舰版、企业版、专业版</td><td align="center">4GB</td><td align="center">192GB</td><td align="center">64位系统的激活证书；32位系统的激活证书、硬件支持及驱动程序兼容性</td></tr><tr><td align="center">家庭高级版</td><td align="center">4GB</td><td align="center">16GB</td><td align="center">64位系统的激活证书；32位系统的激活证书、硬件支持及驱动程序兼容性</td></tr><tr><td align="center">家庭普通版</td><td align="center">4GB</td><td align="center">8GB</td><td align="center">64位系统的激活证书；32位系统的激活证书、硬件支持及驱动程序兼容性</td></tr><tr><td align="center">入门版</td><td align="center">2GB</td><td align="center">2GB</td><td align="center">激活证书</td></tr><tr><td align="center">数据中心版、企业版、基于Itanium版</td><td align="center">N&#x2F;A</td><td align="center">2TB</td><td align="center">测试和可用系统</td></tr><tr><td align="center">基础版</td><td align="center">N&#x2F;A</td><td align="center">8GB</td><td align="center">激活证书</td></tr><tr><td align="center">标准版和网页服务器版</td><td align="center">N&#x2F;A</td><td align="center">32GB</td><td align="center">激活证书</td></tr><tr><td align="center">服务器HPC版本</td><td align="center">N&#x2F;A</td><td align="center">128GB</td><td align="center">激活证书</td></tr></tbody></table><p>因此如果客户为系统配置的内存大于系统支持的最大物理内存，则多出的部分系统无法识别，就会造成系统识别到的内存远低于真实物理内存。</p><h1 id="windows注册表文件限制"><a href="#windows注册表文件限制" class="headerlink" title="windows注册表文件限制"></a>windows注册表文件限制</h1><p>windows启动过程中会读取注册表来解析Kernel-WindowsMaxMemAllowedx64的值，如果解析失败就只能使用2GB的内存，对应的注册表路径如下：</p><pre><code>HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\ProductOptions\ProductPolicy</code></pre><p><img src="/images/windows_memory_limit/1.png"></p><p>对应的注册表键值是大量的16进制数据，无法直观获取，可以使用如下的powershell指令获取具体数值：</p><pre><code>(Get-ItemProperty HKLM:\SYSTEM\CurrentControlSet\Control\ProductOptions\).ProductPolicy.count</code></pre><p>正常的参数值应该是万级别，低于这个数量级就需要考虑注册表损坏的因素了。</p><p>该参数会在系统激活时被重置，因此可以通过激活系统的方法重新设置相关参数。</p><h1 id="系统配置最大内存限制"><a href="#系统配置最大内存限制" class="headerlink" title="系统配置最大内存限制"></a>系统配置最大内存限制</h1><p>在Windows系统配置-引导-高级选项中存在最大内存配置项，默认未勾选，即系统自动识别与设置最大内存。</p><p><img src="/images/windows_memory_limit/2.png"></p><p>如果用户勾选了对应选项，并手动设置了相关参数，可能就会造成系统识别到的内存异常。因此出现类似问题时，建议检查该配置项设置是否符合预期。</p><h1 id="图形卡和其他设备影响内存限制"><a href="#图形卡和其他设备影响内存限制" class="headerlink" title="图形卡和其他设备影响内存限制"></a>图形卡和其他设备影响内存限制</h1><p>设备必须将其内存映射到低于4GB才能与非PAE感知Windows版本兼容。因此，如果系统具有4GB的RAM，则其中一些RAM被BIOS禁用或重新映射在4GB以上如果重新映射内存，X64 Windows可以使用此内存。X86客户端版本的Windows不支持超过4GB标记的物理内存，因此它们无法访问这些重新映射的区域。任何X64 Windows或X86 Server版本都可以。</p><p>启用了PAE的X86客户端版本具有37位可用 (128 GB) 物理地址空间。这些版本施加的限制是允许的最高物理RAM地址，而不是IO空间的大小。这意味着PAE感知驱动程序实际上可以使用超过4GB的物理空间（如果需要）。例如，驱动程序可以映射位4GB以上的“丢失”内存区域，并将此内存公开为RAM磁盘。</p><h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><p>（1）<a href="https://learn.microsoft.com/zh-cn/troubleshoot/azure/virtual-machines/windows/windows-virtual-machine-activation-faq%EF%BC%9B">https://learn.microsoft.com/zh-cn/troubleshoot/azure/virtual-machines/windows/windows-virtual-machine-activation-faq；</a></p><p>（2）<a href="https://cloud.tencent.com/developer/article/1930066%EF%BC%9B">https://cloud.tencent.com/developer/article/1930066；</a></p><p>（3）<a href="https://help.aliyun.com/zh/ecs/the-physical-memory-of-a-windows-instance-is-abnormal%EF%BC%9B">https://help.aliyun.com/zh/ecs/the-physical-memory-of-a-windows-instance-is-abnormal；</a></p><p>（4）<a href="https://learn.microsoft.com/zh-cn/windows/win32/memory/memory-limits-for-windows-releases%EF%BC%9B">https://learn.microsoft.com/zh-cn/windows/win32/memory/memory-limits-for-windows-releases；</a></p><script src="https://utteranc.es/client.js" repo="bbbccvbvv/blog_comments" issue-term="pathname" theme="github-light" crossorigin="anonymous" async></script>]]></content>
+    
+    
+    <summary type="html">&lt;p&gt;最近遇到了一个windows可识别内存只显示2g，其他内存显示为硬件预留的问题，查找相关资料，发现多数认为原因为系统未激活，甚至微软官方的文档也有这个说法。但是当笔者在测试环境进行测试时，发现这个问题不是必现的，笔者的未激活windows系统识别到了完整的内存，远大于2g。因此收集相关资料，尝试研究影响windows可识别内存的相关因素。&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="计算机科学" scheme="https://bbbccvbvv.github.io/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A7%91%E5%AD%A6/"/>
+    
+    
+    <category term="内存" scheme="https://bbbccvbvv.github.io/tags/%E5%86%85%E5%AD%98/"/>
+    
+    <category term="Windows" scheme="https://bbbccvbvv.github.io/tags/Windows/"/>
+    
+  </entry>
   
   <entry>
     <title>windows常见启动问题</title>
@@ -513,41 +536,6 @@
     <category term="Resource partitioning" scheme="https://bbbccvbvv.github.io/tags/Resource-partitioning/"/>
     
     <category term="Fibre Channel VMID" scheme="https://bbbccvbvv.github.io/tags/Fibre-Channel-VMID/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>【翻译】libvirt虚拟机xml配置文件格式（7）Memory Allocation、Memory Backing和Memory Tuning</title>
-    <link href="https://bbbccvbvv.github.io/2022/11/10/domain_xml_format7_memory_allocation/"/>
-    <id>https://bbbccvbvv.github.io/2022/11/10/domain_xml_format7_memory_allocation/</id>
-    <published>2022-11-10T03:56:10.000Z</published>
-    <updated>2023-12-29T02:38:41.453Z</updated>
-    
-    <content type="html"><![CDATA[<p>原文网址：<a href="https://libvirt.org/formatdomain.html#id8" title="Domain XML format">https://libvirt.org/formatdomain.html#id8</a></p><span id="more"></span><h1 id="Memory-Allocation"><a href="#Memory-Allocation" class="headerlink" title="Memory Allocation"></a>Memory Allocation</h1><pre><code>&lt;domain&gt;  ...  &lt;maxMemory slots=&#39;16&#39; unit=&#39;KiB&#39;&gt;1524288&lt;/maxMemory&gt;  &lt;memory unit=&#39;KiB&#39;&gt;524288&lt;/memory&gt;  &lt;currentMemory unit=&#39;KiB&#39;&gt;524288&lt;/currentMemory&gt;  ...&lt;/domain&gt;</code></pre><h2 id="memory"><a href="#memory" class="headerlink" title="memory"></a>memory</h2><p>boot时虚拟机的最大分配内存。内存分配包含了在启动时或在之后热插拔的全部可能的额外内存设备。该值的单位由可选属性项unit设置，默认以KiB为单位（kibibytes，2^10或1024字节块）。有效的单位还有b或byte代表字节，KB代表kilobytes（10^3或1000字节），k或KiB代表kibibytes（1024字节）。MB代表megabytes（10^6或1000000字节），M或MiB代表 mebibytes（2^20或1048576字节），GB代表gigabytes（10^9或1000000000字节），T或TiB代表tebibytes（2^40或1099511627776字节）.然而，该值会被libvirt四舍五入到最近的kibibytes，也可能进一步四舍五入到虚拟机管理程序支持的粒度。一些虚拟机管理程序也会强制设置一个最小值，例如4000KiB。这种情况下，虚拟机配置的numa的memory元素会被忽略。如果发生crash，可选属性项dumpCore可用来控制是否将虚拟机内存包含在生成的coredump文件中（属性值为on和off）。unit自0.9.11起，dumpCore自0.10.2起（仅限于qemu）。</p><h2 id="maxMemory"><a href="#maxMemory" class="headerlink" title="maxMemory"></a>maxMemory</h2><p>运行时虚拟机的最大内存分配。被numa的memory元素或者numa cell大小配置的初始内存可通过内存热插拔方式增长到该元素限制的最大内存大小。unit属性项与memory中的同名属性项表现完全一致。slots属性项指定了将内存添加到虚拟机时可用slot的数量。数量上下限与虚拟机管理程序有关。注意由于内存对齐的限制，通过内存条热插拔所获得的完整内存大小可能无法达到该元素的设置值。自1.2.14起在qemu中支持。</p><h2 id="currentMemory"><a href="#currentMemory" class="headerlink" title="currentMemory"></a>currentMemory</h2><p>虚拟机真实分配的内存。该值小于最大分配数值，允许动态扩充虚拟机内存。如果未设置该项，则默认与memory元素具有同样的数值设置。unit属性项与memory中的unit作用一致。</p><h1 id="Memory-Backing"><a href="#Memory-Backing" class="headerlink" title="Memory Backing"></a>Memory Backing</h1><pre><code>&lt;domain&gt;  ...  &lt;memoryBacking&gt;    &lt;hugepages&gt;      &lt;page size=&quot;1&quot; unit=&quot;G&quot; nodeset=&quot;0-3,5&quot;/&gt;      &lt;page size=&quot;2&quot; unit=&quot;M&quot; nodeset=&quot;4&quot;/&gt;    &lt;/hugepages&gt;    &lt;nosharepages/&gt;    &lt;locked/&gt;    &lt;source type=&quot;file|anonymous|memfd&quot;/&gt;    &lt;access mode=&quot;shared|private&quot;/&gt;    &lt;allocation mode=&quot;immediate|ondemand&quot; threads=&#39;8&#39;/&gt;    &lt;discard/&gt;  &lt;/memoryBacking&gt;  ...&lt;/domain&gt;</code></pre><p>可选元素项memoryBacking包含多个影响主机内存页备份虚拟内存的元素项。</p><h2 id="hugepages"><a href="#hugepages" class="headerlink" title="hugepages"></a>hugepages</h2><p>该元素项告知虚拟机管理程序虚拟机使用大页而非通常的主机内存页大小进行内存分配。自1.2.5起。可以为每个numa节点详尽的设置大页。page元素项被引入。其包含一个强制属性项size用于指定具体使用哪些大页（在支持不同大小大页的系统中尤其有用）。size属性项的默认单位是kilobytes（1024的整数倍）。如果想要使用不同的单位，可使用可选属性项unit。对于numa系统，可选的nodeset属性可能会派上用场，因为它将给定虚拟机的NUMA节点与某些大页大小相关联。在某些例子中，除了4#节点之外的其他numa节点都使用了1G大小的大页。相关语法可以查看NUMA Node Tuning章节。</p><h2 id="nosharepages"><a href="#nosharepages" class="headerlink" title="nosharepages"></a>nosharepages</h2><p>告知虚拟机管理程序虚拟机禁用共享内存页（内存合并，ksm）。自1.0.6起。</p><h2 id="locked"><a href="#locked" class="headerlink" title="locked"></a>locked</h2><p>当虚拟机管理程序支持并设置相关数值后，虚拟机内存页将会在主机内存中锁定，而且主机也不会将其换出，这在某些工况下如实时场景中是十分必要的。对于QEMU&#x2F;KVM虚拟机，qemu进程自身使用的内存也会被锁定；与虚拟机内存不同，libvirt无法提前获取相应内存的数量，所以必须移除对于锁定内存的限制。因此，启用该可选元素项存在潜在的安全风险；当主机内存耗尽时主机无法从虚拟机回复内存，这就意味着大量的虚拟机将会造成大量内存被锁定，主机上会遭受到拒绝服务攻击。因为该原因，除非确实需要否则不建议使用该元素项；即便如此，强烈推荐为特定环境的内存分配设置 hard_limit属性项（参阅Memory Tuning章节），这可以有效的缓解上述描述的风险的发生。自1.0.6起。</p><h2 id="source"><a href="#source" class="headerlink" title="source"></a>source</h2><p>使用type属性项，可提供“file”以利用文件内存备份或保持默认的”anonymous”。自4.10.0起，也可选择memfd备份。（仅限于QEMU&#x2F;KVM）</p><h2 id="access"><a href="#access" class="headerlink" title="access"></a>access</h2><p>使用mode属性项，指明内存是shared还是private。该元素会被每个numa节点的memAccess元素覆盖。</p><h2 id="allocation"><a href="#allocation" class="headerlink" title="allocation"></a>allocation</h2><p>使用可选属性项mode，通过提供”immediate”或”ondemand”参数指明何时进行内存分配。自8.2.0起。也可以通过threads属性设置虚拟机管理程序用来进行内存分配的线程数量。</p><h2 id="discard"><a href="#discard" class="headerlink" title="discard"></a>discard</h2><p>当虚拟机管理程序支持并设置该元素时，在虚拟机关机之前（或当DIMM模块被拔出时）内存内容被丢弃。注意这仅仅只是一个优化项，并不保证在所有场景下都会起作用（例如虚拟机管理程序crash时）。自4.4.0起（仅限于QEMU&#x2F;KVM）。</p><h1 id="Memory-Tuning"><a href="#Memory-Tuning" class="headerlink" title="Memory Tuning"></a>Memory Tuning</h1><pre><code>&lt;domain&gt;  ...  &lt;memtune&gt;    &lt;hard_limit unit=&#39;G&#39;&gt;1&lt;/hard_limit&gt;    &lt;soft_limit unit=&#39;M&#39;&gt;128&lt;/soft_limit&gt;    &lt;swap_hard_limit unit=&#39;G&#39;&gt;2&lt;/swap_hard_limit&gt;    &lt;min_guarantee unit=&#39;bytes&#39;&gt;67108864&lt;/min_guarantee&gt;  &lt;/memtune&gt;  ...&lt;/domain&gt;</code></pre><h2 id="memtune"><a href="#memtune" class="headerlink" title="memtune"></a>memtune</h2><p>可选元素项memtune提供与虚拟机内存调度参数相关的细节描述。如果忽略该项设置，则默认由操作系统提供默认值。对于QEMU&#x2F;KVM，应用于qemu进程的参数被看做一个整体。因此，对其进行计数时，需要加上虚拟机ram、虚拟机显卡ram和qemu自身的一些内存。最后一点很难确定具体数值，因此需要猜想与尝试。对于每个可调参数，可以使用与memory相同的值来指定输入时数字所使用的单位。为了向后兼容，输出始终以KiB为单位。unit自0.9.11起。全部*_limit参数的可能值在0到VIR_DOMAIN_MEMORY_PARAM_UNLIMITED的范围内。</p><h2 id="hard-limit"><a href="#hard-limit" class="headerlink" title="hard_limit"></a>hard_limit</h2><p>可选元素项hard_limit是虚拟机可使用的最大内存。该值的单位是kibibytes（1024字节的块）。qemu和kvm的使用者清冽建议不要设置相关限制项，因为如果虚拟机运行过少则虚拟机可能被内核关闭，决定进程运行所需的内存是一个无法决定的问题；也就是说，如果因工况需要已在 Memory Backing中设置了locked属性，您必须考虑部署的具体细节，并确定一个足够大的hard_limit值，以支持您的虚拟机的内存需求，但是该值足够小也可以保护主机以避免虚拟机锁定全部的内存。</p><h2 id="soft-limit"><a href="#soft-limit" class="headerlink" title="soft_limit"></a>soft_limit</h2><p>可选元素项soft_limit就是内存争用期间强制设置的内存限制。该值的单位是kibibytes（1024字节块）。</p><h2 id="swap-hard-limit"><a href="#swap-hard-limit" class="headerlink" title="swap_hard_limit"></a>swap_hard_limit</h2><p>可选元素项swap_hard_limit就是加上交互内存swap后虚拟机可食用的最大内存。该值的单位是kibibytes（1024字节块）。该值应大于hard_limit的设置值。</p><h2 id="min-guarantee"><a href="#min-guarantee" class="headerlink" title="min_guarantee"></a>min_guarantee</h2><p>可选元素项min_guarantee就是应保证的虚拟机最小分配内存。该值的单位是kibibytes（1024字节块）。该元素仅被VMware ESX和OpenVZ支持。</p><p>本章节描述了用来代表作用域的xml文件格式，根据运行的作用于种类的格式变化，有一些可选配置项用来加载文件。对于特定虚拟机的细节可以查看<br><a href="https://libvirt.org/drivers.html">相关文件</a>。</p>]]></content>
-    
-    
-    <summary type="html">&lt;p&gt;原文网址：&lt;a href=&quot;https://libvirt.org/formatdomain.html#id8&quot; title=&quot;Domain XML format&quot;&gt;https://libvirt.org/formatdomain.html#id8&lt;/a&gt;&lt;/p&gt;</summary>
-    
-    
-    
-    <category term="计算机科学" scheme="https://bbbccvbvv.github.io/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A7%91%E5%AD%A6/"/>
-    
-    
-    <category term="虚拟化" scheme="https://bbbccvbvv.github.io/tags/%E8%99%9A%E6%8B%9F%E5%8C%96/"/>
-    
-    <category term="kvm" scheme="https://bbbccvbvv.github.io/tags/kvm/"/>
-    
-    <category term="libvirt" scheme="https://bbbccvbvv.github.io/tags/libvirt/"/>
-    
-    <category term="虚拟机xml配置文件" scheme="https://bbbccvbvv.github.io/tags/%E8%99%9A%E6%8B%9F%E6%9C%BAxml%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6/"/>
-    
-    <category term="翻译" scheme="https://bbbccvbvv.github.io/tags/%E7%BF%BB%E8%AF%91/"/>
-    
-    <category term="Memory Allocation" scheme="https://bbbccvbvv.github.io/tags/Memory-Allocation/"/>
-    
-    <category term="Memory Backing" scheme="https://bbbccvbvv.github.io/tags/Memory-Backing/"/>
-    
-    <category term="Memory Tuning" scheme="https://bbbccvbvv.github.io/tags/Memory-Tuning/"/>
     
   </entry>
   
