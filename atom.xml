@@ -6,7 +6,7 @@
   <link href="https://bbbccvbvv.github.io/atom.xml" rel="self"/>
   
   <link href="https://bbbccvbvv.github.io/"/>
-  <updated>2024-12-24T13:24:37.486Z</updated>
+  <updated>2025-01-24T09:59:10.778Z</updated>
   <id>https://bbbccvbvv.github.io/</id>
   
   <author>
@@ -15,6 +15,29 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>virtio-win-gt修改Tcp323opts</title>
+    <link href="https://bbbccvbvv.github.io/2025/01/24/20250124-windows_virtio_mdify_tcp1323opts/"/>
+    <id>https://bbbccvbvv.github.io/2025/01/24/20250124-windows_virtio_mdify_tcp1323opts/</id>
+    <published>2025-01-24T10:02:10.000Z</published>
+    <updated>2025-01-24T09:59:10.778Z</updated>
+    
+    <content type="html"><![CDATA[<p>在之前处理的一个问题中，发现HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters路径下的Tcp323opts参数对于网络具有很大影响。虽然最后问题定位于网络驱动版本落后问题，但是在该过程中发现windows的网络相关设置与系统默认设置不一致。</p><span id="more"></span><p>按照微软官方文档的说法：默认情况下启用时间戳和窗口缩放，即默认情况下对应数值为3<br><a href="https://learn.microsoft.com/zh-cn/troubleshoot/windows-server/networking/description-tcp-features">https://learn.microsoft.com/zh-cn/troubleshoot/windows-server/networking/description-tcp-features</a></p><p>在ali的对应系统上，发现整体行为符合微软的文档中的说明：即注册表中不存在对应表项，因此使用了默认策略，启用时间戳和窗口缩放。</p><p>但是在出问题的windows系统上，却发现Tcp1323opts被设置为了0，整体表现与预期不符，结合相关资料，可以认为存在相关程序对该键值进行了修改。</p><p>最后定位在了virtio-win-gt程序上，安装virtio驱动是使用virtio-win-gt-x64.msi进行安装。</p><p>因此在ali的虚拟机上使用virtio-win-gt-x64.msi安装virtio，并结合日志对比安装前后注册表变化，发现virtio-win-gt-x64安装过程中对注册表进行了修改，在日志中发现其修改了两个注册表键值。</p><p>（1）将\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters\Tcp1323Opts设置为0；</p><p>（2）将\Software\VirtIO-FS\FileSystemName设置为NTFS；</p><p>详细日志记录如下：</p><pre><code>MSI (s) (74:70) [21:10:41:755]: Executing op: RegOpenKey(Root=-2147483646,Key=SYSTEM\CurrentControlSet\Services\Tcpip\Parameters,,BinaryType=1,,)MSI (s) (74:70) [21:10:41:755]: Executing op: RegAddValue(Name=Tcp1323Opts,Value=#0,)1: \SYSTEM\CurrentControlSet\Services\Tcpip\Parameters 2: Tcp1323Opts 3: #0 MSI (s) (74:70) [21:10:41:755]: Executing op: RegOpenKey(Root=-2147483646,Key=Software\VirtIO-FS,,BinaryType=1,,)MSI (s) (74:70) [21:10:41:755]: Executing op: RegAddValue(Name=FileSystemName,Value=NTFS,)1: \Software\VirtIO-FS 2: FileSystemName 3: NTFS </code></pre><script src="https://utteranc.es/client.js" repo="bbbccvbvv/blog_comments" issue-term="pathname" theme="github-light" crossorigin="anonymous" async></script>]]></content>
+    
+    
+    <summary type="html">&lt;p&gt;在之前处理的一个问题中，发现HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters路径下的Tcp323opts参数对于网络具有很大影响。虽然最后问题定位于网络驱动版本落后问题，但是在该过程中发现windows的网络相关设置与系统默认设置不一致。&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="计算机科学" scheme="https://bbbccvbvv.github.io/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A7%91%E5%AD%A6/"/>
+    
+    
+    <category term="Windows" scheme="https://bbbccvbvv.github.io/tags/Windows/"/>
+    
+    <category term="network" scheme="https://bbbccvbvv.github.io/tags/network/"/>
+    
+  </entry>
   
   <entry>
     <title>windows内存限制研究</title>
@@ -499,43 +522,6 @@
     <category term="翻译" scheme="https://bbbccvbvv.github.io/tags/%E7%BF%BB%E8%AF%91/"/>
     
     <category term="CPU model and topology" scheme="https://bbbccvbvv.github.io/tags/CPU-model-and-topology/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>【翻译】libvirt虚拟机xml配置文件格式（8）NUMA Node Tuning、Block I/O Tuning、Resource partitioning、Fibre Channel VMID</title>
-    <link href="https://bbbccvbvv.github.io/2022/11/14/domain_xml_format8_block_io_tuning_resource_partitioning_fibre_channel_vmid/"/>
-    <id>https://bbbccvbvv.github.io/2022/11/14/domain_xml_format8_block_io_tuning_resource_partitioning_fibre_channel_vmid/</id>
-    <published>2022-11-14T08:10:10.000Z</published>
-    <updated>2023-12-29T02:38:41.453Z</updated>
-    
-    <content type="html"><![CDATA[<p>原文网址：<a href="https://libvirt.org/formatdomain.html#id8" title="Domain XML format">https://libvirt.org/formatdomain.html#id8</a></p><span id="more"></span><h1 id="NUMA-Node-Tuning"><a href="#NUMA-Node-Tuning" class="headerlink" title="NUMA Node Tuning"></a>NUMA Node Tuning</h1><pre><code>&lt;domain&gt;  ...  &lt;numatune&gt;    &lt;memory mode=&quot;strict&quot; nodeset=&quot;1-4,^3&quot;/&gt;    &lt;memnode cellid=&quot;0&quot; mode=&quot;strict&quot; nodeset=&quot;1&quot;/&gt;    &lt;memnode cellid=&quot;2&quot; mode=&quot;preferred&quot; nodeset=&quot;2&quot;/&gt;  &lt;/numatune&gt;  ...&lt;/domain&gt;</code></pre><h2 id="numatune"><a href="#numatune" class="headerlink" title="numatune"></a>numatune</h2><p>可选元素项numatune提供了如何通过控制虚拟机进程的NUMA策略对NUMA主机的性能进行调度。注意，仅支持QEMU。自0.9.3起。</p><h2 id="memory"><a href="#memory" class="headerlink" title="memory"></a>memory</h2><p>可选元素项memory指明了如何对NUMA主机的虚拟机进程进行内存分配。其包含多个可选属性项。属性项mode的可用值包含interleave、strict、preferred和restrictive，默认设置为strict。restrictive指明使用系统默认策略，仅有cgroups被用来限制内存节点，在memnode元素中将mode设置为restrictive。属性项nodeset指明了numa节点，其与vcpu元素项的cpuset属性项使用相同的语法。属性项placement（自0.9.12起）可被用来表明虚拟机进程的内存放置模式，其值可以为static或auto，是vcpu的placement的默认值，如果指定了nodeset则默认值为static。auto表明虚拟机进程只会从查询numad返回的咨询节点中集中分配内存，属性nodeset的值在指定auto的情况下将会被忽略。如果vcpu的placement设置为auto，且numatune未指定，则numatune的placement设置为auto，mode设置为strict。自0.9.3起。参阅 virDomainSetNumaParameters获取该元素的更多信息。</p><h2 id="memnode"><a href="#memnode" class="headerlink" title="memnode"></a>memnode</h2><p>可选元素项memnode可以为每个虚拟机的numa节点指定内存分配策略。对于没有memnode元素的哪些节点，memory元素的默认值将会被使用。属性项cellid寻址应用设置的虚拟机NUMA节点。属性项mode和nodeset与memory元素中的对应值具有相同的含义和语法。设置与自动placement不兼容。qemu自1.2.7起。</p><h1 id="Block-I-x2F-O-Tuning"><a href="#Block-I-x2F-O-Tuning" class="headerlink" title="Block I&#x2F;O Tuning"></a>Block I&#x2F;O Tuning</h1><pre><code>&lt;domain&gt;  ...  &lt;blkiotune&gt;    &lt;weight&gt;800&lt;/weight&gt;    &lt;device&gt;      &lt;path&gt;/dev/sda&lt;/path&gt;      &lt;weight&gt;1000&lt;/weight&gt;    &lt;/device&gt;    &lt;device&gt;      &lt;path&gt;/dev/sdb&lt;/path&gt;      &lt;weight&gt;500&lt;/weight&gt;      &lt;read_bytes_sec&gt;10000&lt;/read_bytes_sec&gt;      &lt;write_bytes_sec&gt;10000&lt;/write_bytes_sec&gt;      &lt;read_iops_sec&gt;20000&lt;/read_iops_sec&gt;      &lt;write_iops_sec&gt;20000&lt;/write_iops_sec&gt;    &lt;/device&gt;  &lt;/blkiotune&gt;  ...&lt;/domain&gt;</code></pre><h2 id="blkiotune"><a href="#blkiotune" class="headerlink" title="blkiotune"></a>blkiotune</h2><p>可选元素项blkiotune为虚拟机提供了调节Blkio cgroup可调参数的能力。如果忽略该设置项，则其默认由操作系统提供。自0.8.8起。</p><h2 id="weight"><a href="#weight" class="headerlink" title="weight"></a>weight</h2><p>可选元素项weight是虚拟机的全部i&#x2F;o负载。该值的范围是100-1000.在2.6.39内核后，该值的范围是10-1000.</p><h2 id="device"><a href="#device" class="headerlink" title="device"></a>device</h2><p>虚拟机可能又有多个device元素项，以便深入调节虚拟机正在使用的每一个主机块设备的权重。注意多个磁盘（可参阅Hard drives, floppy disks, CDROMs章节）可能共享同一个主机块设备，如果他们被相同的主机文件系统中的文件备份，这也是为什么使用全局作用域的调节参数而非相关的每一个虚拟机磁盘设备的原因（与磁盘定义中的iotune元素项相反（可参阅Hard drives, floppy disks, CDROMs章节），而iotune元素项适用于单个独立的磁盘）。每一个device元素项有两个强制的子元素项，path描述了设备的绝对路径，而weight给出了设备的相对权重，权重范围是100-1000.在2.6.39版本内核之后，该值的范围变为10-1000.自0.9.8起。除此之外，也可使用如下的可选子元素项：</p><h3 id="read-bytes-sec"><a href="#read-bytes-sec" class="headerlink" title="read_bytes_sec"></a>read_bytes_sec</h3><p>以字节为单位的每秒可读吞吐量。自1.2.2起。</p><h3 id="write-bytes-sec"><a href="#write-bytes-sec" class="headerlink" title="write_bytes_sec"></a>write_bytes_sec</h3><p>以字节为单位的每秒可写吞吐量。自1.2.2起。</p><h3 id="read-iops-sec"><a href="#read-iops-sec" class="headerlink" title="read_iops_sec"></a>read_iops_sec</h3><p>每秒i&#x2F;o读操作限制。自1.2.2起。</p><h3 id="write-iops-sec"><a href="#write-iops-sec" class="headerlink" title="write_iops_sec"></a>write_iops_sec</h3><p>每秒i&#x2F;o写操作限制。自1.2.2起。</p><h1 id="Resource-partitioning"><a href="#Resource-partitioning" class="headerlink" title="Resource partitioning"></a>Resource partitioning</h1><p>虚拟机管理程序可能允许将虚拟机放入资源分区，也可能嵌套所述分区。resource元素将与资源分区相关的配置项组织在一起。当前其支持partition子元素项，该子元素项的内容定义了放置虚拟机的资源分区的绝对路径。如果没有列出任何分区，虚拟机将会被放到默认分区中。应用程序或管理员有责任确保分区在虚拟机启动之前就已存在。只有默认分区（适用于特定虚拟机管理程序）可以默认假定已经存在。</p><pre><code>...&lt;resource&gt;  &lt;partition&gt;/virtualmachines/production&lt;/partition&gt;&lt;/resource&gt;...</code></pre><p>资源分区当前在qemu和lxc中受到支持，在所有已安装的控制器中将分区路径映射到cgroups目录。自1.0.5起。</p><h1 id="Fibre-Channel-VMID"><a href="#Fibre-Channel-VMID" class="headerlink" title="Fibre Channel VMID"></a>Fibre Channel VMID</h1><p>FC SAN可以提供多个依赖于VMID的QoS等级和访问控制功能。它还可以收集每个虚拟机的遥测数据，这些数据可用于增强虚拟机的IO性能。可以通过fibrechannel元素项的appid属性项进行配置。该属性项包含了简单的字符串（最大128字节），内核可使用该属性项创建VMID。</p><pre><code>...&lt;resource&gt;  &lt;fibrechannel appid=&#39;userProvidedID&#39;/&gt;&lt;/resource&gt;...</code></pre><p>使用该特征项要求支持光纤通道的硬件，内核编译时配置有 CONFIG_BLK_CGROUP_FC_APPID选项，且nvme_fc内核模块已加载。自7.7.0起。</p><p>本章节描述了用来代表作用域的xml文件格式，根据运行的作用于种类的格式变化，有一些可选配置项用来加载文件。对于特定虚拟机的细节可以查看<br><a href="https://libvirt.org/drivers.html">相关文件</a>。</p>]]></content>
-    
-    
-    <summary type="html">&lt;p&gt;原文网址：&lt;a href=&quot;https://libvirt.org/formatdomain.html#id8&quot; title=&quot;Domain XML format&quot;&gt;https://libvirt.org/formatdomain.html#id8&lt;/a&gt;&lt;/p&gt;</summary>
-    
-    
-    
-    <category term="计算机科学" scheme="https://bbbccvbvv.github.io/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A7%91%E5%AD%A6/"/>
-    
-    
-    <category term="虚拟化" scheme="https://bbbccvbvv.github.io/tags/%E8%99%9A%E6%8B%9F%E5%8C%96/"/>
-    
-    <category term="kvm" scheme="https://bbbccvbvv.github.io/tags/kvm/"/>
-    
-    <category term="libvirt" scheme="https://bbbccvbvv.github.io/tags/libvirt/"/>
-    
-    <category term="虚拟机xml配置文件" scheme="https://bbbccvbvv.github.io/tags/%E8%99%9A%E6%8B%9F%E6%9C%BAxml%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6/"/>
-    
-    <category term="翻译" scheme="https://bbbccvbvv.github.io/tags/%E7%BF%BB%E8%AF%91/"/>
-    
-    <category term="NUMA Node Tuning" scheme="https://bbbccvbvv.github.io/tags/NUMA-Node-Tuning/"/>
-    
-    <category term="Block I/O Tuning" scheme="https://bbbccvbvv.github.io/tags/Block-I-O-Tuning/"/>
-    
-    <category term="Resource partitioning" scheme="https://bbbccvbvv.github.io/tags/Resource-partitioning/"/>
-    
-    <category term="Fibre Channel VMID" scheme="https://bbbccvbvv.github.io/tags/Fibre-Channel-VMID/"/>
     
   </entry>
   
