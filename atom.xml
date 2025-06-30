@@ -6,7 +6,7 @@
   <link href="https://bbbccvbvv.github.io/atom.xml" rel="self"/>
   
   <link href="https://bbbccvbvv.github.io/"/>
-  <updated>2025-05-23T07:49:25.024Z</updated>
+  <updated>2025-06-30T12:43:19.639Z</updated>
   <id>https://bbbccvbvv.github.io/</id>
   
   <author>
@@ -15,6 +15,29 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>windows无法通过ip访问IIS网站</title>
+    <link href="https://bbbccvbvv.github.io/2025/06/30/20250630-windows_iis_cant_access_by_ip/"/>
+    <id>https://bbbccvbvv.github.io/2025/06/30/20250630-windows_iis_cant_access_by_ip/</id>
+    <published>2025-06-30T10:49:10.000Z</published>
+    <updated>2025-06-30T12:43:19.639Z</updated>
+    
+    <content type="html"><![CDATA[<p>在之前处理的一个问题中，发现使用windows server的IIS服务搭建的网站存在访问异常，通过主机名+端口号和localhost+端口号的方法可以正常访问，但是通过127.0.0.1+端口号、局域网ip+端口号、公网ip+端口号的方式均无法正常访问，报错如下：Bad Request-Invalid Hostname（HTTP Error 400.The request hostname is invalid）。</p><span id="more"></span><p>从报错信息来看，系统对访问链接的解析存在异常，使用域名访问需要进行解析，但是使用ip访问则不需要，而报错信息明确提示是无效的主机名，看起来是将链接中的ip地址当作主机名进行解析，因此产生了如上的报错信息。</p><p>首先尝试查看相关的错误日志，相关的错误日志存储在C:\Windows\System32\LogFiles\HTTPERR路径下的httperr.Log文件中，但是奇怪的是，当在浏览器上使用ip+端口的方式进行访问时，在对应日志中没有相关时刻的任何记录，看起来访问链接还没有进入到iis中，即在上层就已经失败。</p><p>无法从日志中获取更详细的信息，转而考虑配置域名解析文件，公共的域名服务器没有办法修改，就修改系统的host文件，路径为C:\Windows\System32\drivers\etc下的hosts文件，在其中增加127.0.0.1和主机名之间的解析规则。但是无效，网站访问报错依旧。</p><p>继续考虑修改域名解析配置，将网络设置中的自动获取域名服务器改为手动配置，配置默认域名服务器为8.8.8.8和1.1.1.1，仍然无效。</p><p>这时注意到IIS中配置的网站达到了200多，而且问题不是一开始就有的，而是开始时正常运行了一段时间，之后才突然出现了问题，怀疑是不是IIS服务存在相关设置。</p><p>通过向资深工程师咨询，发现在IIS中确实存在这样一个配置项：dynamicRegistrationThreshold。</p><p>windows在IIS 8.5 及以上引入这个属性（Win Server 2016上默认装的IIS 是 IIS 10），详情可参考官方链接：<a href="https://learn.microsoft.com/zh-cn/iis/configuration/system.applicationhost/weblimits%EF%BC%9B">https://learn.microsoft.com/zh-cn/iis/configuration/system.applicationhost/weblimits；</a></p><p>当服务器处理站点数大于dynamicRegistrationThreshold 所设置的值时，IIS 服务会使用动态站点激活，即IIS 服务启动时并不会直接启动所有站点，只有当请求到某个站点时，那个站点的监听管道才会被动态激活。在这种情况下（站点数超过dynamicRegistrationThreshold 设置值从而启用动态站点激活后），IIS 便不允许使用IP 地址发送 Web 请求，这就是问题原因。</p><p>后续将dynamicRegistrationThreshold的设置值从默认的100改为1000后，ip访问恢复正常。</p><script src="https://utteranc.es/client.js" repo="bbbccvbvv/blog_comments" issue-term="pathname" theme="github-light" crossorigin="anonymous" async></script>]]></content>
+    
+    
+    <summary type="html">&lt;p&gt;在之前处理的一个问题中，发现使用windows server的IIS服务搭建的网站存在访问异常，通过主机名+端口号和localhost+端口号的方法可以正常访问，但是通过127.0.0.1+端口号、局域网ip+端口号、公网ip+端口号的方式均无法正常访问，报错如下：Bad Request-Invalid Hostname（HTTP Error 400.The request hostname is invalid）。&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="计算机科学" scheme="https://bbbccvbvv.github.io/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A7%91%E5%AD%A6/"/>
+    
+    
+    <category term="Windows" scheme="https://bbbccvbvv.github.io/tags/Windows/"/>
+    
+    <category term="IIS" scheme="https://bbbccvbvv.github.io/tags/IIS/"/>
+    
+  </entry>
   
   <entry>
     <title>windows修复临时账户问题</title>
@@ -483,37 +506,6 @@
     <category term="OpenSSL" scheme="https://bbbccvbvv.github.io/tags/OpenSSL/"/>
     
     <category term="OPENSSL_ia32cap" scheme="https://bbbccvbvv.github.io/tags/OPENSSL-ia32cap/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>windbg标准调试技巧-读写内存（1）：通过虚拟地址访问内存</title>
-    <link href="https://bbbccvbvv.github.io/2023/07/19/windbg_debug_technique_reading_and_writing_memory_1/"/>
-    <id>https://bbbccvbvv.github.io/2023/07/19/windbg_debug_technique_reading_and_writing_memory_1/</id>
-    <published>2023-07-19T11:30:00.000Z</published>
-    <updated>2023-12-29T02:38:41.453Z</updated>
-    
-    <content type="html"><![CDATA[<p>在调试过程中可以通过使用多个指令来访问内存或内存区域。visual studio和windbg提供命令行命令时，也提供了用户图形界面，用户可以用图形界面来查看和编辑内存。详情可以参考windbg帮助文档中的在visual studio中查看和编辑内存和寄存器，以及在windbg中查看和编辑内存两个章节。</p><span id="more"></span><p>以下命令可以读取与写入多种格式的内存。这些屙屎包含了16字节、字格式（单字、双字、四字、八字格式）、整数格式（short、long、quad、unsigned格式）、浮点数格式（10字节、16字节、32字节、64字节实数格式）以及ascii字符格式。</p><ul><li>d*（展示内存display memory）指令会展示特定内存或内驱区域的内容。</li><li>e*（输入数值enter values）指令向特定的内存地址写入数值。</li></ul><p>也可以使用如下指令处理更加特定的数据类型：</p><ul><li>dt（展示类型display type）指令会检索多种数据类型并展示被当前正在调试的应用程序锁创建出来的数据结构。改名了用途广泛并拥有多种变体及可选配置项。</li><li>ds（展示字符串display string）指令展示了STRING、ANSI_STRING和UNICODE_STRING数据结构。</li><li>dl（展示链表display linked list）指令追踪并展示链表。</li><li>d*s（展示字格式和符号display words and symbols）指令检索可能包含符号信息的双字或四字结构，之后展示对应的数据及符号信息。</li><li>!address扩展指令展示位于特定地址的内存属性信息。</li></ul><p>可以使用如下指令来进行内存范围操作：</p><ul><li>m（移动内存move memory）指令将一个内存范围的内容移到另外一个中。</li><li>f（填充内存fill mempry）指令向内存范围中写入指定的样式，后续重复该操作直到内存范围被全部填满。</li><li>c（比较内存compare memory）指令比较两个内存范围的内容；</li><li>s（搜索内存search memory）指令在一个内存范围内搜索指定格式的内容、或者搜索内存范围内的任一ascii或unicode编码；</li><li>.holdmem（保存并比较内存hold and compare memory）指令将一个内存范围与另外一个进行比较。</li></ul><p>在大多数场景下，这些命令以当前的进制解释其参数。因此，如果当前的进制不是16，那么需要在16进制地址前增加0x表示其为16进制。然而，命令的展示输出通常是16进制的，不按照当前进制进行展示。内存窗口以10进制展示了整数与实数以16进制展示其他类型的参数。</p><p>可使用n（设置数字基数set number base）指令改变默认的进制。为快速将数字由一个进制转换为另外一个进制，可使用？（计算表达式evaluate expression）指令或者.format（展示数字格式show number formats）指令。</p><p>当进行用户模式调试时，虚拟地址的含义是当前进程决定的。当你进行内核模式调试时，虚拟地址的含义可以被调试器控制。更多内容，可参考进程上下文（process context）章节。</p>]]></content>
-    
-    
-    <summary type="html">&lt;p&gt;在调试过程中可以通过使用多个指令来访问内存或内存区域。visual studio和windbg提供命令行命令时，也提供了用户图形界面，用户可以用图形界面来查看和编辑内存。详情可以参考windbg帮助文档中的在visual studio中查看和编辑内存和寄存器，以及在windbg中查看和编辑内存两个章节。&lt;/p&gt;</summary>
-    
-    
-    
-    <category term="计算机科学" scheme="https://bbbccvbvv.github.io/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A7%91%E5%AD%A6/"/>
-    
-    <category term="windbg官方文档翻译" scheme="https://bbbccvbvv.github.io/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A7%91%E5%AD%A6/windbg%E5%AE%98%E6%96%B9%E6%96%87%E6%A1%A3%E7%BF%BB%E8%AF%91/"/>
-    
-    
-    <category term="windows" scheme="https://bbbccvbvv.github.io/tags/windows/"/>
-    
-    <category term="windbg" scheme="https://bbbccvbvv.github.io/tags/windbg/"/>
-    
-    <category term="standard debugging techniques" scheme="https://bbbccvbvv.github.io/tags/standard-debugging-techniques/"/>
-    
-    <category term="reading and writng memory" scheme="https://bbbccvbvv.github.io/tags/reading-and-writng-memory/"/>
-    
-    <category term="virtual address" scheme="https://bbbccvbvv.github.io/tags/virtual-address/"/>
     
   </entry>
   
